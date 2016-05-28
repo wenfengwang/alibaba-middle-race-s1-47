@@ -7,10 +7,13 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.rocketmq.client.consumer.DefaultMQPullConsumer;
 import com.alibaba.rocketmq.client.consumer.PullResult;
+import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import com.alibaba.rocketmq.client.exception.MQBrokerException;
 import com.alibaba.rocketmq.client.exception.MQClientException;
 import com.alibaba.rocketmq.common.message.MessageQueue;
 import com.alibaba.rocketmq.remoting.exception.RemotingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -19,7 +22,7 @@ import java.util.*;
  *
  */
 public class TaobaoTopicSpout implements IRichSpout {
-//    private static Logger LOG = LoggerFactory.getLogger(TaobaoTopicSpout.class);
+    private static Logger LOG = LoggerFactory.getLogger(TaobaoTopicSpout.class);
     private SpoutOutputCollector _collector;
     private static DefaultMQPullConsumer pullConsumer;
 //    private long startTime;
@@ -28,8 +31,7 @@ public class TaobaoTopicSpout implements IRichSpout {
     @Override
     public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
         _collector = collector;
-        System.out.println("TaobaoTopicSpout started");
-//        startTime = System.currentTimeMillis();
+        LOG.info("TaobaoTopicSpout started");
         pullConsumer =  new DefaultMQPullConsumer(RaceConfig.MetaConsumerGroup);
         pullConsumer.setNamesrvAddr(RaceConfig.MQNameServerAddr);
         try {
@@ -42,6 +44,7 @@ public class TaobaoTopicSpout implements IRichSpout {
     @Override
     public void nextTuple() {
         try {
+            LOG.info("************ begin tuple ************");
             Set<MessageQueue> msq = pullConsumer.fetchSubscribeMessageQueues(RaceConfig.MqTaobaoTradeTopic);
             Iterator<MessageQueue> iter = msq.iterator();
             MessageQueue mq;
@@ -67,6 +70,7 @@ public class TaobaoTopicSpout implements IRichSpout {
                         break;
                 }
             }
+//            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
         } catch (MQClientException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -75,6 +79,8 @@ public class TaobaoTopicSpout implements IRichSpout {
             e.printStackTrace();
         } catch (MQBrokerException e) {
             e.printStackTrace();
+        } finally {
+            LOG.info("************ end tuple ************");
         }
     }
 

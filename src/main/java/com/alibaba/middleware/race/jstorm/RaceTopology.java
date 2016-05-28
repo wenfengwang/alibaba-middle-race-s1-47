@@ -31,11 +31,10 @@ public class RaceTopology {
 
     public static void main(String[] args){
 
-//        Config conf = new Config();
         HashMap conf = new HashMap();
-        conf.put(Config.NIMBUS_HOST,RaceConfig.JstormNimbusAddr);
-        conf.put(Config.TOPOLOGY_WORKERS, 4);
-
+//        conf.put(Config.NIMBUS_HOST,RaceConfig.JstormNimbusAddr);
+        conf.put(Config.TOPOLOGY_WORKERS, 2);
+//        conf.put(Config.STORM_ZOOKEEPER_SERVERS,RaceConfig.ZookeeperService);
         int spout_Parallelism_hint = 1;
         int bolt_Parallelism_hint = 2;
 
@@ -46,10 +45,11 @@ public class RaceTopology {
 //        builder.setSpout("pay", new PaymenyTopicSpout(), spout_Parallelism_hint);
 
         builder.setBolt("countTaobao", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("taobao");
-        builder.setBolt("presistTaobao", new PersistTaobao(), bolt_Parallelism_hint).shuffleGrouping("countTaobao");
+//        builder.setBolt("presistTaobao", new PersistTaobao(), bolt_Parallelism_hint).shuffleGrouping("countTaobao");
         String topologyName = RaceConfig.JstormTopologyName;
         try {
             StormSubmitter.submitTopology(topologyName, conf, builder.createTopology());
+            LOG.info("Topology submittedsssssssssssssssssss");
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -29,7 +29,7 @@ public class Consumer {
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("Consumer");
 
         //在本地搭建好broker后,记得指定nameServer的地址
-        consumer.setNamesrvAddr("222.199.254.86:9876");
+        consumer.setNamesrvAddr("192.168.1.101:9876");
 
         /**
          * 设置Consumer第一次启动是从队列头部开始消费还是队列尾部开始消费<br>

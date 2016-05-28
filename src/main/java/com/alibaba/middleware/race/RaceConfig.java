@@ -13,6 +13,8 @@ public class RaceConfig implements Serializable {
     // jstorm
     public static String JstormTopologyName = "AlimiddleWareRace";
     public static String JstormNimbusAddr = "192.168.1.101";
+    // zookeeper
+    public static String ZookeeperService = "192.168.1.101";
     // Rocketmq
     public static String MQNameServerAddr = "192.168.1.101:9876";
     public static String MetaConsumerGroup = "Ali_mdw";
