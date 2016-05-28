@@ -45,7 +45,7 @@ public class RaceTopology {
 //        builder.setSpout("pay", new PaymenyTopicSpout(), spout_Parallelism_hint);
 
         builder.setBolt("countTaobao", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("taobao");
-        builder.setBolt("presistTaobao", new PersistTaobao(), bolt_Parallelism_hint).shuffleGrouping("countTaobao");
+//        builder.setBolt("presistTaobao", new PersistTaobao(), bolt_Parallelism_hint).shuffleGrouping("countTaobao");
         String topologyName = RaceConfig.JstormTopologyName;
         try {
             StormSubmitter.submitTopology(topologyName, conf, builder.createTopology());
