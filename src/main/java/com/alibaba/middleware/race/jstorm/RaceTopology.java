@@ -5,6 +5,7 @@ import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
 import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.jstorm.blot.CountTaobao;
+import com.alibaba.middleware.race.jstorm.blot.PersistTaobao;
 import com.alibaba.middleware.race.jstorm.spout.TaobaoTopicSpout;
 import com.alibaba.rocketmq.client.exception.MQClientException;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ public class RaceTopology {
     public static void main(String[] args) throws Exception {
 
         HashMap conf = new HashMap();
-        conf.put(Config.TOPOLOGY_WORKERS, 2);
+        conf.put(Config.TOPOLOGY_WORKERS, 4);
 
         int spout_Parallelism_hint = 1;
         int bolt_Parallelism_hint = 2;
@@ -44,11 +45,11 @@ public class RaceTopology {
 //        builder.setSpout("pay", new PaymenyTopicSpout(), spout_Parallelism_hint);
 
         builder.setBolt("countTaobao", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("taobao");
-//        builder.setBolt("presistTaobao", new PersistTaobao(), bolt_Parallelism_hint).shuffleGrouping("countTaobao");
+        builder.setBolt("presistTaobao", new PersistTaobao(), bolt_Parallelism_hint).shuffleGrouping("countTaobao");
         String topologyName = RaceConfig.JstormTopologyName;
         try {
             StormSubmitter.submitTopology(topologyName, conf, builder.createTopology());
-            LOG.info("Topology submittedsssssssssssssssssss");
+            LOG.info("Topology submitted!!!!");
         } catch (Exception e) {
             e.printStackTrace();
         }

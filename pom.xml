@@ -9,6 +9,7 @@
     <version>1.0-SNAPSHOT</version>
     <build>
         <plugins>
+            <!-- TODO 这些打包插件都尼玛啥区别 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

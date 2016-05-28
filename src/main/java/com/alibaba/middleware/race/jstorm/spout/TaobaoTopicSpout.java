@@ -47,6 +47,7 @@ public class TaobaoTopicSpout implements IRichSpout {
             Set<MessageQueue> msq = pullConsumer.fetchSubscribeMessageQueues(RaceConfig.MqTaobaoTradeTopic);
             Iterator<MessageQueue> iter = msq.iterator();
             MessageQueue mq;
+            LOG.info("************ while ************");
             while (iter.hasNext()) {
                 mq = iter.next();
                 // TODO 这个offset到底特么是干嘛的
