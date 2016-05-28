@@ -20,7 +20,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PersistTaobao implements IRichBolt {
     OutputCollector collector;
     Map<Long, Double> counts = new ConcurrentHashMap<Long, Double>();
-    TairOperatorImpl tairOperator = new TairOperatorImpl();
+    TairOperatorImpl tairOperator;
+
+    public PersistTaobao() {
+        tairOperator = new TairOperatorImpl();
+    }
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;

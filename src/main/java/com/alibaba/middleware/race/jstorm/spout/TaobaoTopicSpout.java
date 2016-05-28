@@ -28,17 +28,16 @@ public class TaobaoTopicSpout implements IRichSpout {
 //    private long startTime;
     private static final Map<MessageQueue, Long> offseTable = new HashMap<MessageQueue, Long>();
 
+    public TaobaoTopicSpout() throws MQClientException {
+        pullConsumer =  new DefaultMQPullConsumer(RaceConfig.MetaConsumerGroup);
+        pullConsumer.setNamesrvAddr(RaceConfig.MQNameServerAddr);
+        pullConsumer.start();
+    }
+
     @Override
     public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
         _collector = collector;
         LOG.info("TaobaoTopicSpout started");
-        pullConsumer =  new DefaultMQPullConsumer(RaceConfig.MetaConsumerGroup);
-        pullConsumer.setNamesrvAddr(RaceConfig.MQNameServerAddr);
-        try {
-            pullConsumer.start();
-        } catch (MQClientException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
