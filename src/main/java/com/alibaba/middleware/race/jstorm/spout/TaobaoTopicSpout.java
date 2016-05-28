@@ -31,12 +31,13 @@ public class TaobaoTopicSpout implements IRichSpout {
     public TaobaoTopicSpout() throws Exception {
         pullConsumer =  new DefaultMQPullConsumer(RaceConfig.MetaConsumerGroup);
         pullConsumer.setNamesrvAddr(RaceConfig.MQNameServerAddr);
+        LOG.info("TaobaoTopicSpout Init");
     }
 
     @Override
     public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
         _collector = collector;
-        LOG.info("TaobaoTopicSpout started");
+        LOG.info("TaobaoTopicSpout open");
         try {
             pullConsumer.start();
         } catch (MQClientException e) {
