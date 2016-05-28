@@ -14,7 +14,7 @@ import java.util.List;
  * 读写tair所需要的集群信息，如masterConfigServer/slaveConfigServer地址/
  * group 、namespace我们都会在正式提交代码前告知选手
  */
-public class TairOperatorImpl {
+public class TairOperatorImpl implements Serializable {
     public static int nameSpace = RaceConfig.TairNamespace;
 
     private List<String> confServers = new ArrayList<String>();
