@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by wangwenfeng on 5/27/16.
  * 持久化数据模块
  */
-public class PersistTaobao implements IRichBolt, Serializable {
+public class PersistTaobao implements IRichBolt {
     OutputCollector collector;
     Map<Long, Double> counts = new ConcurrentHashMap<Long, Double>();
     TairOperatorImpl tairOperator = new TairOperatorImpl();

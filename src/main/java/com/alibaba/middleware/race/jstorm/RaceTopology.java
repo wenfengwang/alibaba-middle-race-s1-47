@@ -32,9 +32,8 @@ public class RaceTopology {
     public static void main(String[] args){
 
         HashMap conf = new HashMap();
-//        conf.put(Config.NIMBUS_HOST,RaceConfig.JstormNimbusAddr);
         conf.put(Config.TOPOLOGY_WORKERS, 2);
-//        conf.put(Config.STORM_ZOOKEEPER_SERVERS,RaceConfig.ZookeeperService);
+
         int spout_Parallelism_hint = 1;
         int bolt_Parallelism_hint = 2;
 
