@@ -17,7 +17,7 @@ import java.util.Map;
 /**
  * Created by wangwenfeng on 5/27/16.
  */
-public class CountTaobao implements IRichBolt {
+public class CountTaobao implements IRichBolt, Serializable {
     OutputCollector collector;
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
