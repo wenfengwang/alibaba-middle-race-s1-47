@@ -5,7 +5,6 @@ import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
 import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.jstorm.blot.CountTaobao;
-import com.alibaba.middleware.race.jstorm.blot.PersistTaobao;
 import com.alibaba.middleware.race.jstorm.spout.TaobaoTopicSpout;
 import com.alibaba.rocketmq.client.exception.MQClientException;
 import org.slf4j.Logger;
@@ -30,7 +29,7 @@ public class RaceTopology {
     private static Logger LOG = LoggerFactory.getLogger(RaceTopology.class);
 
 
-    public static void main(String[] args) throws MQClientException {
+    public static void main(String[] args) throws Exception {
 
         HashMap conf = new HashMap();
         conf.put(Config.TOPOLOGY_WORKERS, 2);

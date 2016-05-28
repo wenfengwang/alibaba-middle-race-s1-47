@@ -28,7 +28,7 @@ public class TaobaoTopicSpout implements IRichSpout {
 //    private long startTime;
     private static final Map<MessageQueue, Long> offseTable = new HashMap<MessageQueue, Long>();
 
-    public TaobaoTopicSpout() throws MQClientException {
+    public TaobaoTopicSpout() throws Exception {
         pullConsumer =  new DefaultMQPullConsumer(RaceConfig.MetaConsumerGroup);
         pullConsumer.setNamesrvAddr(RaceConfig.MQNameServerAddr);
         pullConsumer.start();
