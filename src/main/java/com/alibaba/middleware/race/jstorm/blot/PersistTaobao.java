@@ -9,6 +9,10 @@ import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PersistTaobao implements IRichBolt, Serializable {
     OutputCollector collector;
     Map<Long, Double> counts = new ConcurrentHashMap<Long, Double>();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     TairOperatorImpl tairOperator;
 
     public PersistTaobao() {
@@ -28,20 +33,27 @@ public class PersistTaobao implements IRichBolt, Serializable {
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
-        System.out.println("PersistTaobao started");
     }
 
     @Override
-    public void execute(Tuple input) { // TODO 完善逻辑
-        List<Object> list = input.getValues();
-        long minTimeStamp = formatCreateTime((Long) list.get(0));
-
-        // TODO 这个地方的加法操作是安全的吗
-        double totalPrice = (Double) list.get(1) + counts.get(minTimeStamp);;
-        counts.put(minTimeStamp,totalPrice);
-        System.out.println("**********");
+    public void execute(Tuple input) {
+        ArrayList<Object[]> list = (ArrayList<Object[]>) input.getValue(0);
+        int size = list.size();
+        for (int i = 0; i < size; i++) {
+            long timestamp = (Long) list.get(i)[0];
+            long minuteTimeStamp = 0;
+            try {
+                // TODO 这个地方的时间戳解析性能测试
+                minuteTimeStamp = sdf.parse(sdf.format(new Date(timestamp))).getTime();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            // TODO 这个地方的加法操作是安全的吗
+            double totalPrice = (Double) list.get(i)[1] + counts.get(minuteTimeStamp);
+            counts.put(minuteTimeStamp,totalPrice);
+        }
         //定时写数据到Tair
-        tairOperator.write(new String(RaceConfig.prex_taobao+minTimeStamp),totalPrice);
+//        tairOperator.write(new String(RaceConfig.prex_taobao+minuteTimeStamp), totalPrice);
     }
 
     @Override
@@ -49,10 +61,6 @@ public class PersistTaobao implements IRichBolt, Serializable {
 
     }
 
-    public long formatCreateTime(long createTime) {
-        // TODO 将createTime转化为整分时间戳
-        return 0l;
-    }
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
 
@@ -62,4 +70,23 @@ public class PersistTaobao implements IRichBolt, Serializable {
     public Map<String, Object> getComponentConfiguration() {
         return null;
     }
+
+//    public static void main(String[] args) {
+//        PersistTaobao persistTaobao = new PersistTaobao();
+//        Date date = new Date();
+//        System.out.println("current time: " + date);
+//        System.out.println("current timestamp: " + date.getTime());
+//        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm");
+//        String sd = sdf.format(date.getTime());
+//
+//        Date time = null;
+//        try {
+//            time = sdf.parse(sd);
+//            System.out.println("parsed time: " + time);
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println("parsed timestamp: " + time.getTime());
+//        System.out.println("distance: " + (date.getTime() - time.getTime()));
+//    }
 }
