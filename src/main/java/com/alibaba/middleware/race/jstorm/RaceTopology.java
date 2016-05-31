@@ -1,13 +1,10 @@
 package com.alibaba.middleware.race.jstorm;
 
 import backtype.storm.Config;
-import backtype.storm.StormSubmitter;
+import backtype.storm.LocalCluster;
 import backtype.storm.topology.TopologyBuilder;
 import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.jstorm.blot.CountTaobao;
-import com.alibaba.middleware.race.jstorm.blot.PersistTaobao;
-import com.alibaba.middleware.race.jstorm.spout.TaobaoTopicSpout;
-import com.alibaba.rocketmq.client.exception.MQClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,22 +31,23 @@ public class RaceTopology {
 
         HashMap conf = new HashMap();
         conf.put(Config.TOPOLOGY_WORKERS, 4);
+        conf.put(Config.TOPOLOGY_DEBUG, true);
 
         int spout_Parallelism_hint = 1;
         int bolt_Parallelism_hint = 2;
 
         TopologyBuilder builder = new TopologyBuilder();
 
-        builder.setSpout("taobao", new TaobaoTopicSpout(), spout_Parallelism_hint);
-//        builder.setSpout("tmall", new TmallTopicSpout(), spout_Parallelism_hint);
-//        builder.setSpout("pay", new PaymenyTopicSpout(), spout_Parallelism_hint);
 
         builder.setBolt("countTaobao", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("taobao");
-//        builder.setBolt("presistTaobao", new PersistTaobao(), bolt_Parallelism_hint).shuffleGrouping("countTaobao");
         String topologyName = RaceConfig.JstormTopologyName;
         try {
-            StormSubmitter.submitTopology(topologyName, conf, builder.createTopology());
-            LOG.info("Topology submitted!!!!");
+//            StormSubmitter.submitTopology(topologyName, conf, builder.createTopology());
+           LocalCluster localCluster = new LocalCluster();
+            localCluster.submitTopology(RaceConfig.JstormTopologyName, conf, builder.createTopology());
+            Thread.sleep(100000);
+            localCluster.shutdown();
+//            LOG.info("Topology submitted!!!!");
         } catch (Exception e) {
             e.printStackTrace();
         }
