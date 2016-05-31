@@ -9,12 +9,8 @@ public class RaceConfig implements Serializable {
     public static String prex_taobao = "platformTaobao_";
     public static String prex_ratio = "ratio_";
 
-
     // jstorm
     public static String JstormTopologyName = "AlimiddleWareRace";
-    public static String JstormNimbusAddr = "192.168.1.101";
-    // zookeeper
-    public static String ZookeeperService = "192.168.1.101";
 
     // Rocketmq
     public static String MQNameServerAddr = "192.168.1.101:9876";

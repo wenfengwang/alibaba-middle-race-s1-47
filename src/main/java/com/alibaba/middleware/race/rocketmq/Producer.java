@@ -17,10 +17,10 @@ import java.util.concurrent.Semaphore;
 public class Producer {
 
     private static Random rand = new Random();
-    private static int count = 1000;
+    private static int count = 20000;
 
     public static void main(String[] args) throws MQClientException, InterruptedException {
-        DefaultMQProducer producer = new DefaultMQProducer("please_rename_unique_group_name");
+        DefaultMQProducer producer = new DefaultMQProducer(RaceConfig.MqConsumerGroup);
 
         producer.setNamesrvAddr("192.168.1.101:9876");
         producer.start();

@@ -44,7 +44,7 @@ public class CountTaobao implements IRichBolt, Serializable {
             OrderMessage order = RaceUtils.readKryoObject(OrderMessage.class, body);
             Object[] objects = new Object[] {order.getCreateTime(), order.getTotalPrice()};
             emitList.add(objects);
-//            LOG.info(order.toString());
+            LOG.info(order.toString());
         }
         // TODO 这个地方的需要建个阻塞队列吗
         collector.emit(new Values(emitList));

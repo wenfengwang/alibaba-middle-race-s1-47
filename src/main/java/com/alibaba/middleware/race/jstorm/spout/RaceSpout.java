@@ -176,6 +176,7 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
     }
     private void sendTuple(MqTuple mqTuple) {
         mqTuple.updateEmitMs();
+        LOG.info("------- SEND TUPLE -------");
         collector.emit(new Values(mqTuple), mqTuple.getCreateMs());
     }
 
