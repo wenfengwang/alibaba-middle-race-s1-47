@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by wangwenfeng on 5/31/16.
  */
-public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckValueSpout, IFailValueSpout {
+public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IAckValueSpout, IFailValueSpout {
     private static Logger LOG = LoggerFactory.getLogger(RaceSpout.class);
     protected SpoutConfig mqClientConfig;
 
@@ -49,7 +49,7 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
         this.id = context.getThisComponentId() + ":" + context.getThisTaskId();
         this.sendingQueue = new LinkedBlockingDeque<MqTuple>();
 
-        conf.putAll(spoutConf);
+        tpConf.putAll(spoutConf);
         mqClientConfig = SpoutConfig.mkInstance(conf);
 
         try {
@@ -122,6 +122,15 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
     @Override
     public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
         try {
+//            List<Object[]> list = new ArrayList<Object[]>();
+//            int size = msgs.size();
+//            for (int i = 0; i < size; i++) {
+//                MessageExt msg = msgs.get(i);
+//                byte[] body = msg.getBody();
+//                OrderMessage order = RaceUtils.readKryoObject(OrderMessage.class,body);
+//                Object[] objects = new Object[] {order.getCreateTime(), order.getTotalPrice()};
+//                list.add(objects);
+//            }
             MqTuple mqTuple = new MqTuple(msgs, context.getMessageQueue());
 
             if (flowControl) {

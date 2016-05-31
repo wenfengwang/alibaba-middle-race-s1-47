@@ -38,18 +38,18 @@ public class CountTaobao implements IRichBolt, Serializable {
         byte[] body;
         MessageExt msg;// TODO 测试下在for循环内部定义和外部定义的性能差别
         int size = list.size();
-        ArrayList<Object[]> emitList = new ArrayList<Object[]>();
+//        ArrayList<Object[]> emitList = new ArrayList<Object[]>();
         for (int i = 0; i < size; i++) {
             msg = list.get(i);
             body = msg.getBody();
             OrderMessage order = RaceUtils.readKryoObject(OrderMessage.class, body);
-            Object[] objects = new Object[] {order.getCreateTime(), order.getTotalPrice()};
-            emitList.add(objects);
+//            Object[] objects = new Object[] {, };
+//            emitList.add(objects);
+            // TODO 每条emit的效率和放到一起直接emit哪个高? 另外, ack的时间会比较高
+            collector.emit(new Values(order.getCreateTime(), order.getTotalPrice()));
             LOG.info(order.toString());
         }
         // TODO 这个地方的需要建个阻塞队列吗
-        collector.emit(new Values(emitList));
-//        LOG.info("************* emited ***************");
         collector.ack(input);
     }
 
