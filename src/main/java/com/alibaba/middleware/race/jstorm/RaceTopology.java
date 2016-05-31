@@ -55,13 +55,13 @@ public class RaceTopology {
         TopologyBuilder builder = new TopologyBuilder();
 
         builder.setSpout("taobao",new RaceSpout(confTaobao), spout_Parallelism_hint);
-        builder.setSpout("tmall",new RaceSpout(confTmall), spout_Parallelism_hint);
-        builder.setSpout("payment",new RaceSpout(confPayment), spout_Parallelism_hint);
+//        builder.setSpout("tmall",new RaceSpout(confTmall), spout_Parallelism_hint);
+//        builder.setSpout("payment",new RaceSpout(confPayment), spout_Parallelism_hint);
 
 
         builder.setBolt("countTaobao", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("taobao");
-        builder.setBolt("countTmall", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("tmall");
-        builder.setBolt("countPayment", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("payment");
+//        builder.setBolt("countTmall", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("tmall");
+//        builder.setBolt("countPayment", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("payment");
 
         try {
 //            StormSubmitter.submitTopology(topologyName, conf, builder.createTopology());

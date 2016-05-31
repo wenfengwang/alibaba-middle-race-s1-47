@@ -25,11 +25,8 @@ public class PersistTaobao implements IRichBolt, Serializable {
     OutputCollector collector;
     Map<Long, Double> counts = new ConcurrentHashMap<Long, Double>();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-    TairOperatorImpl tairOperator;
+    TairOperatorImpl tairOperator = new TairOperatorImpl();
 
-    public PersistTaobao() {
-        tairOperator = new TairOperatorImpl();
-    }
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
@@ -40,17 +37,16 @@ public class PersistTaobao implements IRichBolt, Serializable {
         ArrayList<Object[]> list = (ArrayList<Object[]>) input.getValue(0);
         int size = list.size();
         for (int i = 0; i < size; i++) {
-            long timestamp = (Long) list.get(i)[0];
-            long minuteTimeStamp = 0;
             try {
+                long timestamp = (Long) list.get(i)[0];
                 // TODO 这个地方的时间戳解析性能测试
-                minuteTimeStamp = sdf.parse(sdf.format(new Date(timestamp))).getTime();
+                long minuteTimeStamp = sdf.parse(sdf.format(new Date(timestamp))).getTime();
+                // TODO 这个地方的加法操作是安全的吗
+                double totalPrice = (Double) list.get(i)[1] + counts.get(minuteTimeStamp);
+                counts.put(minuteTimeStamp,totalPrice);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            // TODO 这个地方的加法操作是安全的吗
-            double totalPrice = (Double) list.get(i)[1] + counts.get(minuteTimeStamp);
-            counts.put(minuteTimeStamp,totalPrice);
         }
         //定时写数据到Tair
 //        tairOperator.write(new String(RaceConfig.prex_taobao+minuteTimeStamp), totalPrice);
@@ -71,22 +67,13 @@ public class PersistTaobao implements IRichBolt, Serializable {
         return null;
     }
 
-//    public static void main(String[] args) {
+//    public static void main(String[] args) throws ParseException {
 //        PersistTaobao persistTaobao = new PersistTaobao();
-//        Date date = new Date();
-//        System.out.println("current time: " + date);
-//        System.out.println("current timestamp: " + date.getTime());
-//        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm");
-//        String sd = sdf.format(date.getTime());
-//
-//        Date time = null;
-//        try {
-//            time = sdf.parse(sd);
-//            System.out.println("parsed time: " + time);
-//        } catch (ParseException e) {
-//            e.printStackTrace();
+//        long timestamp = new Date().getTime();
+//        long start = System.currentTimeMillis();
+//        for(int i = 0; i < 1000000; i++){
+//            long minuteTimeStamp = persistTaobao.sdf.parse(persistTaobao.sdf.format(new Date(timestamp))).getTime();
 //        }
-//        System.out.println("parsed timestamp: " + time.getTime());
-//        System.out.println("distance: " + (date.getTime() - time.getTime()));
+//        System.out.println(System.currentTimeMillis() - start);
 //    }
 }
