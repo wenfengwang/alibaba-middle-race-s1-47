@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * Created by wangwenfeng on 5/31/16.
  */
-public class SpoutFactory {
+public class ConsumerFactory {
     private static Logger LOG = LoggerFactory.getLogger(RaceSpout.class);
 
     public static Map<String, DefaultMQPushConsumer> consumers =

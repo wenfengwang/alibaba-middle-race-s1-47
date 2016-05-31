@@ -4,7 +4,6 @@ import backtype.storm.spout.SpoutOutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.IRichSpout;
 import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import com.alibaba.jstorm.client.spout.IAckValueSpout;
 import com.alibaba.jstorm.client.spout.IFailValueSpout;
@@ -16,7 +15,6 @@ import com.alibaba.rocketmq.common.message.MessageExt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -33,22 +31,38 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
     private SpoutOutputCollector collector;
     private transient DefaultMQPushConsumer consumer;
 
-    private Map conf;
+    private Map tpConf;
+    private Map spoutConf;
     protected String id;
-    private String field;
     private boolean flowControl = true;
     private boolean autoAck = false;
 
-    public RaceSpout(String field) {
-        this.field = field;
+    public RaceSpout(Map conf) {
+        this.spoutConf = conf;
     }
 
     @Override
     public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
-        this.conf = conf;
+        this.tpConf = conf;
         this.collector = collector;
         this.id = context.getThisComponentId() + ":" + context.getThisTaskId();
         this.sendingQueue = new LinkedBlockingDeque<MqTuple>();
+
+        conf.putAll(spoutConf);
+        mqClientConfig = SpoutConfig.mkInstance(conf);
+
+        try {
+            consumer = ConsumerFactory.mkInstance(mqClientConfig, this);
+        } catch (Exception e) {
+            LOG.error("Failed to create Meta Consumer ", e);
+            throw new RuntimeException("Failed to create MetaConsumer" + id, e);
+        }
+
+        if (consumer == null) {
+            LOG.warn(id + " already exist consumer in current worker, don't need to fetch data ");
+        }
+
+        LOG.info("Successfully init " + id);
     }
 
     @Override
@@ -96,7 +110,7 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields(this.field));
+
     }
 
     @Override

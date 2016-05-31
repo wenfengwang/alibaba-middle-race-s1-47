@@ -15,13 +15,14 @@ public class RaceConfig implements Serializable {
     public static String JstormNimbusAddr = "192.168.1.101";
     // zookeeper
     public static String ZookeeperService = "192.168.1.101";
+
     // Rocketmq
     public static String MQNameServerAddr = "192.168.1.101:9876";
-    public static String MetaConsumerGroup = "Ali_mdw";
+    public static String MqConsumerGroup = "Ali_mdw";
     public static String MqPayTopic = "MiddlewareRaceTestData_Pay";
     public static String MqTmallTradeTopic = "MiddlewareRaceTestData_TMOrder";
-    public static String MqTaobaoTradeTopic = "MiddlewareRaceTestData_TBOrder";
 
+    public static String MqTaobaoTradeTopic = "MiddlewareRaceTestData_TBOrder";
     // Tair
     public static String TairConfigServer = "192.168.1.101:5198";
     public static String TairGroup = "group_1";

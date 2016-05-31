@@ -169,11 +169,8 @@ public class SpoutConfig implements Serializable {
     }
 
     public static SpoutConfig mkInstance(Map conf) {
-
         return new SpoutConfig(conf);
     }
-
-
 
     public int getMaxFailTimes() {
         return maxFailTimes;
