@@ -35,7 +35,7 @@ public class RaceTopology {
 
         // Toplology Configuration
         HashMap tpConf = new HashMap();
-        tpConf.put(Config.TOPOLOGY_WORKERS, 3);
+        tpConf.put(Config.TOPOLOGY_WORKERS, 4);
         tpConf.put(Config.TOPOLOGY_DEBUG, true);
 
         // Spout's public configuration
@@ -51,8 +51,8 @@ public class RaceTopology {
         HashMap<Object,Object> confPayment= new HashMap(publicSpoutConfig);
         confPayment.put(SpoutConfig.META_TOPIC,RaceConfig.MqPayTopic);
 
-        int spout_Parallelism_hint = 1;
-        int bolt_Parallelism_hint = 1;
+        int spout_Parallelism_hint = 2;
+        int bolt_Parallelism_hint = 2;
 
         TopologyBuilder builder = new TopologyBuilder();
 
@@ -67,11 +67,11 @@ public class RaceTopology {
 //        builder.setBolt("countPayment", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("payment");
 
         try {
-//            StormSubmitter.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
-            LocalCluster localCluster = new LocalCluster();
-            localCluster.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
-            Thread.sleep(1000000);
-            localCluster.shutdown();
+            StormSubmitter.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
+//            LocalCluster localCluster = new LocalCluster();
+//            localCluster.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
+//            Thread.sleep(1000000);
+//            localCluster.shutdown();
 //            LOG.info("Topology submitted!!!!");
         } catch (Exception e) {
             e.printStackTrace();
