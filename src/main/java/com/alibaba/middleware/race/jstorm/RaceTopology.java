@@ -34,7 +34,7 @@ public class RaceTopology {
 
         // Toplology Configuration
         HashMap tpConf = new HashMap();
-        tpConf.put(Config.TOPOLOGY_WORKERS, 4);
+        tpConf.put(Config.TOPOLOGY_WORKERS, 2);
         tpConf.put(Config.TOPOLOGY_DEBUG, true);
 
         // Spout's public configuration
@@ -66,11 +66,11 @@ public class RaceTopology {
 
         try {
             StormSubmitter.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
-//           LocalCluster localCluster = new LocalCluster();
+//            LocalCluster localCluster = new LocalCluster();
 //            localCluster.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
 //            Thread.sleep(100000);
 //            localCluster.shutdown();
-//            LOG.info("Topology submitted!!!!");
+            LOG.info("Topology submitted!!!!");
         } catch (Exception e) {
             e.printStackTrace();
         }

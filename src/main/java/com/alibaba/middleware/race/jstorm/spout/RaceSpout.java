@@ -4,6 +4,7 @@ import backtype.storm.spout.SpoutOutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.IRichSpout;
 import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import com.alibaba.jstorm.client.spout.IAckValueSpout;
 import com.alibaba.jstorm.client.spout.IFailValueSpout;
@@ -110,7 +111,7 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-
+        declarer.declare(new Fields("taobao"));
     }
 
     @Override
@@ -121,6 +122,8 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
     @Override
     public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
         try {
+            LOG.info("------------- receive data!! -------------");
+
             MqTuple mqTuple = new MqTuple(msgs, context.getMessageQueue());
 
             if (flowControl) {
@@ -175,6 +178,7 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
     }
     private void sendTuple(MqTuple mqTuple) {
         mqTuple.updateEmitMs();
+        LOG.info("------------- send tuple!! -------------");
         collector.emit(new Values(mqTuple), mqTuple.getCreateMs());
     }
 
