@@ -41,12 +41,17 @@ public class PersistTaobao implements IRichBolt, Serializable {
         ArrayList<Object[]> list = (ArrayList<Object[]>) input.getValue(0);
         int size = list.size();
         for (int i = 0; i < size; i++) {
+            Object[] objects = list.get(i);
+            if (objects.length == 0 ) {
+                LOG.warn("Object size is 0!!!!!!!!!");
+                continue;
+            }
             try {
-                long timestamp = (Long) list.get(i)[0];
+                long timestamp = (Long) objects[0];
                 // TODO 这个地方的时间戳解析性能测试
                 long minuteTimeStamp = sdf.parse(sdf.format(new Date(timestamp))).getTime();
                 // TODO 这个地方的加法操作是安全的吗
-                double totalPrice = (Double) list.get(i)[1] + counts.get(minuteTimeStamp);
+                double totalPrice = (Double) objects[1] + counts.get(minuteTimeStamp);
                 LOG.info(new String(RaceConfig.prex_taobao+minuteTimeStamp) + " : " + totalPrice);
 //                counts.put(minuteTimeStamp,totalPrice);
             } catch (ParseException e) {

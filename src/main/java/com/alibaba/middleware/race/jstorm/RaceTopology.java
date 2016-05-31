@@ -51,14 +51,14 @@ public class RaceTopology {
         HashMap<Object,Object> confPayment= new HashMap(publicSpoutConfig);
         confPayment.put(SpoutConfig.META_TOPIC,RaceConfig.MqPayTopic);
 
-        int spout_Parallelism_hint = 2;
-        int bolt_Parallelism_hint = 2;
-
+        int spout_Parallelism_hint = 1;
+        int bolt_Parallelism_hint = 3;
+        int _bolt_Parallelism_hint = 2;
         TopologyBuilder builder = new TopologyBuilder();
 
         builder.setSpout("taobao",new RaceSpout(confTaobao), spout_Parallelism_hint);
         builder.setBolt("countTaobao", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("taobao");
-        builder.setBolt("perisistTaobao", new PersistTaobao(),bolt_Parallelism_hint).shuffleGrouping("countTaobao");
+        builder.setBolt("perisistTaobao", new PersistTaobao(),_bolt_Parallelism_hint).shuffleGrouping("countTaobao");
 
 //        builder.setSpout("tmall",new RaceSpout(confTmall), spout_Parallelism_hint);
 //        builder.setBolt("countTmall", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("tmall");
