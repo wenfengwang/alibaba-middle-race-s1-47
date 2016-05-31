@@ -7,6 +7,8 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
 import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.text.ParseException;
@@ -22,10 +24,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * 持久化数据模块
  */
 public class PersistTaobao implements IRichBolt, Serializable {
+    private static Logger LOG = LoggerFactory.getLogger(CountTaobao.class);
+
     OutputCollector collector;
     Map<Long, Double> counts = new ConcurrentHashMap<Long, Double>();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-    TairOperatorImpl tairOperator = new TairOperatorImpl();
+//    TairOperatorImpl tairOperator = new TairOperatorImpl();
 
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
@@ -43,7 +47,8 @@ public class PersistTaobao implements IRichBolt, Serializable {
                 long minuteTimeStamp = sdf.parse(sdf.format(new Date(timestamp))).getTime();
                 // TODO 这个地方的加法操作是安全的吗
                 double totalPrice = (Double) list.get(i)[1] + counts.get(minuteTimeStamp);
-                counts.put(minuteTimeStamp,totalPrice);
+                LOG.info(new String(RaceConfig.prex_taobao+minuteTimeStamp) + " : " + totalPrice);
+//                counts.put(minuteTimeStamp,totalPrice);
             } catch (ParseException e) {
                 e.printStackTrace();
             }

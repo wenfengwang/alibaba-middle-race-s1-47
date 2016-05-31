@@ -27,7 +27,6 @@ public class CountTaobao implements IRichBolt, Serializable {
     OutputCollector collector;
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-        System.out.println("CountTaobao started");
         this.collector = collector;
     }
 
@@ -45,10 +44,11 @@ public class CountTaobao implements IRichBolt, Serializable {
             OrderMessage order = RaceUtils.readKryoObject(OrderMessage.class, body);
             Object[] objects = new Object[] {order.getCreateTime(), order.getTotalPrice()};
             emitList.add(objects);
-            LOG.info(order.toString());
+//            LOG.info(order.toString());
         }
         // TODO 这个地方的需要建个阻塞队列吗
-//        collector.emit(new Values(emitList));
+        collector.emit(new Values(emitList));
+        LOG.info("************* emited ***************");
         collector.ack(input);
     }
 

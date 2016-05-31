@@ -122,8 +122,6 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
     @Override
     public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
         try {
-            LOG.info("------------- receive data!! -------------");
-
             MqTuple mqTuple = new MqTuple(msgs, context.getMessageQueue());
 
             if (flowControl) {
@@ -178,7 +176,6 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
     }
     private void sendTuple(MqTuple mqTuple) {
         mqTuple.updateEmitMs();
-        LOG.info("------------- send tuple!! -------------");
         collector.emit(new Values(mqTuple), mqTuple.getCreateMs());
     }
 
