@@ -35,8 +35,8 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
     private Map tpConf;
     private Map spoutConf;
     protected String id;
-    private boolean flowControl = true;
-    private boolean autoAck = false;
+    private boolean flowControl = false;
+    private boolean autoAck = true;
 
     public RaceSpout(Map conf) {
         this.spoutConf = conf;
@@ -176,7 +176,6 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
     }
     private void sendTuple(MqTuple mqTuple) {
         mqTuple.updateEmitMs();
-        LOG.info("------- SEND TUPLE -------");
         collector.emit(new Values(mqTuple), mqTuple.getCreateMs());
     }
 

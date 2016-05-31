@@ -17,7 +17,7 @@ import java.util.concurrent.Semaphore;
 public class Producer {
 
     private static Random rand = new Random();
-    private static int count = 20000;
+    private static int count = 2000;
 
     public static void main(String[] args) throws MQClientException, InterruptedException {
         DefaultMQProducer producer = new DefaultMQProducer(RaceConfig.MqConsumerGroup);
@@ -40,7 +40,7 @@ public class Producer {
 
                 producer.send(msgToBroker, new SendCallback() {
                     public void onSuccess(SendResult sendResult) {
-                        System.out.println(orderMessage);
+//                        System.out.println(orderMessage);
                         semaphore.release();
                     }
                     public void onException(Throwable throwable) {
@@ -62,7 +62,7 @@ public class Producer {
                         final Message messageToBroker = new Message(RaceConfig.MqPayTopic, RaceUtils.writeKryoObject(paymentMessage));
                         producer.send(messageToBroker, new SendCallback() {
                             public void onSuccess(SendResult sendResult) {
-                                System.out.println(paymentMessage);
+//                                System.out.println(paymentMessage);
                             }
                             public void onException(Throwable throwable) {
                                 throwable.printStackTrace();

@@ -49,7 +49,7 @@ public class CountTaobao implements IRichBolt, Serializable {
         }
         // TODO 这个地方的需要建个阻塞队列吗
         collector.emit(new Values(emitList));
-        LOG.info("************* emited ***************");
+//        LOG.info("************* emited ***************");
         collector.ack(input);
     }
 
