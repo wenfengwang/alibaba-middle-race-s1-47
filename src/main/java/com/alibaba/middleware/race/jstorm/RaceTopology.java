@@ -51,6 +51,7 @@ public class RaceTopology {
         HashMap<Object,Object> confPayment= new HashMap(publicSpoutConfig);
         confPayment.put(SpoutConfig.META_TOPIC,RaceConfig.MqPayTopic);
 
+        // TODO 设计acker https://github.com/alibaba/jstorm/wiki/Ack-%E6%9C%BA%E5%88%B6 -> msgId具体是?
         int spout_Parallelism_hint = 1;
         int bolt_Parallelism_hint = 3;
         int _bolt_Parallelism_hint = 2;

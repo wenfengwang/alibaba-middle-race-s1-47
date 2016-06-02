@@ -23,6 +23,7 @@ import java.util.Map;
 /**
  * Created by wangwenfeng on 5/27/16.
  */
+// TODO 非事务环境中，尽量使用IBasicBolt -> https://github.com/alibaba/jstorm/wiki/%E5%BC%80%E5%8F%91%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93
 public class CountTaobao implements IRichBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(CountTaobao.class);
     OutputCollector collector;
@@ -33,21 +34,25 @@ public class CountTaobao implements IRichBolt, Serializable {
 
     @Override
     public void execute(Tuple input) {
-        MqTuple mqTuple = (MqTuple) input.getValue(0);
-        List<MessageExt> list = mqTuple.getMsgList();
-        byte[] body;
-        MessageExt msg;// TODO 测试下在for循环内部定义和外部定义的性能差别
-        int size = list.size();
+        try {
+            MqTuple mqTuple = (MqTuple) input.getValue(0);
+            List<MessageExt> list = mqTuple.getMsgList();
+            byte[] body;
+            MessageExt msg;// TODO 测试下在for循环内部定义和外部定义的性能差别
+            int size = list.size();
 //        ArrayList<Object[]> emitList = new ArrayList<Object[]>();
-        for (int i = 0; i < size; i++) {
-            msg = list.get(i);
-            body = msg.getBody();
-            OrderMessage order = RaceUtils.readKryoObject(OrderMessage.class, body);
+            for (int i = 0; i < size; i++) {
+                msg = list.get(i);
+                body = msg.getBody();
+                OrderMessage order = RaceUtils.readKryoObject(OrderMessage.class, body);
 //            Object[] objects = new Object[] {, };
 //            emitList.add(objects);
-            // TODO 每条emit的效率和放到一起直接emit哪个高? 另外, ack的时间会比较高
-            collector.emit(new Values(order.getCreateTime(), order.getTotalPrice()));
-            LOG.info(order.toString());
+                // TODO 每条emit的效率和放到一起直接emit哪个高? 另外, ack的时间会比较高
+                collector.emit(new Values(order.getCreateTime(), order.getTotalPrice()));
+                LOG.info(order.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         // TODO 这个地方的需要建个阻塞队列吗
         collector.ack(input);
@@ -60,7 +65,7 @@ public class CountTaobao implements IRichBolt, Serializable {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("countTaobao"));
+        declarer.declare(new Fields("createTime","totalPrice"));
     }
 
     @Override
