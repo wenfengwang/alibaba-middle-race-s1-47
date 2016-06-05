@@ -37,7 +37,8 @@ public class RaceTopology {
         HashMap tpConf = new HashMap();
         tpConf.put(Config.TOPOLOGY_WORKERS, 4);
         tpConf.put(Config.TOPOLOGY_DEBUG, true);
-
+        tpConf.put(Config.TOPOLOGY_ACKER_EXECUTORS,1);  //等价于 Config.setNumAckers(tpConf,1);
+//        tpConf.put(Config.HEAR)
         // Spout's public configuration
         HashMap<Object, Object> publicSpoutConfig = new HashMap();
         publicSpoutConfig.put(SpoutConfig.META_CONSUMER_GROUP, RaceConfig.MqConsumerGroup);
@@ -53,8 +54,8 @@ public class RaceTopology {
 
         // TODO 设计acker https://github.com/alibaba/jstorm/wiki/Ack-%E6%9C%BA%E5%88%B6 -> msgId具体是?
         int spout_Parallelism_hint = 1;
-        int bolt_Parallelism_hint = 3;
-        int _bolt_Parallelism_hint = 2;
+        int bolt_Parallelism_hint = 1;
+        int _bolt_Parallelism_hint = 1;
         TopologyBuilder builder = new TopologyBuilder();
 
         builder.setSpout("taobao",new RaceSpout(confTaobao), spout_Parallelism_hint);
@@ -73,7 +74,7 @@ public class RaceTopology {
 //            localCluster.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
 //            Thread.sleep(1000000);
 //            localCluster.shutdown();
-//            LOG.info("Topology submitted!!!!");
+            LOG.info("Topology submitted!!!!");
         } catch (Exception e) {
             e.printStackTrace();
         }
