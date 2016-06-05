@@ -51,11 +51,11 @@ public class CountTaobao implements IRichBolt, Serializable {
                 collector.emit(new Values(order.getCreateTime(), order.getTotalPrice()));
                 LOG.info(order.toString());
             }
+            collector.ack(input);
         } catch (Exception e) {
             e.printStackTrace();
         }
         // TODO 这个地方的需要建个阻塞队列吗
-        collector.ack(input);
     }
 
     @Override
