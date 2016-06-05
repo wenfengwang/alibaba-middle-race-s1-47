@@ -38,7 +38,7 @@ public class RaceTopology {
         tpConf.put(Config.TOPOLOGY_WORKERS, 4);
         tpConf.put(Config.TOPOLOGY_DEBUG, true);
         tpConf.put(Config.TOPOLOGY_ACKER_EXECUTORS,1);  //等价于 Config.setNumAckers(tpConf,1);
-//        tpConf.put(Config.HEAR)
+
         // Spout's public configuration
         HashMap<Object, Object> publicSpoutConfig = new HashMap();
         publicSpoutConfig.put(SpoutConfig.META_CONSUMER_GROUP, RaceConfig.MqConsumerGroup);
