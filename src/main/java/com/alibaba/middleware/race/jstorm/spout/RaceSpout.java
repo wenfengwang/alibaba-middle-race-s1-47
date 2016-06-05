@@ -16,6 +16,7 @@ import com.alibaba.rocketmq.common.message.MessageExt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -131,7 +132,7 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
 //                Object[] objects = new Object[] {order.getCreateTime(), order.getTotalPrice()};
 //                list.add(objects);
 //            }
-            MqTuple mqTuple = new MqTuple(msgs, context.getMessageQueue());
+            MqTuple mqTuple = new MqTuple(new ArrayList<MessageExt>(msgs), context.getMessageQueue());
 
             if (flowControl) {
                 sendingQueue.offer(mqTuple);
