@@ -27,14 +27,14 @@ public class MqTuple implements Serializable {
     protected transient CountDownLatch latch;
     protected transient boolean isSuccess;
 
-//    public MqTuple() {
-//        msgList = new ArrayList<MessageExt>();
-//        mq = new MessageQueue();
-//        createMs = System.currentTimeMillis();
-//        failureTimes = new AtomicInteger(0);
-//        latch = new CountDownLatch(1);
-//        isSuccess = false;
-//    }
+    public MqTuple() {
+        msgList = null;
+        mq = null;
+        createMs = System.currentTimeMillis();
+        failureTimes = new AtomicInteger(0);
+        latch = new CountDownLatch(1);
+        isSuccess = false;
+    }
 
     public MqTuple(List<MessageExt> msgs, MessageQueue messageQueue) {
         msgList = msgs;

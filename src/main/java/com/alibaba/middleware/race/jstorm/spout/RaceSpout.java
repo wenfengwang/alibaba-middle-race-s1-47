@@ -44,7 +44,6 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
 
     @Override
     public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
-        LOG.info("*******************************************");
         this.tpConf = conf;
         this.collector = collector;
         this.id = context.getThisComponentId() + ":" + context.getThisTaskId();
