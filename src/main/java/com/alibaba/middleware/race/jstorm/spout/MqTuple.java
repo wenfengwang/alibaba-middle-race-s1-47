@@ -7,7 +7,6 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -28,14 +27,14 @@ public class MqTuple implements Serializable {
     protected transient CountDownLatch latch;
     protected transient boolean isSuccess;
 
-    public MqTuple() {
-        msgList = new ArrayList<MessageExt>();
-        mq = new MessageQueue();
-        createMs = System.currentTimeMillis();
-        failureTimes = new AtomicInteger(0);
-        latch = new CountDownLatch(1);
-        isSuccess = false;
-    }
+//    public MqTuple() {
+//        msgList = new ArrayList<MessageExt>();
+//        mq = new MessageQueue();
+//        createMs = System.currentTimeMillis();
+//        failureTimes = new AtomicInteger(0);
+//        latch = new CountDownLatch(1);
+//        isSuccess = false;
+//    }
 
     public MqTuple(List<MessageExt> msgs, MessageQueue messageQueue) {
         msgList = msgs;

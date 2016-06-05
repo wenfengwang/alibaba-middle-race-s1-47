@@ -7,4 +7,4 @@ target/
 .settings
 .idea/
 *.iml
-*.xml
+pom.xml
