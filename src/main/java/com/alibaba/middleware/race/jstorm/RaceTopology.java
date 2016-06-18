@@ -15,13 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 
-
-/**
- * 这是一个很简单的例子
- * 选手的拓扑提交到集群，我们是有超时设置的。每个选手的拓扑最多跑20分钟，一旦超过这个时间
- * 我们会将选手拓扑杀掉。
- */
-
 /**
  * 选手拓扑入口类，我们定义必须是com.alibaba.middleware.race.jstorm.RaceTopology
  * 因为我们后台对选手的git进行下载打包，拓扑运行的入口类默认是com.alibaba.middleware.race.jstorm.RaceTopology；
@@ -68,13 +61,13 @@ public class RaceTopology {
 //        builder.setSpout("payment",new RaceSpout(confPayment), spout_Parallelism_hint);
 //        builder.setBolt("countPayment", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("payment");
 
-        try {g
-            StormSubmitter.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
-//            LocalCluster localCluster = new LocalCluster();
-//            localCluster.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
-//            Thread.sleep(1000000);
-//            localCluster.shutdown();
-//            LOG.info("Topology submitted!!!!");
+        try {
+//            StormSubmitter.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
+            LocalCluster localCluster = new LocalCluster();
+            localCluster.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
+            Thread.sleep(1000000);
+            localCluster.shutdown();
+            LOG.info("Topology submitted!!!!");
         } catch (Exception e) {
             e.printStackTrace();
         }
