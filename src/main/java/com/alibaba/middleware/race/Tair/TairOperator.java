@@ -12,7 +12,7 @@ public class TairOperator {
         list.add("192.168.1.161:5198");
         TairOperatorImpl tairOperator = new TairOperatorImpl(list);
         tairOperator.write(111, "eddfaef");
-        System.out.println(tairOperator.get("abc"));
+//        System.out.println(tairOperator.get("abc"));
         System.out.println(tairOperator.get(111));
     }
 }
