@@ -47,7 +47,7 @@ public class TableItemFactory {
     }
 
     public static double createTotalPrice() {
-        return round(rand.nextDouble() * MAX_TOTAL_PRICE + 0.1, 2);
+        return round(rand.nextDouble() * MAX_TOTAL_PRICE + 10, 2);
     }
 
 }

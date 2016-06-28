@@ -34,7 +34,7 @@ public class Consumer {
         consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
 
         //�ڱ��ش��broker��,�ǵ�ָ��nameServer�ĵ�ַ
-        consumer.setNamesrvAddr("192.168.1.101:9876");
+        consumer.setNamesrvAddr("192.168.1.161:9876");
 
         consumer.subscribe(RaceConfig.MqPayTopic, "*");
 
