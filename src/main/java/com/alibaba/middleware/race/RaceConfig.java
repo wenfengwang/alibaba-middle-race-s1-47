@@ -18,7 +18,7 @@ public class RaceConfig implements Serializable {
 
     // Tair
     public static String TairGroup = "group_tianchi";
-    public static Integer TairNamespace = 19542;
+    public static Integer TairNamespace = 1;
     public static String prex_tmall = "platformTmall_" + TeadCode + "_";
     public static String prex_taobao = "platformTaobao_" + TeadCode + "_";
     public static String prex_ratio = "ratio_" + TeadCode + "_";

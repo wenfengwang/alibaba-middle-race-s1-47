@@ -11,7 +11,7 @@ public class TairOperator {
         List<String> list = new ArrayList<String>();
         list.add("192.168.1.161:5198");
         TairOperatorImpl tairOperator = new TairOperatorImpl(list);
-        tairOperator.write(111, "eddfaef");
+//        tairOperator.write(111, "eddfaef");
 //        System.out.println(tairOperator.get("abc"));
         System.out.println(tairOperator.get(111));
     }
