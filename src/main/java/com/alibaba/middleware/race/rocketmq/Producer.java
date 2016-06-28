@@ -22,7 +22,7 @@ public class Producer {
     public static void main(String[] args) throws MQClientException, InterruptedException {
         DefaultMQProducer producer = new DefaultMQProducer(RaceConfig.MqConsumerGroup);
 
-        producer.setNamesrvAddr("192.168.1.101:9876");
+        producer.setNamesrvAddr("192.168.1.161:9876");
         producer.start();
 
         final String [] topics = new String[]{RaceConfig.MqTaobaoTradeTopic, RaceConfig.MqTmallTradeTopic};

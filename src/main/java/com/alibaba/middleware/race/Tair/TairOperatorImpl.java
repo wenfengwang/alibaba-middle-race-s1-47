@@ -21,8 +21,7 @@ public class TairOperatorImpl implements Serializable {
 
     DefaultTairManager tairManager = new DefaultTairManager();
 //
-    public TairOperatorImpl() {
-        confServers.add(RaceConfig.TairConfigServer);
+    public TairOperatorImpl(List confServers) {
         tairManager.setConfigServerList(confServers);
         tairManager.setGroupName(RaceConfig.TairGroup);
         tairManager.init();
