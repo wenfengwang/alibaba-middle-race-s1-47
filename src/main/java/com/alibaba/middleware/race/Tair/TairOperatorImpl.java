@@ -36,6 +36,10 @@ public class TairOperatorImpl implements Serializable {
         Result<DataEntry> result = tairManager.get(nameSpace, key);
         if (result.isSuccess()) {
             DataEntry entry = result.getValue();
+            if (entry == null) {
+                System.out.println("exit");
+                return null;
+            }
             return entry.getValue();
         } else {
             return "failed";
