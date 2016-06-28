@@ -68,7 +68,7 @@ public class RaceTopology {
 //        builder.setSpout("payment",new RaceSpout(confPayment), spout_Parallelism_hint);
 //        builder.setBolt("countPayment", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("payment");
 
-        try {g
+        try {
             StormSubmitter.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
 //            LocalCluster localCluster = new LocalCluster();
 //            localCluster.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
