@@ -27,8 +27,15 @@ public class RaceUtils {
         Kryo kryo = new Kryo();
         Input input = new Input(bytes);
         input.close();
-         T ret = kryo.readObject(input, tClass);
-        return ret;
+        try {
+            T ret = null;
+            ret = kryo.readObject(input, tClass);
+            return ret;
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("*********");
+        }
+        return null;
     }
 
 }

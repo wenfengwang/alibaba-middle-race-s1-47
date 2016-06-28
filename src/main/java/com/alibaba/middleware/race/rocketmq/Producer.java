@@ -12,13 +12,14 @@ import com.alibaba.middleware.race.RaceUtils;
 
 import java.util.Random;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class Producer {
 
     private static Random rand = new Random();
     private static int count = 2000;
-
+    private static AtomicInteger atomInt = new AtomicInteger(0);
     public static void main(String[] args) throws MQClientException, InterruptedException {
         DefaultMQProducer producer = new DefaultMQProducer(RaceConfig.MqConsumerGroup);
 
@@ -31,6 +32,9 @@ public class Producer {
         for (int i = 0; i < count; i++) {
             try {
                 final int platform = rand.nextInt(2);
+                if (platform == 0) {
+                    atomInt.addAndGet(1);
+                }
                 final OrderMessage orderMessage = ( platform == 0 ? OrderMessage.createTbaoMessage() : OrderMessage.createTmallMessage());
                 orderMessage.setCreateTime(System.currentTimeMillis());
 
@@ -95,6 +99,7 @@ public class Producer {
             producer.send(endMsgTB);
             producer.send(endMsgTM);
             producer.send(endMsgPay);
+            System.out.println(atomInt.get());
         } catch (Exception e) {
             e.printStackTrace();
         }

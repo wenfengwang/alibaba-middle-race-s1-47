@@ -47,13 +47,16 @@ public class CountTaobao implements IRichBolt, Serializable {
             for (int i = 0; i < size; i++) {
                 msg = list.get(i);
                 body = msg.getBody();
+                if (body.length == 2 && body[0] == 0 && body[1] == 0) {
+                    System.out.println("all message complete!!!");
+//                    System.exit(0);
+                }
                 OrderMessage order = RaceUtils.readKryoObject(OrderMessage.class, body);
 //            Object[] objects = new Object[] {, };
 //            emitList.add(objects);
                 // TODO 每条emit的效率和放到一起直接emit哪个高? 另外, ack的时间会比较高
                 recievedMsg.addAndGet(1);
                 collector.emit(new Values(order.getCreateTime(), order.getTotalPrice()));
-                LOG.info(order.toString());
             }
             LOG.info(String.valueOf(System.currentTimeMillis() - start_time));
             LOG.info("recieved message count : " + recievedMsg.get());

@@ -26,14 +26,16 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PersistTaobao implements IRichBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(CountTaobao.class);
 
-    OutputCollector collector;
-    Map<Long, Double> counts = new ConcurrentHashMap<Long, Double>();
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+    private OutputCollector collector;
+    private Map<String, Double> counts;
+    private SimpleDateFormat sdf;
 //    TairOperatorImpl tairOperator = new TairOperatorImpl();
 
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
+        counts = new ConcurrentHashMap<String, Double>();
+        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     }
 
     @Override
@@ -42,10 +44,16 @@ public class PersistTaobao implements IRichBolt, Serializable {
         long minuteTimeStamp = 0;
         try {
             minuteTimeStamp = sdf.parse(sdf.format(new Date((Long) input.getValue(0)))).getTime();
-            double totalPrice = (Double) input.getValue(1) + counts.get(minuteTimeStamp);
+
+            // TODO 为什么一直会抛出空指针异常 -> 因为当get找不到值的时候，会返回null，而等号的左边是double类型，不接受null，也不
+            // TODO 自动转换，所以就抛出了空指针异常。
+            // 空指针异常并不是仅仅限于调用者为空，异常的null变量赋值也会导致空指针异常
+            String sumPrice =  String.valueOf(counts.get(minuteTimeStamp));//String.valueOf(minuteTimeStamp)
+            double totalPrice = (Double)input.getValue(1) + (("null").equals(sumPrice) ? 0.0: Double.valueOf(sumPrice));
+            counts.put(String.valueOf(minuteTimeStamp),totalPrice);
             LOG.info(new String(RaceConfig.prex_taobao+minuteTimeStamp) + " : " + totalPrice);
             collector.ack(input);
-        } catch (ParseException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
