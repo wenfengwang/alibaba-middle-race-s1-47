@@ -48,8 +48,8 @@ public class CountTaobao implements IRichBolt, Serializable {
                 msg = list.get(i);
                 body = msg.getBody();
                 if (body.length == 2 && body[0] == 0 && body[1] == 0) {
-                    System.out.println("all message complete!!!");
-//                    System.exit(0);
+                    collector.emit(new Values("",""));
+                    return;
                 }
                 OrderMessage order = RaceUtils.readKryoObject(OrderMessage.class, body);
 //            Object[] objects = new Object[] {, };

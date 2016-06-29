@@ -33,10 +33,10 @@ public class PersistTaobao implements IRichBolt, Serializable {
     private OutputCollector collector;
     private Map<String, Double> counts;
     private SimpleDateFormat sdf;
-    private volatile String concurrentTimeStamp;
-    private volatile boolean changed;
+    private volatile String concurrentTimeStamp = null;
+    private volatile boolean changed = false;
     private String prefix;
-    TairOperatorImpl tairOperator = new TairOperatorImpl(new ArrayList());
+    TairOperatorImpl tairOperator;
 
     public PersistTaobao() {}
 
@@ -48,11 +48,14 @@ public class PersistTaobao implements IRichBolt, Serializable {
         this.collector = collector;
         counts = new ConcurrentHashMap<String, Double>();
         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        ArrayList<String> list = new ArrayList<String>();
+        list.add("192.168.1.161:5198");
+        tairOperator = new TairOperatorImpl(list);
+//        context.get
     }
 
     @Override
     public void execute(Tuple input) {
-//        ArrayList<Object[]> list = (ArrayList<Object[]>) input.getValue(0);
         String minuteTimeStamp;
         try {
             // 因外在大概率上消息顺序是有序的,所以仅当时间戳的值改变后我们对当前的值进行持久化操作
@@ -61,21 +64,27 @@ public class PersistTaobao implements IRichBolt, Serializable {
                 concurrentTimeStamp = minuteTimeStamp;
                 changed = true;
             }
+
             // 为什么一直会抛出空指针异常 -> 因为当get找不到值的时候，会返回null，而等号的左边是double类型，不接受null，也不
             // 自动转换，所以就抛出了空指针异常。
             // 空指针异常并不是仅仅限于调用者为空，异常的null变量赋值也会导致空指针异常
             String sumPrice =  String.valueOf(counts.get(minuteTimeStamp));//String.valueOf(minuteTimeStamp)
             double totalPrice = (Double)input.getValue(1) + (("null").equals(sumPrice) ? 0.0: Double.valueOf(sumPrice));
             counts.put(String.valueOf(minuteTimeStamp),totalPrice);
-
+            System.out.println(totalPrice);
             if (changed) {
                 // TODO 这个地方存在线程不安全的可能吗? -> 单个bolt线程安全, 多个不安全
-                tairOperator.write(prefix+minuteTimeStamp, totalPrice);
+                tairOperator.write(prefix+concurrentTimeStamp, totalPrice);
                 collector.ack(input);
                 changed = false;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            // 结束时将当前结果写入到tair
+            if ("".equals(input.getValue(0)) && "".equals(input.getValue(1))) {
+                tairOperator.write(prefix+concurrentTimeStamp, counts.get(concurrentTimeStamp));
+                System.out.println(concurrentTimeStamp);
+                System.out.println(counts.get(concurrentTimeStamp));
+            }
         }
     }
 
@@ -93,14 +102,4 @@ public class PersistTaobao implements IRichBolt, Serializable {
     public Map<String, Object> getComponentConfiguration() {
         return null;
     }
-
-//    public static void main(String[] args) throws ParseException {
-//        PersistTaobao persistTaobao = new PersistTaobao();
-//        long timestamp = new Date().getTime();
-//        long start = System.currentTimeMillis();
-//        for(int i = 0; i < 1000000; i++){
-//            long minuteTimeStamp = persistTaobao.sdf.parse(persistTaobao.sdf.format(new Date(timestamp))).getTime();
-//        }
-//        System.out.println(System.currentTimeMillis() - start);
-//    }
 }
