@@ -20,7 +20,7 @@ public class TairOperatorImpl implements Serializable {
     private List<String> confServers = new ArrayList<String>();
 
     DefaultTairManager tairManager = new DefaultTairManager();
-//
+
     public TairOperatorImpl(List confServers) {
         tairManager.setConfigServerList(confServers);
         tairManager.setGroupName(RaceConfig.TairGroup);
