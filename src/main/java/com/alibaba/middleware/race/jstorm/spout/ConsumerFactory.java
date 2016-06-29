@@ -31,6 +31,7 @@ public class ConsumerFactory {
         String key = topic + "@" + groupId;
 
         DefaultMQPushConsumer consumer = consumers.get(key);
+        consumer.getDefaultMQPushConsumerImpl();
         if (consumer != null) {
             LOG.info("Consumer of " + key + " has been created, don't recreate it ");
             //Attention, this place return null to info duplicated consumer

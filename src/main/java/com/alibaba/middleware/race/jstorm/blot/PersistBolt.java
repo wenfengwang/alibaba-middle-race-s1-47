@@ -1,21 +1,18 @@
 package com.alibaba.middleware.race.jstorm.blot;
 
-import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.IRichBolt;
+import backtype.storm.topology.BasicOutputCollector;
+import backtype.storm.topology.IBasicBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
-import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,10 +24,9 @@ import java.util.concurrent.ConcurrentHashMap;
 // TODO 各个Topic的持久化bolt应该仅设置为一个, 如果设置为多个时候可能会导致数据分流,而使得消息缺失, 必须去从Tair中读取.而且多个持久化的
 // TODO bolt,会存在若干线程不安全的情况
 
-public class PersistTaobao implements IRichBolt, Serializable {
-    private static Logger LOG = LoggerFactory.getLogger(CountTaobao.class);
+public class PersistBolt implements IBasicBolt, Serializable {
+    private static Logger LOG = LoggerFactory.getLogger(PersistBolt.class);
 
-    private OutputCollector collector;
     private Map<String, Double> counts;
     private SimpleDateFormat sdf;
     TairOperatorImpl tairOperator;
@@ -40,14 +36,14 @@ public class PersistTaobao implements IRichBolt, Serializable {
     private volatile boolean changed = false;
     private String prefix;
 
-    public PersistTaobao() {}
+    public PersistBolt() {}
 
-    public PersistTaobao(String prefix) {
+    public PersistBolt(String prefix) {
         this.prefix = prefix;
     }
+
     @Override
-    public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-        this.collector = collector;
+    public void prepare(Map stormConf, TopologyContext context) {
         counts = new ConcurrentHashMap<String, Double>();
         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
@@ -59,7 +55,7 @@ public class PersistTaobao implements IRichBolt, Serializable {
     }
 
     @Override
-    public void execute(Tuple input) {
+    public void execute(Tuple input, BasicOutputCollector collector) {
         String minuteTimeStamp;
         try {
             // 因外在大概率上消息顺序是有序的,所以仅当时间戳的值改变后我们对当前的值进行持久化操作
@@ -79,7 +75,7 @@ public class PersistTaobao implements IRichBolt, Serializable {
             if (changed) {
                 // TODO 这个地方存在线程不安全的可能吗? -> 单个bolt线程安全, 多个不安全
                 tairOperator.write(prefix+concurrentTimeStamp, totalPrice);
-                collector.ack(input);
+//                collector.ack(input);
                 changed = false;
             }
         } catch (Exception e) {
@@ -99,7 +95,6 @@ public class PersistTaobao implements IRichBolt, Serializable {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-
     }
 
     @Override

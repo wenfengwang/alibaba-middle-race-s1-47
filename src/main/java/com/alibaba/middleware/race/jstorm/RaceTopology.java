@@ -2,12 +2,12 @@ package com.alibaba.middleware.race.jstorm;
 
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
-import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
-import clojure.lang.Obj;
 import com.alibaba.middleware.race.RaceConfig;
-import com.alibaba.middleware.race.jstorm.blot.CountTaobao;
-import com.alibaba.middleware.race.jstorm.blot.PersistTaobao;
+import com.alibaba.middleware.race.jstorm.blot.CountBolt;
+import com.alibaba.middleware.race.jstorm.blot.PersistBolt;
+import com.alibaba.middleware.race.jstorm.blot.RatioBolt;
+import com.alibaba.middleware.race.jstorm.blot.RatioCount;
 import com.alibaba.middleware.race.jstorm.spout.RaceSpout;
 import com.alibaba.middleware.race.jstorm.spout.SpoutConfig;
 import org.slf4j.Logger;
@@ -30,7 +30,6 @@ public class RaceTopology {
         HashMap tpConf = new HashMap();
         tpConf.put(Config.TOPOLOGY_WORKERS, 4);
         tpConf.put(Config.TOPOLOGY_ACKER_EXECUTORS,1);  //等价于 Config.setNumAckers(tpConf,1);
-//        tpConf.put(Config.TOPOLOGY_DEBUG,false);
 
         // Spout's public configuration
         HashMap<Object, Object> publicSpoutConfig = new HashMap();
@@ -53,16 +52,17 @@ public class RaceTopology {
         int _bolt_Parallelism_hint = 1;
         TopologyBuilder builder = new TopologyBuilder();
 
-        builder.setSpout("taobao",new RaceSpout(confTaobao), spout_Parallelism_hint);
-        builder.setBolt("countTaobao", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("taobao");
-        builder.setBolt("perisistTaobao", new PersistTaobao(RaceConfig.prex_taobao),_bolt_Parallelism_hint).shuffleGrouping("countTaobao");
+        builder.setSpout("TaobaoSpout",new RaceSpout(confTaobao), spout_Parallelism_hint);
+        builder.setBolt("CountTaobao", new CountBolt(), bolt_Parallelism_hint).shuffleGrouping("TaobaoSpout");
+        builder.setBolt("PerisistTaobao", new PersistBolt(RaceConfig.prex_taobao),_bolt_Parallelism_hint).shuffleGrouping("CountTaobao");
 
-//        builder.setSpout("tmall",new RaceSpout(confTmall), spout_Parallelism_hint);
-//        builder.setBolt("countTmall", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("tmall");
-//        builder.setBolt("perisistTaobao", new PersistTaobao(RaceConfig.prex_tmall),_bolt_Parallelism_hint).shuffleGrouping("countTmall");
+        builder.setSpout("TmallSpout",new RaceSpout(confTmall), spout_Parallelism_hint);
+        builder.setBolt("CountTmall", new CountBolt(), bolt_Parallelism_hint).shuffleGrouping("TmallSpout");
+        builder.setBolt("PerisistTmall", new PersistBolt(RaceConfig.prex_tmall),_bolt_Parallelism_hint).shuffleGrouping("CountTmall");
 
-//        builder.setSpout("payment",new RaceSpout(confPayment), spout_Parallelism_hint);
-//        builder.setBolt("countPayment", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("payment");
+        builder.setSpout("PaymentSpout",new RaceSpout(confPayment), spout_Parallelism_hint);
+        builder.setBolt("CountPayment", new RatioBolt(), bolt_Parallelism_hint).shuffleGrouping("PaymentSpout");
+        builder.setBolt("PerisistRatio", new RatioCount(RaceConfig.prex_ratio),_bolt_Parallelism_hint).shuffleGrouping("CountPayment");
 
         try {
 //            StormSubmitter.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
