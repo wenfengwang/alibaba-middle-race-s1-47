@@ -28,10 +28,9 @@ public class RaceTopology {
 
         // Toplology Configuration
         HashMap tpConf = new HashMap();
-        tpConf.put(Config.TOPOLOGY_WORKERS, 2);
-        tpConf.put(Config.TOPOLOGY_DEBUG, true);
+        tpConf.put(Config.TOPOLOGY_WORKERS, 4);
         tpConf.put(Config.TOPOLOGY_ACKER_EXECUTORS,1);  //等价于 Config.setNumAckers(tpConf,1);
-        tpConf.put(Config.TOPOLOGY_DEBUG,false);
+//        tpConf.put(Config.TOPOLOGY_DEBUG,false);
 
         // Spout's public configuration
         HashMap<Object, Object> publicSpoutConfig = new HashMap();
@@ -41,23 +40,26 @@ public class RaceTopology {
         // Spout's Topic configuration
         HashMap<Object,Object> confTaobao = new HashMap(publicSpoutConfig);
         confTaobao.put(SpoutConfig.META_TOPIC,RaceConfig.MqTaobaoTradeTopic);
+
         HashMap<Object,Object> confTmall = new HashMap(publicSpoutConfig);
         confTmall.put(SpoutConfig.META_TOPIC,RaceConfig.MqTmallTradeTopic);
+
         HashMap<Object,Object> confPayment= new HashMap(publicSpoutConfig);
         confPayment.put(SpoutConfig.META_TOPIC,RaceConfig.MqPayTopic);
 
         // TODO 设计acker https://github.com/alibaba/jstorm/wiki/Ack-%E6%9C%BA%E5%88%B6 -> msgId具体是?
         int spout_Parallelism_hint = 1;
-        int bolt_Parallelism_hint = 1;
+        int bolt_Parallelism_hint = 2;
         int _bolt_Parallelism_hint = 1;
         TopologyBuilder builder = new TopologyBuilder();
 
         builder.setSpout("taobao",new RaceSpout(confTaobao), spout_Parallelism_hint);
         builder.setBolt("countTaobao", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("taobao");
-        builder.setBolt("perisistTaobao", new PersistTaobao(),_bolt_Parallelism_hint).shuffleGrouping("countTaobao");
+        builder.setBolt("perisistTaobao", new PersistTaobao(RaceConfig.prex_taobao),_bolt_Parallelism_hint).shuffleGrouping("countTaobao");
 
-//        builder.setSpout("tmall",new RaceSpout(confTmall), spout_Parallelism_hint);
-//        builder.setBolt("countTmall", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("tmall");
+        builder.setSpout("tmall",new RaceSpout(confTmall), spout_Parallelism_hint);
+        builder.setBolt("countTmall", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("tmall");
+        builder.setBolt("perisistTaobao", new PersistTaobao(RaceConfig.prex_tmall),_bolt_Parallelism_hint).shuffleGrouping("countTmall");
 
 //        builder.setSpout("payment",new RaceSpout(confPayment), spout_Parallelism_hint);
 //        builder.setBolt("countPayment", new CountTaobao(), bolt_Parallelism_hint).shuffleGrouping("payment");

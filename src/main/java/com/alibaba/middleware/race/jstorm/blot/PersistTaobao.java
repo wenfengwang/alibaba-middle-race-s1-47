@@ -38,12 +38,16 @@ public class PersistTaobao implements IRichBolt, Serializable {
     private String prefix;
     TairOperatorImpl tairOperator = new TairOperatorImpl(new ArrayList());
 
+    public PersistTaobao() {}
+
+    public PersistTaobao(String prefix) {
+        this.prefix = prefix;
+    }
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
         counts = new ConcurrentHashMap<String, Double>();
         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        prefix = (String) stormConf.get("prefix");
     }
 
     @Override
