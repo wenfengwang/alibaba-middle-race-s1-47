@@ -28,7 +28,7 @@ public class RaceTopology {
 
         // Toplology Configuration
         HashMap tpConf = new HashMap();
-        tpConf.put(Config.TOPOLOGY_WORKERS, 4);
+        tpConf.put(Config.TOPOLOGY_WORKERS, 2);
         tpConf.put(Config.TOPOLOGY_DEBUG, true);
         tpConf.put(Config.TOPOLOGY_ACKER_EXECUTORS,1);  //等价于 Config.setNumAckers(tpConf,1);
         tpConf.put(Config.TOPOLOGY_DEBUG,false);
