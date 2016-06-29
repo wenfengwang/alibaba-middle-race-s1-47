@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by wangwenfeng on 5/27/16.
  */
 // TODO 非事务环境中，尽量使用IBasicBolt -> https://github.com/alibaba/jstorm/wiki/%E5%BC%80%E5%8F%91%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93
-public class CountTaobao implements IRichBolt, Serializable {
+public class CountTaobao<T> implements IRichBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(CountTaobao.class);
 //    private static AtomicInteger recievedMsg = new AtomicInteger(0);
     OutputCollector collector;

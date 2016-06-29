@@ -71,7 +71,7 @@ public class RatioCount implements IRichBolt, Serializable {
                 changed = true;
             }
 
-            double[] amountArr =  messageMap.get(minuteTimeStamp);//String.valueOf(minuteTimeStamp)
+            double[] amountArr =  messageMap.get(minuteTimeStamp);
             if (amountArr == null) {
                 amountArr = new double[]{0,0};
             }
