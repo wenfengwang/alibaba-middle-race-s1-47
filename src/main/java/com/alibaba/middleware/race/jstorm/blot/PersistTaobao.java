@@ -33,10 +33,12 @@ public class PersistTaobao implements IRichBolt, Serializable {
     private OutputCollector collector;
     private Map<String, Double> counts;
     private SimpleDateFormat sdf;
-    private volatile String concurrentTimeStamp = null;
+    TairOperatorImpl tairOperator;
+
+    private volatile String concurrentTimeStamp;
+    private volatile String oldTimeStamp;
     private volatile boolean changed = false;
     private String prefix;
-    TairOperatorImpl tairOperator;
 
     public PersistTaobao() {}
 
@@ -48,10 +50,12 @@ public class PersistTaobao implements IRichBolt, Serializable {
         this.collector = collector;
         counts = new ConcurrentHashMap<String, Double>();
         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+        this.concurrentTimeStamp = "";
+        this.oldTimeStamp = "";
         ArrayList<String> list = new ArrayList<String>();
         list.add("192.168.1.161:5198");
         tairOperator = new TairOperatorImpl(list);
-//        context.get
     }
 
     @Override
