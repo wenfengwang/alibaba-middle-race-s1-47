@@ -6,6 +6,7 @@ import com.alibaba.rocketmq.client.MQHelper;
 import com.alibaba.rocketmq.client.consumer.DefaultMQPullConsumer;
 import com.alibaba.rocketmq.client.consumer.DefaultMQPushConsumer;
 import com.alibaba.rocketmq.client.consumer.listener.MessageListenerConcurrently;
+import com.alibaba.rocketmq.client.exception.MQClientException;
 import com.alibaba.rocketmq.client.impl.consumer.DefaultMQPullConsumerImpl;
 import com.alibaba.rocketmq.common.consumer.ConsumeFromWhere;
 import com.alibaba.rocketmq.common.protocol.heartbeat.MessageModel;
@@ -91,19 +92,15 @@ public class ConsumerFactory {
         return consumer;
     }
 
-    public static synchronized DefaultMQPullConsumer mkPullInstance(String topic)  throws Exception{
+    public static synchronized DefaultMQPullConsumer mkPullInstance(String topic) throws MQClientException {
         if (pullConsumer == null) {
-            DefaultMQPullConsumer consumer = new DefaultMQPullConsumer(RaceConfig.MqConsumerGroup);
-            consumer.setNamesrvAddr(RaceConfig.MQNameServerAddr);
-            consumer.start();
-            pullConsumer = consumer;
+            pullConsumer = new DefaultMQPullConsumer(RaceConfig.MqConsumerGroup);
+            pullConsumer.setNamesrvAddr(RaceConfig.MQNameServerAddr);
+            pullConsumer.start();
             LOG.info("Successfully create pullConsumer");
-            return consumer;
-        } else {
-            return pullConsumer;
         }
 
-
+        return pullConsumer;
     }
 
 }

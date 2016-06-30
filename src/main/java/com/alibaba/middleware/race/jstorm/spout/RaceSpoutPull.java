@@ -44,13 +44,16 @@ public class RaceSpoutPull implements IRichSpout, IAckValueSpout, IFailValueSpou
     @Override
     public void open(Map conf, TopologyContext context, SpoutOutputCollector collector)  {
         try {
-            synchronized (this) {
-                if (consumer == null) {
-                    consumer = new DefaultMQPullConsumer(RaceConfig.MqConsumerGroup);
-                    consumer.setNamesrvAddr(RaceConfig.MQNameServerAddr);
-                    consumer.start();
-                }
-            }
+            /**
+             * TODO
+             * 用这个写法会一直进到if里面
+             * if(consumer == null) {
+             *      consumer = new DefaultMQPullConsumer(RaceConfig.MqConsumerGroup);
+             *      consumer.setNamesrvAddr(RaceConfig.MQNameServerAddr);
+             *      consumer.start();
+             * }
+             */
+            consumer = ConsumerFactory.mkPullInstance(topic);
             consumer.registerMessageQueueListener(topic, null);
         } catch (MQClientException e) {
             e.printStackTrace();
@@ -94,8 +97,8 @@ public class RaceSpoutPull implements IRichSpout, IAckValueSpout, IFailValueSpou
 
                 switch (result.getPullStatus()) {
                     case FOUND:
-                        System.out.println("消费进度 topic: " + topic + "; Offset: " + offset);
-                        System.out.println("接收到的消息集合, topic: " + topic + "; " + result);
+//                        System.out.println("消费进度 topic: " + topic + "; Offset: " + offset);
+//                        System.out.println("接收到的消息集合, topic: " + topic + "; " + result);
                         List<MessageExt> list = result.getMsgFoundList();
                         MqTuple mqTuple = new MqTuple(list);
                         if (list == null || list.size() == 0) {

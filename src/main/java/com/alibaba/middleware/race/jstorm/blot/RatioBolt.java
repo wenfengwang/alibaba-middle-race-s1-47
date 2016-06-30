@@ -54,7 +54,7 @@ public class RatioBolt implements IRichBolt, Serializable {
                 count.addAndGet(1);
                 collector.emit(new Values(paymentMessage.getCreateTime(), paymentMessage.getPayPlatform(),paymentMessage.getPayAmount()));
             }
-            LOG.info("***** " + count.get() + " ******");
+            LOG.info("***** PaymentMessage: " + count.get() + " ******");
 
             LOG.info(String.valueOf(System.currentTimeMillis() - start_time));
             collector.ack(input);
