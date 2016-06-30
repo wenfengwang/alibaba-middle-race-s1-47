@@ -75,7 +75,6 @@ public class PersistBolt implements IBasicBolt, Serializable {
             if (changed) {
                 // TODO 这个地方存在线程不安全的可能吗? -> 单个bolt线程安全, 多个不安全
                 tairOperator.write(prefix+concurrentTimeStamp, totalPrice);
-//                collector.ack(input);
                 changed = false;
             }
         } catch (Exception e) {

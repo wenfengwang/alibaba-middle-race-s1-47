@@ -42,18 +42,16 @@ public class CountBolt implements IBasicBolt, Serializable {
             long start_time = System.currentTimeMillis();
             for (int i = 0; i < size; i++) {
                 count.addAndGet(1);
-//                msg = list.get(i);
-//                body = msg.getBody();
-//                if (body.length == 2 && body[0] == 0 && body[1] == 0) {
-//                    collector.emit(new Values("",""));
-//                    return;
-//                }
-//                OrderMessage order = RaceUtils.readKryoObject(OrderMessage.class, body);
-//                LOG.info(order.toString());
-//                // TODO 每条emit的效率和放到一起直接emit哪个高? 另外, ack的时间会比较高
-//                collector.emit(new Values(order.getCreateTime(), order.getTotalPrice()));
+                msg = list.get(i);
+                body = msg.getBody();
+                if (body.length == 2 && body[0] == 0 && body[1] == 0) {
+                    collector.emit(new Values("",""));
+                    return;
+                }
+                OrderMessage order = RaceUtils.readKryoObject(OrderMessage.class, body);
+                // TODO 每条emit的效率和放到一起直接emit哪个高? 另外, ack的时间会比较高
+                collector.emit(new Values(order.getCreateTime(), order.getTotalPrice()));
             }
-            LOG.info("$$$$$ OrderMessage: " + count.get() + " $$$$$");
         } catch (Exception e) {
             e.printStackTrace();
         }

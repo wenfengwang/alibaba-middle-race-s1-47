@@ -2,6 +2,8 @@ package com.alibaba.middleware.race.jstorm.blot;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
+import backtype.storm.topology.BasicOutputCollector;
+import backtype.storm.topology.IBasicBolt;
 import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Fields;
@@ -25,17 +27,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by wangwenfeng on 6/29/16.
  */
-public class RatioBolt implements IRichBolt, Serializable {
-    private OutputCollector collector;
+public class RatioBolt implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(RatioBolt.class);
     private static AtomicInteger count = new AtomicInteger(0);
+
     @Override
-    public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-        this.collector = collector;
+    public void prepare(Map stormConf, TopologyContext context) {
+
     }
 
     @Override
-    public void execute(Tuple input) {
+    public void execute(Tuple input, BasicOutputCollector collector) {
         try {
             MqTuple mqTuple = (MqTuple) input.getValue(0);
             List<MessageExt> list = mqTuple.getMsgList();
@@ -54,10 +56,8 @@ public class RatioBolt implements IRichBolt, Serializable {
                 count.addAndGet(1);
                 collector.emit(new Values(paymentMessage.getCreateTime(), paymentMessage.getPayPlatform(),paymentMessage.getPayAmount()));
             }
-            LOG.info("***** PaymentMessage: " + count.get() + " ******");
 
             LOG.info(String.valueOf(System.currentTimeMillis() - start_time));
-            collector.ack(input);
         } catch (Exception e) {
             e.printStackTrace();
         }

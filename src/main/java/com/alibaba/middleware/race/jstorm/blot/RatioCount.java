@@ -2,6 +2,8 @@ package com.alibaba.middleware.race.jstorm.blot;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
+import backtype.storm.topology.BasicOutputCollector;
+import backtype.storm.topology.IBasicBolt;
 import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
@@ -19,8 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by wangwenfeng on 6/29/16.
  */
-public class RatioCount implements IRichBolt, Serializable {
-    private OutputCollector collector;
+public class RatioCount implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(RatioCount.class);
 
     private SimpleDateFormat sdf;
@@ -43,8 +44,7 @@ public class RatioCount implements IRichBolt, Serializable {
     }
 
     @Override
-    public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-        this.collector = collector;
+    public void prepare(Map stormConf, TopologyContext context) {
         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         messageMap = new ConcurrentHashMap<String, double[]>();
 
@@ -59,12 +59,10 @@ public class RatioCount implements IRichBolt, Serializable {
     }
 
     @Override
-    public void execute(Tuple input) {
-        String minuteTimeStamp;
-
+    public void execute(Tuple input, BasicOutputCollector collector) {
         try {
             short payPlatform = (Short) input.getValue(1);
-            minuteTimeStamp = String.valueOf(sdf.parse(sdf.format(new Date((Long) input.getValue(0)))).getTime()).substring(0,10);
+            String minuteTimeStamp = String.valueOf(sdf.parse(sdf.format(new Date((Long) input.getValue(0)))).getTime()).substring(0,10);
             if (!minuteTimeStamp.equals(concurrentTimeStamp)) {
                 oldTimeStamp = concurrentTimeStamp;
                 concurrentTimeStamp = minuteTimeStamp;
@@ -80,7 +78,6 @@ public class RatioCount implements IRichBolt, Serializable {
             if (changed) {
                 double[] lastMessage = messageMap.get(oldTimeStamp);
                 tairOperator.write(prefix+oldTimeStamp, lastMessage[1]/lastMessage[0]);
-                collector.ack(input);
                 changed = false;
             }
         } catch (Exception e) {
@@ -95,12 +92,10 @@ public class RatioCount implements IRichBolt, Serializable {
 
     @Override
     public void cleanup() {
-
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-
     }
 
     @Override
