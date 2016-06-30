@@ -29,6 +29,7 @@ public class RatioCount implements IBasicBolt, Serializable {
     TairOperatorImpl tairOperator;
 
     private volatile boolean changed = false;
+    private static volatile boolean endFlag = false;
 
     private String concurrentTimeStamp;
     private String oldTimeStamp;
@@ -75,14 +76,17 @@ public class RatioCount implements IBasicBolt, Serializable {
             }
             amountArr[payPlatform] += (Double)input.getValue(2);
             messageMap.put(minuteTimeStamp,amountArr);
-            if (changed) {
+            if (changed && !("").equals(oldTimeStamp)) {
                 double[] lastMessage = messageMap.get(oldTimeStamp);
                 tairOperator.write(prefix+oldTimeStamp, lastMessage[1]/lastMessage[0]);
                 changed = false;
+            } else if (endFlag) {
+                tairOperator.write(prefix+minuteTimeStamp, amountArr[1]/amountArr[0]);
             }
         } catch (Exception e) {
             if ("".equals(input.getValue(0)) && "".equals(input.getValue(1)) && "".equals(input.getValue(2))) {
                 double[] lastMessage = messageMap.get(concurrentTimeStamp);
+                endFlag = true;
                 tairOperator.write(prefix+concurrentTimeStamp, lastMessage[1]/lastMessage[0]); //TODO 两位小数
                 System.out.println(concurrentTimeStamp);
                 System.out.println(messageMap.get(concurrentTimeStamp));

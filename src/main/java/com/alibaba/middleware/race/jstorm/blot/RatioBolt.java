@@ -44,7 +44,6 @@ public class RatioBolt implements IBasicBolt, Serializable {
             byte[] body;
             MessageExt msg;
             int size = list.size();
-            long start_time = System.currentTimeMillis();
             for (int i = 0; i < size; i++) {
                 msg = list.get(i);
                 body = msg.getBody();
@@ -56,8 +55,6 @@ public class RatioBolt implements IBasicBolt, Serializable {
                 count.addAndGet(1);
                 collector.emit(new Values(paymentMessage.getCreateTime(), paymentMessage.getPayPlatform(),paymentMessage.getPayAmount()));
             }
-
-            LOG.info(String.valueOf(System.currentTimeMillis() - start_time));
         } catch (Exception e) {
             e.printStackTrace();
         }

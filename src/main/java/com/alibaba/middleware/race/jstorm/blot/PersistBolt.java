@@ -34,6 +34,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
     private volatile String concurrentTimeStamp;
     private volatile String oldTimeStamp;
     private volatile boolean changed = false;
+    private static volatile boolean endFlag = false;
     private String prefix;
 
     public PersistBolt() {}
@@ -61,6 +62,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
             // 因外在大概率上消息顺序是有序的,所以仅当时间戳的值改变后我们对当前的值进行持久化操作
             minuteTimeStamp = String.valueOf(sdf.parse(sdf.format(new Date((Long) input.getValue(0)))).getTime()).substring(0,10);
             if (!minuteTimeStamp.equals(concurrentTimeStamp)) {
+                oldTimeStamp = concurrentTimeStamp;
                 concurrentTimeStamp = minuteTimeStamp;
                 changed = true;
             }
@@ -71,18 +73,17 @@ public class PersistBolt implements IBasicBolt, Serializable {
             String sumPrice =  String.valueOf(counts.get(minuteTimeStamp));//String.valueOf(minuteTimeStamp)
             double totalPrice = (Double)input.getValue(1) + (("null").equals(sumPrice) ? 0.0: Double.valueOf(sumPrice));
             counts.put(String.valueOf(minuteTimeStamp),totalPrice);
-            LOG.info(String.valueOf(sumPrice));
-            if (changed) {
+            if (changed&&!("").equals(oldTimeStamp)) {
                 // TODO 这个地方存在线程不安全的可能吗? -> 单个bolt线程安全, 多个不安全
-                tairOperator.write(prefix+concurrentTimeStamp, totalPrice);
+                tairOperator.write(prefix+oldTimeStamp, totalPrice);
                 changed = false;
+            } else if (endFlag) {
+                tairOperator.write(prefix+minuteTimeStamp, totalPrice);
             }
-        } catch (Exception e) {
-            // 结束时将当前结果写入到tair
+        } catch (Exception e) { // 收到结束信号后每次都进行持久化
             if ("".equals(input.getValue(0)) && "".equals(input.getValue(1))) {
+                endFlag = true;
                 tairOperator.write(prefix+concurrentTimeStamp, counts.get(concurrentTimeStamp));
-                System.out.println(concurrentTimeStamp);
-                System.out.println(counts.get(concurrentTimeStamp));
             }
         }
     }

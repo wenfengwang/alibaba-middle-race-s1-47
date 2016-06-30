@@ -73,12 +73,12 @@ public class RaceSpoutPull implements IRichSpout, IAckValueSpout, IFailValueSpou
 
     @Override
     public void activate() {
-        LOG.warn("不支持的方法调用");
+        LOG.warn("activate:不支持的方法调用");
     }
 
     @Override
     public void deactivate() {
-        LOG.warn("不支持的方法调用");
+        LOG.warn("deactivate:不支持的方法调用");
     }
 
     @Override
@@ -87,6 +87,7 @@ public class RaceSpoutPull implements IRichSpout, IAckValueSpout, IFailValueSpou
         try {
             Set<MessageQueue> messageQueueSet = consumer.fetchSubscribeMessageQueues(topic);
             if (messageQueueSet == null) {
+                Thread.sleep(100);
                 return;
             }
             for (MessageQueue mq : messageQueueSet) {
@@ -141,12 +142,12 @@ public class RaceSpoutPull implements IRichSpout, IAckValueSpout, IFailValueSpou
 
     @Override
     public void ack(Object msgId) {
-        LOG.warn("不支持的方法调用");
+        LOG.warn("ack:不支持的方法调用");
     }
 
     @Override
     public void fail(Object msgId) {
-        LOG.warn("不支持的方法调用");
+        LOG.warn("fail:不支持的方法调用");
     }
 
     @Override
