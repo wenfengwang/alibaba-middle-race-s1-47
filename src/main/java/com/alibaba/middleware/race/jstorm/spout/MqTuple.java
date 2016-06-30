@@ -27,8 +27,8 @@ public class MqTuple implements Serializable {
     protected transient CountDownLatch latch;
     protected transient boolean isSuccess;
 
-    public MqTuple() {
-        msgList = null;
+    public MqTuple(List<MessageExt> msgs) {
+        this.msgList = msgs;
         mq = null;
         createMs = System.currentTimeMillis();
         failureTimes = new AtomicInteger(0);

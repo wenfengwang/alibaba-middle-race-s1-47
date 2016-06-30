@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Producer {
 
     private static Random rand = new Random();
-    private static int count = 2000;
+    private static int count = 20000;
     private static AtomicInteger atomInt = new AtomicInteger(0);
     public static void main(String[] args) throws MQClientException, InterruptedException {
         DefaultMQProducer producer = new DefaultMQProducer(RaceConfig.MqConsumerGroup);

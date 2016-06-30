@@ -1,9 +1,12 @@
 package com.alibaba.middleware.race.jstorm.spout;
 
 import com.alibaba.jstorm.utils.JStormUtils;
+import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.rocketmq.client.MQHelper;
+import com.alibaba.rocketmq.client.consumer.DefaultMQPullConsumer;
 import com.alibaba.rocketmq.client.consumer.DefaultMQPushConsumer;
 import com.alibaba.rocketmq.client.consumer.listener.MessageListenerConcurrently;
+import com.alibaba.rocketmq.client.impl.consumer.DefaultMQPullConsumerImpl;
 import com.alibaba.rocketmq.common.consumer.ConsumeFromWhere;
 import com.alibaba.rocketmq.common.protocol.heartbeat.MessageModel;
 import org.slf4j.Logger;
@@ -19,8 +22,11 @@ import java.util.Map;
 public class ConsumerFactory {
     private static Logger LOG = LoggerFactory.getLogger(RaceSpout.class);
 
+
     public static Map<String, DefaultMQPushConsumer> consumers =
             new HashMap<String, DefaultMQPushConsumer>();
+
+    public static DefaultMQPullConsumer pullConsumer;
 
     public static synchronized DefaultMQPushConsumer mkInstance(SpoutConfig config,
                                                                 MessageListenerConcurrently listener)  throws Exception{
@@ -83,6 +89,21 @@ public class ConsumerFactory {
         LOG.info("Successfully create " + key + " consumer");
 
         return consumer;
+    }
+
+    public static synchronized DefaultMQPullConsumer mkPullInstance(String topic)  throws Exception{
+        if (pullConsumer == null) {
+            DefaultMQPullConsumer consumer = new DefaultMQPullConsumer(RaceConfig.MqConsumerGroup);
+            consumer.setNamesrvAddr(RaceConfig.MQNameServerAddr);
+            consumer.start();
+            pullConsumer = consumer;
+            LOG.info("Successfully create pullConsumer");
+            return consumer;
+        } else {
+            return pullConsumer;
+        }
+
+
     }
 
 }

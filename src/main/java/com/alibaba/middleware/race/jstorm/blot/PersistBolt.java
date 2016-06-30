@@ -71,7 +71,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
             String sumPrice =  String.valueOf(counts.get(minuteTimeStamp));//String.valueOf(minuteTimeStamp)
             double totalPrice = (Double)input.getValue(1) + (("null").equals(sumPrice) ? 0.0: Double.valueOf(sumPrice));
             counts.put(String.valueOf(minuteTimeStamp),totalPrice);
-            System.out.println(totalPrice);
+            LOG.info(String.valueOf(sumPrice));
             if (changed) {
                 // TODO 这个地方存在线程不安全的可能吗? -> 单个bolt线程安全, 多个不安全
                 tairOperator.write(prefix+concurrentTimeStamp, totalPrice);

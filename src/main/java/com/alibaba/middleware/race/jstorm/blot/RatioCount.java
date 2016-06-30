@@ -61,9 +61,9 @@ public class RatioCount implements IRichBolt, Serializable {
     @Override
     public void execute(Tuple input) {
         String minuteTimeStamp;
-        short payPlatform = (Short) input.getValue(1);
 
         try {
+            short payPlatform = (Short) input.getValue(1);
             minuteTimeStamp = String.valueOf(sdf.parse(sdf.format(new Date((Long) input.getValue(0)))).getTime()).substring(0,10);
             if (!minuteTimeStamp.equals(concurrentTimeStamp)) {
                 oldTimeStamp = concurrentTimeStamp;

@@ -12,6 +12,7 @@ import com.alibaba.rocketmq.client.consumer.DefaultMQPushConsumer;
 import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import com.alibaba.rocketmq.client.consumer.listener.MessageListenerConcurrently;
+import com.alibaba.rocketmq.client.exception.MQClientException;
 import com.alibaba.rocketmq.common.message.MessageExt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,10 +29,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IAckValueSpout, IFailValueSpout {
     private static Logger LOG = LoggerFactory.getLogger(RaceSpout.class);
     protected SpoutConfig mqClientConfig;
+    private static final Object lock = new Object();
 
     private LinkedBlockingDeque<MqTuple> sendingQueue;
     private SpoutOutputCollector collector;
-    private transient DefaultMQPushConsumer consumer;
+    private static DefaultMQPushConsumer consumer;
+    private AtomicInteger count = new AtomicInteger(0);
 
     private Map tpConf;
     private Map spoutConf;
@@ -63,7 +66,7 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
         if (consumer == null) {
             LOG.warn(id + " already exist consumer in current worker, don't need to fetch data ");
         }
-
+        count.addAndGet(1);
         LOG.info("Successfully init " + id);
     }
 
@@ -87,7 +90,6 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
 
     @Override
     public void nextTuple() {
-        LOG.info("NEXT TUPLE !!!!!!!!");
         MqTuple mqTuple = null;
         try {
             mqTuple = sendingQueue.take();
@@ -123,15 +125,8 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
     @Override
     public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
         try {
-//            List<Object[]> list = new ArrayList<Object[]>();
-//            int size = msgs.size();
-//            for (int i = 0; i < size; i++) {
-//                MessageExt msg = msgs.get(i);
-//                byte[] body = msg.getBody();
-//                OrderMessage order = RaceUtils.readKryoObject(OrderMessage.class,body);
-//                Object[] objects = new Object[] {order.getCreateTime(), order.getTotalPrice()};
-//                list.add(objects);
-//            }
+
+
             MqTuple mqTuple = new MqTuple(new ArrayList<MessageExt>(msgs), context.getMessageQueue());
 
             if (flowControl) {
