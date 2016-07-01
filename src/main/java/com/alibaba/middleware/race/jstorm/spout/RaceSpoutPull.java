@@ -73,33 +73,26 @@ public class RaceSpoutPull implements IRichSpout, IAckValueSpout, IFailValueSpou
 
     @Override
     public void activate() {
-        LOG.warn("activate:不支持的方法调用");
+        LOG.warn("activate: unsupport method!");
     }
 
     @Override
     public void deactivate() {
-        LOG.warn("deactivate:不支持的方法调用");
+        LOG.warn("deactivate: unsupport method!");
     }
 
     @Override
     public void nextTuple() {
-
         try {
             Set<MessageQueue> messageQueueSet = consumer.fetchSubscribeMessageQueues(topic);
-            if (messageQueueSet == null) {
-                Thread.sleep(100);
-                return;
-            }
+
             for (MessageQueue mq : messageQueueSet) {
-                //每个队列里无限循环，分批拉取未消费的消息，直到拉取不到新消息为止
                 long offset = consumer.fetchConsumeOffset(mq, false);
                 offset = offset < 0 ? 0 : offset;
                 PullResult result = consumer.pull(mq, null, offset, 64);
 
                 switch (result.getPullStatus()) {
                     case FOUND:
-//                        System.out.println("消费进度 topic: " + topic + "; Offset: " + offset);
-//                        System.out.println("接收到的消息集合, topic: " + topic + "; " + result);
                         List<MessageExt> list = result.getMsgFoundList();
                         MqTuple mqTuple = new MqTuple(list);
                         if (list == null || list.size() == 0) {
@@ -113,41 +106,32 @@ public class RaceSpoutPull implements IRichSpout, IAckValueSpout, IFailValueSpou
                         consumer.updateConsumeOffset(mq, offset);
                         break;
                     case NO_MATCHED_MSG:
-                        System.out.println("没有匹配的消息");
+                        LOG.info("NO_MATCHED_MSG");
                         break;
                     case NO_NEW_MSG:
-//                        System.out.println("没有未消费的新消息");
-                        //拉取不到新消息，跳出 SINGLE_MQ 当前队列循环，开始下一队列循环。
+                        LOG.info("NO_NEW_MSG");
                         break;
                     case OFFSET_ILLEGAL:
-                        System.out.println("下标错误");
+                        LOG.info("OFFSET_ILLEGAL");
                         break;
                     default:
                         break;
                 }
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (RemotingException e) {
-            e.printStackTrace();
-        } catch (MQClientException e) {
-            e.printStackTrace();
-        } catch (MQBrokerException e) {
-            e.printStackTrace();
         } catch (Exception e) {
-            System.out.println("***** "+ topic + "*****");
-            e.printStackTrace();
+            LOG.info("***** "+ topic + "*****");
+            LOG.error(e.getMessage());
         }
     }
 
     @Override
     public void ack(Object msgId) {
-        LOG.warn("ack:不支持的方法调用");
+        LOG.warn("ack: unsupport method!");
     }
 
     @Override
     public void fail(Object msgId) {
-        LOG.warn("fail:不支持的方法调用");
+        LOG.warn("fail: unsupport method!");
     }
 
     @Override

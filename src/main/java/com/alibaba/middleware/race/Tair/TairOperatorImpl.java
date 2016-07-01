@@ -15,7 +15,7 @@ import java.util.List;
  * group 、namespace我们都会在正式提交代码前告知选手
  */
 public class TairOperatorImpl implements Serializable {
-    public static int nameSpace = RaceConfig.TairNamespace;
+    public static int nameSpace = RaceConfig.OffLineTairNamespace;
 
     private List<String> confServers = new ArrayList<String>();
 
@@ -37,7 +37,6 @@ public class TairOperatorImpl implements Serializable {
         if (result.isSuccess()) {
             DataEntry entry = result.getValue();
             if (entry == null) {
-                System.out.println("exit");
                 return null;
             }
             return entry.getValue();

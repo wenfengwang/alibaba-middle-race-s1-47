@@ -5,6 +5,7 @@ import backtype.storm.topology.BasicOutputCollector;
 import backtype.storm.topology.IBasicBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
+import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,9 +51,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
 
         this.concurrentTimeStamp = "";
         this.oldTimeStamp = "";
-        ArrayList<String> list = new ArrayList<String>();
-        list.add("192.168.1.161:5198");
-        tairOperator = new TairOperatorImpl(list);
+        tairOperator = new TairOperatorImpl(RaceConfig.OffLineTairServerAddr);
     }
 
     @Override
