@@ -88,8 +88,6 @@ public class RatioCount implements IBasicBolt, Serializable {
                 double[] lastMessage = messageMap.get(concurrentTimeStamp);
                 endFlag = true;
                 tairOperator.write(prefix+concurrentTimeStamp, lastMessage[1]/lastMessage[0]); //TODO 两位小数
-                System.out.println(concurrentTimeStamp);
-                System.out.println(messageMap.get(concurrentTimeStamp));
             }
         }
     }
