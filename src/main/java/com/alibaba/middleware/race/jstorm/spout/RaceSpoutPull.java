@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by sxian.wang on 2016/6/30.
  */
 public class RaceSpoutPull implements IRichSpout, IAckValueSpout, IFailValueSpout {
-    private static Logger LOG = LoggerFactory.getLogger(RaceSpoutPull.class);
+    private static Logger LOG = LoggerFactory.getLogger(RaceSpout.class);
     private SpoutOutputCollector collector;
 
     private static DefaultMQPullConsumer consumer;
@@ -85,6 +85,7 @@ public class RaceSpoutPull implements IRichSpout, IAckValueSpout, IFailValueSpou
     public void nextTuple() {
         try {
             Set<MessageQueue> messageQueueSet = consumer.fetchSubscribeMessageQueues(topic);
+
             for (MessageQueue mq : messageQueueSet) {
                 long offset = consumer.fetchConsumeOffset(mq, false);
                 offset = offset < 0 ? 0 : offset;
@@ -97,6 +98,7 @@ public class RaceSpoutPull implements IRichSpout, IAckValueSpout, IFailValueSpou
                         if (list == null || list.size() == 0) {
                             break;
                         }
+
                         sendTuple(mqTuple);
                         // 获取下一个下标位置
                         // TODO 为啥
@@ -108,8 +110,8 @@ public class RaceSpoutPull implements IRichSpout, IAckValueSpout, IFailValueSpou
                         Thread.sleep(200);
                         break;
                     case NO_NEW_MSG:
-                        Thread.sleep(200);
                         LOG.info("NO_NEW_MSG");
+                        Thread.sleep(200);
                         break;
                     case OFFSET_ILLEGAL:
                         LOG.info("OFFSET_ILLEGAL");
