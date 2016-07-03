@@ -41,7 +41,7 @@ public class PersistRatio implements IBasicBolt, Serializable {
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
         ratioMap = new ConcurrentHashMap<Long, Ratio>();
-        tairOperator = new TairOperatorImpl(RaceConfig.OffLineTairServerAddr,RaceConfig.OffLineTairNamespace);
+        tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr,RaceConfig.TairNamespace);
         currentTimeStamp = 0;
         endFlag = false;
         headNode = tailNode = null;

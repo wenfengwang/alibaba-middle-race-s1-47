@@ -15,5 +15,8 @@ public class TairOperator {
         int a,b;
         a = b = 2;
         System.out.println(a+" "+b);
+        TairOperatorImpl tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr,RaceConfig.TairNamespace);
+        System.out.println("*************************");
+        System.out.println("Result: "+tairOperator.get("platformTmall_373058h4iq_1467532980"));
     }
 }

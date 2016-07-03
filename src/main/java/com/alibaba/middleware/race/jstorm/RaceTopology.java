@@ -59,19 +59,19 @@ public class RaceTopology {
         builder.setBolt("CountTmall", new CountBolt(), bolt_Parallelism_hint).shuffleGrouping("TmallSpout");
         builder.setBolt("PerisistTmall", new PersistBolt(RaceConfig.prex_tmall),_bolt_Parallelism_hint).shuffleGrouping("CountTmall");
 
-        builder.setSpout("PaymentSpout",new RaceSpout(confPayment), spout_Parallelism_hint);
+//        builder.setSpout("PaymentSpout",new RaceSpout(confPayment), spout_Parallelism_hint);
         builder.setSpout("PaymentSpout",new RaceSpoutPull(RaceConfig.MqPayTopic), spout_Parallelism_hint);
         builder.setBolt("splitPayment", new RatioBolt(), bolt_Parallelism_hint).shuffleGrouping("PaymentSpout");
         builder.setBolt("CountPayment", new RatioCount(),_bolt_Parallelism_hint).shuffleGrouping("splitPayment");
         builder.setBolt("PersistRatio", new PersistRatio(),_bolt_Parallelism_hint).shuffleGrouping("CountPayment");
 
         try {
-//            StormSubmitter.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
-            LocalCluster localCluster = new LocalCluster();
-            localCluster.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
-            Thread.sleep(1000000);
-            localCluster.shutdown();
-            LOG.info("Topology submitted!!!!");
+            StormSubmitter.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
+//            LocalCluster localCluster = new LocalCluster();
+//            localCluster.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
+//            Thread.sleep(1000000);
+//            localCluster.shutdown();
+//            LOG.info("Topology submitted!!!!");
         } catch (Exception e) {
             e.printStackTrace();
         }
