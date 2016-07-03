@@ -6,17 +6,21 @@ import backtype.storm.topology.BasicOutputCollector;
 import backtype.storm.topology.IBasicBolt;
 import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
+import backtype.storm.tuple.Values;
+import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
+import com.alibaba.middleware.race.model.Ratio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static com.twitter.chill.config.ReflectingInstantiator.prefix;
 
 /**
  * Created by wangwenfeng on 6/29/16.
@@ -24,70 +28,40 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RatioCount implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(RatioCount.class);
 
-    private SimpleDateFormat sdf;
-    private Map<String,double[]> messageMap;
-    TairOperatorImpl tairOperator;
+    private long conCurrentTime;
+    private double[] sumAmount;
+    private boolean endFlag = false;
 
-    private volatile boolean changed = false;
-    private static volatile boolean endFlag = false;
-
-    private String concurrentTimeStamp;
-    private String oldTimeStamp;
-    private long concurrentPCAmount;
-    private long concurrentMobileAmount;
-
-    private String prefix;
-
-    public RatioCount() {}
-
-    public RatioCount(String prefix) {
-        this.prefix = prefix;
-    }
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
-        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        messageMap = new ConcurrentHashMap<String, double[]>();
-
-        ArrayList<String> list = new ArrayList<String>();
-        list.add("192.168.1.161:5198");
-        tairOperator = new TairOperatorImpl(list);
-
-        this.concurrentTimeStamp = "";
-        this.oldTimeStamp = "";
-        this.concurrentPCAmount = 0;
-        this.concurrentMobileAmount = 0;
+        conCurrentTime = 0;
+        sumAmount = new double[]{0,0};
     }
 
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) {
-        try {
-            short payPlatform = (Short) input.getValue(1);
-            String minuteTimeStamp = String.valueOf(sdf.parse(sdf.format(new Date((Long) input.getValue(0)))).getTime()).substring(0,10);
-            if (!minuteTimeStamp.equals(concurrentTimeStamp)) {
-                oldTimeStamp = concurrentTimeStamp;
-                concurrentTimeStamp = minuteTimeStamp;
-                changed = true;
-            }
+        // 仅作切分
+        HashMap<Long, double[]> tuple = (HashMap<Long, double[]>) input.getValue(0);
 
-            double[] amountArr =  messageMap.get(minuteTimeStamp);
-            if (amountArr == null) {
-                amountArr = new double[]{0,0};
-            }
-            amountArr[payPlatform] += (Double)input.getValue(2);
-            messageMap.put(minuteTimeStamp,amountArr);
-            if (changed && !("").equals(oldTimeStamp)) {
-                double[] lastMessage = messageMap.get(oldTimeStamp);
-                tairOperator.write(prefix+oldTimeStamp, lastMessage[1]/lastMessage[0]);
-                changed = false;
-            } else if (endFlag) {
-                tairOperator.write(prefix+minuteTimeStamp, amountArr[1]/amountArr[0]);
-            }
-        } catch (Exception e) {
-            if ("".equals(input.getValue(0)) && "".equals(input.getValue(1)) && "".equals(input.getValue(2))) {
-                double[] lastMessage = messageMap.get(concurrentTimeStamp);
+        Set<Map.Entry<Long,double[]>> entrySet = tuple.entrySet();
+        for (Map.Entry<Long, double[]> entry : entrySet) {
+            long minuteTimeStamp = entry.getKey();
+            double[] amount = entry.getValue();
+            if (minuteTimeStamp == -1 && amount[0] == -1 && amount[1] == -1 ) {
+                collector.emit(new Values(-1l,new double[]{-1,-1}));
                 endFlag = true;
-                tairOperator.write(prefix+concurrentTimeStamp, lastMessage[1]/lastMessage[0]); //TODO 两位小数
+            }
+            if (minuteTimeStamp != conCurrentTime) {
+                collector.emit(new Values(conCurrentTime, sumAmount));
+                conCurrentTime = minuteTimeStamp;
+                sumAmount[0] = sumAmount[1] = 0; //TODO 确认下这个写法
+            }
+            sumAmount[0] += amount[0];
+            sumAmount[1] += amount[1];
+            if (endFlag) {
+                collector.emit(new Values(conCurrentTime, sumAmount));
+                sumAmount[0] = sumAmount[1] = 0; //TODO 确认下这个写法
             }
         }
     }
@@ -98,6 +72,7 @@ public class RatioCount implements IBasicBolt, Serializable {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
+        declarer.declare(new Fields("timeStamp","sumAmount"));
     }
 
     @Override

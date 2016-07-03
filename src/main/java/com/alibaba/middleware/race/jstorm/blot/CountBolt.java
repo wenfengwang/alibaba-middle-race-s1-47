@@ -63,7 +63,6 @@ public class CountBolt implements IBasicBolt, Serializable {
                 // TODO 每条emit的效率和放到一起直接emit哪个高? 另外, ack的时间会比较高
                 collector.emit(new Values(order.getCreateTime(), order.getTotalPrice()));
             }
-            System.out.println(platFormStr[platForm] +": " + count[platForm].get());
         } catch (Exception e) {
             e.printStackTrace();
         }

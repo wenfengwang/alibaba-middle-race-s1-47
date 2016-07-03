@@ -51,7 +51,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
 
         this.concurrentTimeStamp = "";
         this.oldTimeStamp = "";
-        tairOperator = new TairOperatorImpl(RaceConfig.OffLineTairServerAddr);
+        tairOperator = new TairOperatorImpl(RaceConfig.OnLineTairServerAddr, RaceConfig.OnLineNamespace);
     }
 
     @Override

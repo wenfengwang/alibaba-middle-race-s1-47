@@ -15,13 +15,14 @@ import java.util.List;
  * group 、namespace我们都会在正式提交代码前告知选手
  */
 public class TairOperatorImpl implements Serializable {
-    public static int nameSpace = RaceConfig.OffLineTairNamespace;
+    public static int nameSpace;
 
     private List<String> confServers = new ArrayList<String>();
 
     DefaultTairManager tairManager = new DefaultTairManager();
 
-    public TairOperatorImpl(List confServers) {
+    public TairOperatorImpl(List confServers, int nameSpace) {
+        this.nameSpace = nameSpace;
         tairManager.setConfigServerList(confServers);
         tairManager.setGroupName(RaceConfig.TairGroup);
         tairManager.init();

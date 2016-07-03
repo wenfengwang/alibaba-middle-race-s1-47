@@ -67,12 +67,12 @@ public class RaceTopology {
         builder.setBolt("PerisistRatio", new RatioCount(RaceConfig.prex_ratio),_bolt_Parallelism_hint).shuffleGrouping("CountPayment");
 
         try {
-//            StormSubmitter.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
-            LocalCluster localCluster = new LocalCluster();
-            localCluster.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
-            Thread.sleep(100000);
-            localCluster.shutdown();
-            LOG.info("Topology submitted!!!!");
+            StormSubmitter.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
+//            LocalCluster localCluster = new LocalCluster();
+//            localCluster.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());
+//            Thread.sleep(100000);
+//            localCluster.shutdown();
+//            LOG.info("Topology submitted!!!!");
         } catch (Exception e) {
             e.printStackTrace();
         }
