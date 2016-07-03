@@ -86,6 +86,7 @@ public class Producer {
                 e.printStackTrace();
                 Thread.sleep(1000);
             }
+//            Thread.sleep(200);
         }
 
         semaphore.acquire(count);

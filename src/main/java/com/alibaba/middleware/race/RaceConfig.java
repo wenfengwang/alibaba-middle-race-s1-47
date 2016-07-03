@@ -13,7 +13,7 @@ public class RaceConfig implements Serializable {
 
     // Rocketmq
     public static final String MQNameServerAddr = "192.168.1.161:9876";
-    public static final String MqConsumerGroup = "AliMiddleWareRace";
+    public static final String MqConsumerGroup = "373058h4iq";
     public static final String MqPayTopic = "MiddlewareRaceTestData_Pay";
     public static final String MqTmallTradeTopic = "MiddlewareRaceTestData_TMOrder";
     public static final String MqTaobaoTradeTopic = "MiddlewareRaceTestData_TBOrder";
@@ -27,7 +27,7 @@ public class RaceConfig implements Serializable {
     // online
     public static final int OnLineNamespace = 19542;
     public static final List<String> OnLineTairServerAddr = Arrays.asList(new String[]{"10.101.72.127:5198","10.101.72.129:5198"});
-    // online
+    // offline
     public static final List<String> OffLineTairServerAddr = Arrays.asList(new String[]{"192.168.1.161:5198"});
     public static final int  OffLineTairNamespace = 1;
 }

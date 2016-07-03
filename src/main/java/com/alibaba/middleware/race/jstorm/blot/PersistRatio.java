@@ -28,21 +28,23 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PersistRatio implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(PersistRatio.class);
     private ConcurrentHashMap<Long,Ratio> ratioMap;
-    private long preTimeStamp;
     private long currentTimeStamp;
+    private long minTimeStamp;
+    private long maxTimeStamp;
     private TairOperatorImpl tairOperator;
 
-    private boolean changed;
+    private Ratio headNode;
+    private Ratio tailNode;
+
     private boolean endFlag;
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
         ratioMap = new ConcurrentHashMap<Long, Ratio>();
         tairOperator = new TairOperatorImpl(RaceConfig.OffLineTairServerAddr,RaceConfig.OffLineTairNamespace);
-        preTimeStamp = 0;
         currentTimeStamp = 0;
-        changed = false;
         endFlag = false;
+        headNode = tailNode = null;
     }
 
     @Override
@@ -56,32 +58,48 @@ public class PersistRatio implements IBasicBolt, Serializable {
 
         Ratio ratioNode = ratioMap.get(minuteTimeStamp);
         if (ratioNode == null) {
-            long preTimeStamp = minuteTimeStamp - 60;
-            Ratio preRatio = ratioMap.get(preTimeStamp);
-            do {
-                if (preRatio == null) {
-                    preTimeStamp -= 60;
-                    preRatio = ratioMap.get(preTimeStamp);
-                } else {
-                    ratioNode = new Ratio(minuteTimeStamp,preRatio);
-                }
-            } while (preRatio == null);
+            if (currentTimeStamp == 0) { // 0 init
+                ratioNode = new Ratio(minuteTimeStamp,null);
+                maxTimeStamp = minTimeStamp = currentTimeStamp = minuteTimeStamp;
+                headNode = tailNode = ratioNode;
+            } else if (minuteTimeStamp < minTimeStamp) {
+                //TODO 完善构造器
+                ratioNode = new Ratio(minuteTimeStamp,headNode,0); // flag 位，0是head节点 ，1是tair节点
+                minTimeStamp = minuteTimeStamp;
+                headNode = ratioNode;
+            } else if (minuteTimeStamp > maxTimeStamp) {
+                ratioNode = new Ratio(minuteTimeStamp,tailNode,1); // flag 位，0是head节点 ，1是tair节点
+                maxTimeStamp = minuteTimeStamp;
+                tailNode = ratioNode;
+            } else {
+                long preTimeStamp = minuteTimeStamp - 60;
+                Ratio preRatio = ratioMap.get(preTimeStamp);
+                do {
+                    if (preRatio == null) {
+                        preTimeStamp -= 60;
+                        preRatio = ratioMap.get(preTimeStamp);
+                    } else {
+                        ratioNode = new Ratio(minuteTimeStamp,preRatio);
+                    }
+                } while (preRatio == null);
+            }
         }
 
+        ratioMap.put(minuteTimeStamp,ratioNode);
         do {
             ratioNode.updatePCAmount(amount[0]);
             ratioNode.updateMobileAmount(amount[1]);
-        } while (ratioNode.getNextRtaio()!=null);
+            ratioNode = ratioNode.getNextRtaio();
+        } while (ratioNode != null);
 
-        if (minuteTimeStamp != currentTimeStamp) {
+        if (minuteTimeStamp != currentTimeStamp || endFlag) {
             Ratio _ratio = ratioMap.get(currentTimeStamp);
+            currentTimeStamp = minuteTimeStamp;
             do {
                 _ratio.toTair(tairOperator);
                 _ratio = _ratio.getNextRtaio();
-                if (_ratio == null) break;
-            } while (_ratio.toBeTair == true);
+            } while (_ratio != null && _ratio.toBeTair == true);
         }
-        // 写入到Tair的逻辑怎么裸 TODO 应该对Ratio加个标志位, 表示对Ratio的update是正常的还是倒回搞的,如果标志位为true, 遍历更新,否则只更新一个
     }
 
     @Override

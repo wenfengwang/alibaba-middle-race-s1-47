@@ -75,14 +75,17 @@ public class PersistBolt implements IBasicBolt, Serializable {
             if (changed&&!("").equals(oldTimeStamp)) {
                 // TODO 这个地方存在线程不安全的可能吗? -> 单个bolt线程安全, 多个不安全
                 tairOperator.write(prefix+oldTimeStamp, totalPrice);
+                LOG.info(prefix+oldTimeStamp + " : " + totalPrice);
                 changed = false;
             } else if (endFlag) {
                 tairOperator.write(prefix+minuteTimeStamp, totalPrice);
+                LOG.info(prefix+oldTimeStamp + " : " + totalPrice);
             }
         } catch (Exception e) { // 收到结束信号后每次都进行持久化
             if ("".equals(input.getValue(0)) && "".equals(input.getValue(1))) {
                 endFlag = true;
                 tairOperator.write(prefix+concurrentTimeStamp, counts.get(concurrentTimeStamp));
+                LOG.info(prefix+oldTimeStamp + " : " +  counts.get(concurrentTimeStamp));
             }
         }
     }

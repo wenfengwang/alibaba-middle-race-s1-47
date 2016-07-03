@@ -2,12 +2,15 @@ package com.alibaba.middleware.race.model;
 
 import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
+import com.alibaba.middleware.race.jstorm.spout.RaceSpoutPull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by wangwenfeng on 7/1/16.
  */
 public class Ratio {
-
+    private static Logger LOG = LoggerFactory.getLogger(RaceSpoutPull.class);
     private final long timeStamp; // 整分时间戳
     private final String  prex;
     private volatile double ratio; // 比值
@@ -22,9 +25,7 @@ public class Ratio {
     private Ratio nextRtaio;
 
     public Ratio(long timeStamp, Ratio preRatio) {
-        if (preRatio.timeStamp >= timeStamp) {
-            throw new RuntimeException("timeStamp error");
-        }
+
         this.timeStamp = timeStamp;
         this.currentPCAmount = 0;
         this.currentMobileAmount = 0;
@@ -35,6 +36,7 @@ public class Ratio {
             PCAmount = 0;
             MobileAmount = 0;
             ratio = 0;
+            this.preRatio = null;
             this.nextRtaio = null;
             return;
         }
@@ -42,21 +44,49 @@ public class Ratio {
         MobileAmount = preRatio.MobileAmount;
         ratio = preRatio.ratio;
 
-        if (preRatio.nextRtaio != null) {
-            if (preRatio.nextRtaio.getTimeStamp() <= timeStamp) {
-                throw new RuntimeException("preRatio's nextRatio error");
-            }
-            preRatio.getNextRtaio().setPreRatio(this);
+        try {
+            // preRatio nextRatio肯定不为null
             this.nextRtaio = preRatio.getNextRtaio();
+            this.preRatio = preRatio;
+            this.nextRtaio.setPreRatio(this);
             preRatio.setNextRtaio(this);
-        } else {
-            preRatio.setNextRtaio(this);
-            this.nextRtaio = null;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
+
+    public Ratio(long timeStamp, Ratio ratio, int flag) { //flag位，0是head节点 ，1是tair节点
+        this.timeStamp = timeStamp;
+        this.currentPCAmount = 0;
+        this.currentMobileAmount = 0;
+        prex = RaceConfig.prex_ratio + timeStamp;
+        switch (flag) {
+            case 0:
+                this.ratio = 0;
+                preRatio = null;
+                nextRtaio = ratio;
+                ratio.setPreRatio(this);
+                PCAmount = 0;
+                MobileAmount = 0;
+                break;
+            case 1:
+                this.ratio = ratio.getRatio();
+                preRatio = ratio;
+                nextRtaio = null;
+                ratio.setNextRtaio(this);
+                PCAmount = ratio.getPCAmount();
+                MobileAmount = ratio.getMobileAmount();
+                break;
+        }
+
     }
 
     public long getTimeStamp() {
         return timeStamp;
+    }
+
+    public double getRatio() {
+        return ratio;
     }
 
     public double getCurrentPCAmount() {
@@ -94,16 +124,16 @@ public class Ratio {
     public void updateMobileAmount(double v) {
         currentMobileAmount += v;
         MobileAmount += v;
-        updatedRatio();
+        updateRatio();
     }
 
     public void updatePCAmount(double v) {
         currentPCAmount += v;
         PCAmount += v;
-        updatedRatio();
+        updateRatio();
     }
 
-    private void updatedRatio() {
+    private void updateRatio() {
         if (MobileAmount == 0 || PCAmount == 0 ){
             return;
         }
@@ -115,6 +145,8 @@ public class Ratio {
 
     public void toTair(TairOperatorImpl tairOperator) {
         tairOperator.write(prex,ratio);
+        LOG.info(prex+": "+ ratio);
         toBeTair = false;
     }
+
 }

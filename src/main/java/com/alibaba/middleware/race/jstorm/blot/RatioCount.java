@@ -27,13 +27,13 @@ import static com.twitter.chill.config.ReflectingInstantiator.prefix;
  */
 public class RatioCount implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(RatioCount.class);
-    private long conCurrentTime;
+    private long currentTime;
     private double[] sumAmount;
     private boolean endFlag = false;
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
-        conCurrentTime = 0;
+        currentTime = 0;
         sumAmount = new double[]{0,0};
     }
 
@@ -45,21 +45,26 @@ public class RatioCount implements IBasicBolt, Serializable {
         Set<Map.Entry<Long,double[]>> entrySet = tuple.entrySet();
         for (Map.Entry<Long, double[]> entry : entrySet) {
             long minuteTimeStamp = entry.getKey();
+            if (currentTime == 0) {
+                currentTime = minuteTimeStamp;
+            }
             double[] amount = entry.getValue();
             if (minuteTimeStamp == -1 && amount[0] == -1 && amount[1] == -1 ) {
                 collector.emit(new Values(-1l,new double[]{-1,-1}));
                 endFlag = true;
                 return;
             }
-            if (minuteTimeStamp != conCurrentTime) {
-                collector.emit(new Values(conCurrentTime, sumAmount));
-                conCurrentTime = minuteTimeStamp;
+            if (minuteTimeStamp != currentTime) {
+
+                LOG.info(String.valueOf(minuteTimeStamp));
+                collector.emit(new Values(currentTime, sumAmount));
+                currentTime = minuteTimeStamp;
                 sumAmount[0] = sumAmount[1] = 0;
             }
             sumAmount[0] += amount[0];
             sumAmount[1] += amount[1];
             if (endFlag) {
-                collector.emit(new Values(conCurrentTime, sumAmount));
+                collector.emit(new Values(currentTime, sumAmount));
                 sumAmount[0] = sumAmount[1] = 0;
             }
         }
