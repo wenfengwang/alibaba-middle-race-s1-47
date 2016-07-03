@@ -71,7 +71,7 @@
             <version>2.1.1</version>
             <!--            跑jstorm本地测试或者本地需要kryo相关操作时，请将provided屏蔽，
                         提交到jstorm集群的时候，记得加上provided的-->
-            <!--<scope>provided</scope>-->
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
