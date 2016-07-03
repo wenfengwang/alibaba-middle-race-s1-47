@@ -17,8 +17,6 @@ import java.util.List;
 public class TairOperatorImpl implements Serializable {
     public static int nameSpace;
 
-    private List<String> confServers = new ArrayList<String>();
-
     DefaultTairManager tairManager = new DefaultTairManager();
 
     public TairOperatorImpl(List confServers, int nameSpace) {

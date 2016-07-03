@@ -5,10 +5,7 @@ import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
 import com.alibaba.middleware.race.RaceConfig;
-import com.alibaba.middleware.race.jstorm.blot.CountBolt;
-import com.alibaba.middleware.race.jstorm.blot.PersistBolt;
-import com.alibaba.middleware.race.jstorm.blot.RatioBolt;
-import com.alibaba.middleware.race.jstorm.blot.RatioCount;
+import com.alibaba.middleware.race.jstorm.blot.*;
 import com.alibaba.middleware.race.jstorm.spout.RaceSpout;
 import com.alibaba.middleware.race.jstorm.spout.RaceSpoutPull;
 import com.alibaba.middleware.race.jstorm.spout.SpoutConfig;
@@ -54,17 +51,18 @@ public class RaceTopology {
         int _bolt_Parallelism_hint = 1;
         TopologyBuilder builder = new TopologyBuilder();
 
-        builder.setSpout("TaobaoSpout",new RaceSpoutPull(RaceConfig.MqTaobaoTradeTopic), spout_Parallelism_hint);
-        builder.setBolt("CountTaobao", new CountBolt(), bolt_Parallelism_hint).shuffleGrouping("TaobaoSpout");
-        builder.setBolt("PerisistTaobao", new PersistBolt(RaceConfig.prex_taobao),_bolt_Parallelism_hint).shuffleGrouping("CountTaobao");
-
-        builder.setSpout("TmallSpout",new RaceSpoutPull(RaceConfig.MqTmallTradeTopic), spout_Parallelism_hint);
-        builder.setBolt("CountTmall", new CountBolt(), bolt_Parallelism_hint).shuffleGrouping("TmallSpout");
-        builder.setBolt("PerisistTmall", new PersistBolt(RaceConfig.prex_tmall),_bolt_Parallelism_hint).shuffleGrouping("CountTmall");
+//        builder.setSpout("TaobaoSpout",new RaceSpoutPull(RaceConfig.MqTaobaoTradeTopic), spout_Parallelism_hint);
+//        builder.setBolt("CountTaobao", new CountBolt(), bolt_Parallelism_hint).shuffleGrouping("TaobaoSpout");
+//        builder.setBolt("PerisistTaobao", new PersistBolt(RaceConfig.prex_taobao),_bolt_Parallelism_hint).shuffleGrouping("CountTaobao");
+//
+//        builder.setSpout("TmallSpout",new RaceSpoutPull(RaceConfig.MqTmallTradeTopic), spout_Parallelism_hint);
+//        builder.setBolt("CountTmall", new CountBolt(), bolt_Parallelism_hint).shuffleGrouping("TmallSpout");
+//        builder.setBolt("PerisistTmall", new PersistBolt(RaceConfig.prex_tmall),_bolt_Parallelism_hint).shuffleGrouping("CountTmall");
 
         builder.setSpout("PaymentSpout",new RaceSpoutPull(RaceConfig.MqPayTopic), spout_Parallelism_hint);
-        builder.setBolt("CountPayment", new RatioBolt(), bolt_Parallelism_hint).shuffleGrouping("PaymentSpout");
-        builder.setBolt("PerisistRatio", new RatioCount(RaceConfig.prex_ratio),_bolt_Parallelism_hint).shuffleGrouping("CountPayment");
+        builder.setBolt("splitPayment", new RatioBolt(), bolt_Parallelism_hint).shuffleGrouping("PaymentSpout");
+        builder.setBolt("CountPayment", new RatioCount(),_bolt_Parallelism_hint).shuffleGrouping("splitPayment");
+        builder.setBolt("PersistRatio", new PersistRatio(),_bolt_Parallelism_hint).shuffleGrouping("CountPayment");
 
         try {
             StormSubmitter.submitTopology(RaceConfig.JstormTopologyName, tpConf, builder.createTopology());

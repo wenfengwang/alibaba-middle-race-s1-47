@@ -27,11 +27,9 @@ import static com.twitter.chill.config.ReflectingInstantiator.prefix;
  */
 public class RatioCount implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(RatioCount.class);
-
     private long conCurrentTime;
     private double[] sumAmount;
     private boolean endFlag = false;
-
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
@@ -51,17 +49,18 @@ public class RatioCount implements IBasicBolt, Serializable {
             if (minuteTimeStamp == -1 && amount[0] == -1 && amount[1] == -1 ) {
                 collector.emit(new Values(-1l,new double[]{-1,-1}));
                 endFlag = true;
+                return;
             }
             if (minuteTimeStamp != conCurrentTime) {
                 collector.emit(new Values(conCurrentTime, sumAmount));
                 conCurrentTime = minuteTimeStamp;
-                sumAmount[0] = sumAmount[1] = 0; //TODO 确认下这个写法
+                sumAmount[0] = sumAmount[1] = 0;
             }
             sumAmount[0] += amount[0];
             sumAmount[1] += amount[1];
             if (endFlag) {
                 collector.emit(new Values(conCurrentTime, sumAmount));
-                sumAmount[0] = sumAmount[1] = 0; //TODO 确认下这个写法
+                sumAmount[0] = sumAmount[1] = 0;
             }
         }
     }

@@ -6,6 +6,8 @@ import backtype.storm.topology.IBasicBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
+import com.alibaba.middleware.race.RaceConfig;
+import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 import com.alibaba.middleware.race.model.Ratio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +29,8 @@ public class PersistRatio implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(PersistRatio.class);
     private ConcurrentHashMap<Long,Ratio> ratioMap;
     private long preTimeStamp;
-    private long conConcurrentTimeStamp;
+    private long currentTimeStamp;
+    private TairOperatorImpl tairOperator;
 
     private boolean changed;
     private boolean endFlag;
@@ -35,8 +38,9 @@ public class PersistRatio implements IBasicBolt, Serializable {
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
         ratioMap = new ConcurrentHashMap<Long, Ratio>();
+        tairOperator = new TairOperatorImpl(RaceConfig.OffLineTairServerAddr,RaceConfig.OffLineTairNamespace);
         preTimeStamp = 0;
-        conConcurrentTimeStamp = 0;
+        currentTimeStamp = 0;
         changed = false;
         endFlag = false;
     }
@@ -47,17 +51,36 @@ public class PersistRatio implements IBasicBolt, Serializable {
         double[] amount = (double[]) input.getValue(1); // 0 PC 1 MOBILE
         if (minuteTimeStamp == -1 && amount[0] == -1 && amount[1] == -1 ) {
             endFlag = true;
+            return;
         }
+
         Ratio ratioNode = ratioMap.get(minuteTimeStamp);
-        if (ratioNode != null) {
+        if (ratioNode == null) {
+            long preTimeStamp = minuteTimeStamp - 60;
+            Ratio preRatio = ratioMap.get(preTimeStamp);
             do {
-                ratioNode.updatePCAmount(amount[0]);
-                ratioNode.updateMobileAmount(amount[1]);
-            } while (ratioNode.getNextRtaio()!=null);
-        } else {
-
+                if (preRatio == null) {
+                    preTimeStamp -= 60;
+                    preRatio = ratioMap.get(preTimeStamp);
+                } else {
+                    ratioNode = new Ratio(minuteTimeStamp,preRatio);
+                }
+            } while (preRatio == null);
         }
 
+        do {
+            ratioNode.updatePCAmount(amount[0]);
+            ratioNode.updateMobileAmount(amount[1]);
+        } while (ratioNode.getNextRtaio()!=null);
+
+        if (minuteTimeStamp != currentTimeStamp) {
+            Ratio _ratio = ratioMap.get(currentTimeStamp);
+            do {
+                _ratio.toTair(tairOperator);
+                _ratio = _ratio.getNextRtaio();
+                if (_ratio == null) break;
+            } while (_ratio.toBeTair == true);
+        }
         // 写入到Tair的逻辑怎么裸 TODO 应该对Ratio加个标志位, 表示对Ratio的update是正常的还是倒回搞的,如果标志位为true, 遍历更新,否则只更新一个
     }
 
