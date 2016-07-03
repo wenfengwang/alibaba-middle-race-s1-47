@@ -26,8 +26,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class CountBolt implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(CountBolt.class);
     private int platForm = -1;
-    private static final String[] platFormStr = new String[]{"Tmall","Taobao"};
-    // 淘宝订单 天猫订单 付款订单
     private static AtomicInteger[] count = new AtomicInteger[]{new AtomicInteger(0),new AtomicInteger(0)};
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
