@@ -42,7 +42,7 @@ public class RatioBolt implements IBasicBolt, Serializable {
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
-        synchronized (paymentMap) {
+        synchronized (lockObj) {
             if (paymentMap == null) {
                 paymentMap = new ConcurrentHashMap<>();
             }

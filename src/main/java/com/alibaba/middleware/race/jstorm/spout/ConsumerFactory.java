@@ -35,13 +35,14 @@ public class ConsumerFactory {
         String topic = config.getTopic();
         String groupId = config.getConsumerGroup();
 
-        String key = topic + "@" + groupId;
+        String key = groupId;
 
         DefaultMQPushConsumer consumer = consumers.get(key);
         if (consumer != null) {
             LOG.info("Consumer of " + key + " has been created, don't recreate it ");
             //Attention, this place return null to info duplicated consumer
-            return null;
+            consumer.subscribe(config.getTopic(),config.getSubExpress());
+            return consumer;
         }
 
         StringBuilder sb = new StringBuilder();
@@ -57,7 +58,10 @@ public class ConsumerFactory {
         String instanceName = groupId +"@" +	JStormUtils.process_pid();
         consumer.setInstanceName(instanceName);
         consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_LAST_OFFSET);
-        consumer.subscribe(config.getTopic(), config.getSubExpress());
+        consumer.subscribe(RaceConfig.MqPayTopic, config.getSubExpress());
+        consumer.subscribe(RaceConfig.MqTmallTradeTopic, config.getSubExpress());
+        consumer.subscribe(RaceConfig.MqTaobaoTradeTopic, config.getSubExpress());
+
         consumer.registerMessageListener(listener);
 
         consumer.setPullThresholdForQueue(config.getQueueSize());

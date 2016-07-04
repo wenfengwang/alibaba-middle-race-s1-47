@@ -106,7 +106,7 @@ public class RaceSpoutPull implements IRichSpout, IAckValueSpout, IFailValueSpou
                         Thread.sleep(200);
                         break;
                     case NO_NEW_MSG:
-                        LOG.info("NO_NEW_MSG");
+                        LOG.info("***** "+ topic + "*****"+"NO_NEW_MSG");
                         Thread.sleep(200);
                         break;
                     case OFFSET_ILLEGAL:

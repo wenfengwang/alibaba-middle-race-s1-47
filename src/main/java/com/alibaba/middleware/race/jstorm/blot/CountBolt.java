@@ -41,7 +41,7 @@ public class CountBolt implements IBasicBolt, Serializable {
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
-        synchronized (orderMap) {
+        synchronized (lockObj) {
             if (orderMap == null) {
                orderMap = new ConcurrentHashMap<>();
             }

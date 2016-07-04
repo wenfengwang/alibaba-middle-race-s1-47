@@ -57,6 +57,7 @@ public class PersistRatio implements IBasicBolt, Serializable {
         }
 
         Ratio ratioNode = ratioMap.get(minuteTimeStamp);
+        ;
         if (ratioNode == null) {
             if (currentTimeStamp == 0) { // 0 init
                 ratioNode = new Ratio(minuteTimeStamp,null);
@@ -83,9 +84,11 @@ public class PersistRatio implements IBasicBolt, Serializable {
                     }
                 } while (preRatio == null);
             }
-        }
+            if (ratioMap == null || /*minuteTimeStamp == null ||*/ ratioNode == null)
+                System.out.println();
 
-        ratioMap.put(minuteTimeStamp,ratioNode);
+            ratioMap.put(minuteTimeStamp,ratioNode);
+        }
         do {
             ratioNode.updatePCAmount(amount[0]);
             ratioNode.updateMobileAmount(amount[1]);

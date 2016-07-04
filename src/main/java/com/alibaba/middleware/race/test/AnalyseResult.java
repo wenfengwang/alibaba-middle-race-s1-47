@@ -38,22 +38,26 @@ public class AnalyseResult {
         }
     }
 
-    public void addOrder(OrderMessage orderMessage, short platform) { // 0 taobao 1 tmall
+    public void addOrder(OrderMessage orderMessage, int platform) { // 0 taobao 1 tmall
         try {
             long timeStamp = sdf.parse(sdf.format(new Date(orderMessage.getCreateTime()))).getTime()/1000;
+
             if (platform == 0) {
-                double totalPrice = producerTaobaoOrder.get(timeStamp) + orderMessage.getTotalPrice();
+                Double totalPrice = producerTaobaoOrder.get(timeStamp);
+                if (totalPrice == null) totalPrice = 0.0;
+                totalPrice += orderMessage.getTotalPrice();
                 producerTaobaoOrder.put(timeStamp,totalPrice);
             } else {
-                double totalPrice = producerTmallOrder.get(timeStamp) + orderMessage.getTotalPrice();
+                Double totalPrice = producerTmallOrder.get(timeStamp);
+                if (totalPrice == null) totalPrice = 0.0;
+                totalPrice += orderMessage.getTotalPrice();
                 producerTmallOrder.put(timeStamp,totalPrice);
             }
 
-
-        } catch (ParseException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
+        System.out.println("added order...");
     }
 
     public void addPayment(PaymentMessage paymentMessage) {
@@ -71,10 +75,12 @@ public class AnalyseResult {
         } catch (ParseException e) {
             e.printStackTrace();
         }
+        System.out.println("added payment...");
+
     }
 
 
-    private void analyseTaobao() throws IOException, InterruptedException {
+    public void analyseTaobao() throws IOException, InterruptedException {
         Thread.sleep(5000);
         Set<Map.Entry<Long, Double>> tbEntrySet = producerTaobaoOrder.entrySet();
         HashMap<Long, String> tbResultMap = new HashMap<>();
@@ -82,26 +88,26 @@ public class AnalyseResult {
         float tbSuccess = 0;
         for (Map.Entry entry : tbEntrySet) {
             long timeStamp = (long) entry.getKey();
-            double tairTaobaoPrice = (double) tairOperator.get(RaceConfig.prex_taobao+timeStamp);
+            double tairTaobaoPrice = tairOperator.get(RaceConfig.prex_taobao+timeStamp) == null ? 0.0 :(double)  tairOperator.get(RaceConfig.prex_taobao+timeStamp) ;
 
             String str;
             if (tairTaobaoPrice == (double) entry.getValue()) {
                 tbSuccess++;
-                str = RaceConfig.prex_taobao+timeStamp + ", Result: Success. Amount is " + String.valueOf(tairTaobaoPrice);
+                str = RaceConfig.prex_taobao+timeStamp + ", Result: Success. Amount is " + String.valueOf(tairTaobaoPrice) + "\n";
             } else {
                 str = RaceConfig.prex_taobao+timeStamp + ", Result: Failed. Tair: " + tairTaobaoPrice +
-                                                                ", Producer: "+ entry.getValue();
+                                                                ", Producer: "+ entry.getValue() + "\n";
             }
             tbResultMap.put(timeStamp,str);
             bw.write(str);
         }
-        bw.write("Taobao准确率: " + tbSuccess/tbEntrySetSize);
+        bw.write("Taobao准确率: " + tbSuccess/tbEntrySetSize + "\n");
         bw.flush();
         bw.close();
         System.out.println("Taobao准确率: " + tbSuccess/tbEntrySetSize);
     }
 
-    private void analyseTmall() throws IOException, InterruptedException {
+    public void analyseTmall() throws IOException, InterruptedException {
         Thread.sleep(5000);
         Set<Map.Entry<Long, Double>> tmEntrySet = producerTmallOrder.entrySet();
         HashMap<Long, String> tmResultMap = new HashMap<>();
@@ -109,26 +115,26 @@ public class AnalyseResult {
         float tmSuccess = 0;
         for (Map.Entry entry : tmEntrySet) {
             long timeStamp = (long) entry.getKey();
-            double tairTaobaoPrice = (double) tairOperator.get(RaceConfig.prex_tmall+timeStamp);
+            double tairTaobaoPrice = tairOperator.get(RaceConfig.prex_taobao+timeStamp) == null ? 0.0 :(double)  tairOperator.get(RaceConfig.prex_taobao+timeStamp) ;
 
             String str;
             if (tairTaobaoPrice == (double) entry.getValue()) {
                 tmSuccess++;
-                str = RaceConfig.prex_tmall+timeStamp + ", Result: Success. Amount is " + String.valueOf(tairTaobaoPrice);
+                str = RaceConfig.prex_tmall+timeStamp + ", Result: Success. Amount is " + String.valueOf(tairTaobaoPrice) + "\n";
             } else {
                 str = RaceConfig.prex_tmall+timeStamp + ", Result: Failed. Tair: " + tairTaobaoPrice +
-                        ", Producer: "+ entry.getValue();
+                        ", Producer: "+ entry.getValue() + "\n";
             }
             tmResultMap.put(timeStamp,str);
             bw.write(str);
         }
-        bw.write("Tmall准确率: " + tmSuccess/tmEntrySetSize);
+        bw.write("Tmall准确率: " + tmSuccess/tmEntrySetSize + "\n");
         bw.flush();
         bw.close();
         System.out.println("Tmall准确率: " + tmSuccess/tmEntrySetSize);
     }
 
-    private void analysePayment() throws IOException, InterruptedException {
+    public void analysePayment() throws IOException, InterruptedException {
         Thread.sleep(5000);
         double pcTotalPrice = 0;
         double moTotalPrice = 0;
@@ -138,22 +144,22 @@ public class AnalyseResult {
         float success = 0;
         for (Map.Entry<Long, double[]> entry : EntrySet) {
             long timeStamp = entry.getKey();
-            double tairRatio = (double) tairOperator.get(RaceConfig.prex_ratio+timeStamp);
+            double tairRatio = tairOperator.get(RaceConfig.prex_ratio+timeStamp) == null ? 0.0 : (double) tairOperator.get(RaceConfig.prex_ratio+timeStamp);
             pcTotalPrice += entry.getValue()[0];
             moTotalPrice += entry.getValue()[1];
             double ratio = moTotalPrice/pcTotalPrice;
             String str;
             if (tairRatio == ratio) {
                 success++;
-                str = RaceConfig.prex_ratio+timeStamp + ", Result: Success. Ratio is " + tairRatio;
+                str = RaceConfig.prex_ratio+timeStamp + ", Result: Success. Ratio is " + tairRatio + "\n";
             } else {
                 str = RaceConfig.prex_ratio+timeStamp + ", Result: Failed. Tair: " + tairRatio +
-                        ", Producer: "+ ratio;
+                        ", Producer: "+ ratio + "\n";
             }
             ResultMap.put(timeStamp,str);
             bw.write(str);
         }
-        bw.write("支付信息准确率: " + success/EntrySetSize);
+        bw.write("支付信息准确率: " + success/EntrySetSize + "\n");
         bw.flush();
         bw.close();
         System.out.println("支付信息准确率: " + success/EntrySetSize);

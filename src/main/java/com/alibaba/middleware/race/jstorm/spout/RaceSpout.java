@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,7 +31,7 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
     private static Logger LOG = LoggerFactory.getLogger(RaceSpout.class);
     protected SpoutConfig mqClientConfig;
     private static final Object lock = new Object();
-
+    private static ConcurrentHashMap<String,Integer> counts = new ConcurrentHashMap<>();
     private LinkedBlockingDeque<MqTuple> sendingQueue;
     private SpoutOutputCollector collector;
     private static DefaultMQPushConsumer consumer;
@@ -125,8 +126,15 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
     @Override
     public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
         try {
-
-            context.getMessageQueue().getTopic();
+            String topic = context.getMessageQueue().getTopic();
+            Integer count = counts.get(topic);
+            if (count == null) {
+                counts.put(topic,msgs.size());
+            } else {
+                count += msgs.size();
+                counts.put(topic,count);
+                LOG.info("***** " + topic + " :" + count + " *****");
+            }
             MqTuple mqTuple = new MqTuple(new ArrayList<MessageExt>(msgs), context.getMessageQueue());
 
             if (flowControl) {
