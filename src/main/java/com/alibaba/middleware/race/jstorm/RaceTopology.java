@@ -33,7 +33,7 @@ public class RaceTopology {
         // Spout's public configuration
         HashMap<Object, Object> publicSpoutConfig = new HashMap();
         publicSpoutConfig.put(SpoutConfig.META_CONSUMER_GROUP, RaceConfig.MqConsumerGroup);
-//        publicSpoutConfig.put(SpoutConfig.META_NAMESERVER,RaceConfig.MQNameServerAddr);
+        publicSpoutConfig.put(SpoutConfig.META_NAMESERVER,RaceConfig.MQNameServerAddr);
 
         // Spout's Topic configuration
         HashMap<Object,Object> confTaobao = new HashMap(publicSpoutConfig);

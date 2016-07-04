@@ -10,6 +10,7 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import clojure.lang.IFn;
+import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.RaceUtils;
 import com.alibaba.middleware.race.jstorm.spout.MqTuple;
 import com.alibaba.middleware.race.model.OrderMessage;
@@ -21,10 +22,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -33,11 +32,24 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RatioBolt implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(RatioBolt.class);
 
+    private static ConcurrentHashMap<Long,HashSet<Long>> paymentMap;
     private SimpleDateFormat sdf;
+    private final static Object lockObj = new Object();
+    private long currentTime;
+    private double amount;
+
+    private final boolean checkDuplicated = RaceConfig.CHECK_PAYMENT_DUPLICATED;
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
+        synchronized (paymentMap) {
+            if (paymentMap == null) {
+                paymentMap = new ConcurrentHashMap<>();
+            }
+        }
         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        currentTime = 0;
+        amount = 0;
     }
 
     @Override
@@ -58,13 +70,34 @@ public class RatioBolt implements IBasicBolt, Serializable {
                 }
                 PaymentMessage paymentMessage = RaceUtils.readKryoObject(PaymentMessage.class, body);
 
-                long minuteTimeStamp = sdf.parse(sdf.format(new Date(paymentMessage.getCreateTime()))).getTime()/1000;
-                double[] node = emitTuple.get(minuteTimeStamp); // 0 PC 1 MOBILE
+                long timeStamp = sdf.parse(sdf.format(new Date(paymentMessage.getCreateTime()))).getTime()/1000;
+                double[] node = emitTuple.get(timeStamp); // 0 PC 1 MOBILE
                 if (node == null) {
                     node = new double[]{0,0};
                 }
+
+//                if (checkDuplicated) {
+//                    HashSet<Long> orderIdSet = paymentMap.get(timeStamp);
+//                    if (orderIdSet == null) { // 创建orderIdSet
+//                        synchronized (lockObj) { // TODO 测试多个bolt加锁性能和单个bolt不加锁性能差别
+//                            orderIdSet = paymentMap.get(timeStamp);
+//                            if (orderIdSet == null) {
+//                                orderIdSet = new HashSet<>();
+//                                paymentMap.put(timeStamp, orderIdSet);
+//                            }
+//                        }
+//                    }
+//
+//                    if (orderIdSet.contains(timeStamp)) {
+//                        continue;
+//                    } else {
+//                        synchronized (orderIdSet) {
+//                            orderIdSet.add(paymentMessage.getOrderId());
+//                        }
+//                    }
+//                }
                 node[paymentMessage.getPayPlatform()] += paymentMessage.getPayAmount();
-                emitTuple.put(minuteTimeStamp,node);
+                emitTuple.put(timeStamp,node);
             }
             collector.emit(new Values(emitTuple));
         } catch (Exception e) {

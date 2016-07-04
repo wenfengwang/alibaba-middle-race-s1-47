@@ -28,11 +28,11 @@ public class AnalyseResult {
     private final TairOperatorImpl tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr, RaceConfig.TairNamespace);
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     private BufferedWriter bw;
+    private volatile static long startTime = 0;
 
-    public AnalyseResult() {
-        String path;
+    public AnalyseResult(String path) {
         try {
-            bw = new BufferedWriter(new FileWriter(new File("D://result.txt")));
+            bw = new BufferedWriter(new FileWriter(new File(path)));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -73,12 +73,9 @@ public class AnalyseResult {
         }
     }
 
-    public void end(){
-        analyseOrder();
-        analysePayment();
-    }
 
-    private void analyseOrder() {
+    private void analyseTaobao() throws IOException, InterruptedException {
+        Thread.sleep(5000);
         Set<Map.Entry<Long, Double>> tbEntrySet = producerTaobaoOrder.entrySet();
         HashMap<Long, String> tbResultMap = new HashMap<>();
         int tbEntrySetSize = tbEntrySet.size();
@@ -96,9 +93,16 @@ public class AnalyseResult {
                                                                 ", Producer: "+ entry.getValue();
             }
             tbResultMap.put(timeStamp,str);
+            bw.write(str);
         }
+        bw.write("Taobao准确率: " + tbSuccess/tbEntrySetSize);
+        bw.flush();
+        bw.close();
         System.out.println("Taobao准确率: " + tbSuccess/tbEntrySetSize);
+    }
 
+    private void analyseTmall() throws IOException, InterruptedException {
+        Thread.sleep(5000);
         Set<Map.Entry<Long, Double>> tmEntrySet = producerTmallOrder.entrySet();
         HashMap<Long, String> tmResultMap = new HashMap<>();
         int tmEntrySetSize = tmEntrySet.size();
@@ -116,11 +120,16 @@ public class AnalyseResult {
                         ", Producer: "+ entry.getValue();
             }
             tmResultMap.put(timeStamp,str);
+            bw.write(str);
         }
+        bw.write("Tmall准确率: " + tmSuccess/tmEntrySetSize);
+        bw.flush();
+        bw.close();
         System.out.println("Tmall准确率: " + tmSuccess/tmEntrySetSize);
     }
 
-    private void analysePayment() {
+    private void analysePayment() throws IOException, InterruptedException {
+        Thread.sleep(5000);
         double pcTotalPrice = 0;
         double moTotalPrice = 0;
         Set<Map.Entry<Long, double[]>> EntrySet = producerPayment.entrySet();
@@ -142,9 +151,17 @@ public class AnalyseResult {
                         ", Producer: "+ ratio;
             }
             ResultMap.put(timeStamp,str);
+            bw.write(str);
         }
-
+        bw.write("支付信息准确率: " + success/EntrySetSize);
+        bw.flush();
+        bw.close();
         System.out.println("支付信息准确率: " + success/EntrySetSize);
+    }
+
+    public void startTime(){
+        if (startTime == 0)
+            startTime = System.currentTimeMillis();
     }
 
 }

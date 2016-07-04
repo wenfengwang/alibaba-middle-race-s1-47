@@ -1,7 +1,6 @@
 package com.alibaba.middleware.race;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -12,7 +11,7 @@ public class RaceConfig implements Serializable {
     public static final String JstormTopologyName = "373058h4iq";
 
     // Rocketmq
-//    public static final String MQNameServerAddr = "192.168.1.161:9876";
+    public static final String MQNameServerAddr = "192.168.1.161:9876";
     public static final String MqConsumerGroup = "373058h4iq";
     public static final String MqPayTopic = "MiddlewareRaceTestData_Pay";
     public static final String MqTmallTradeTopic = "MiddlewareRaceTestData_TMOrder";
@@ -24,9 +23,19 @@ public class RaceConfig implements Serializable {
     public static final String prex_taobao = "platformTaobao_" + TeamCode + "_";
     public static final String prex_ratio = "ratio_" + TeamCode + "_";
 
-    // online
 //    public static final int TairNamespace = 19542;
 //    public static final List<String> TairServerAddr = Arrays.asList(new String[]{"10.101.72.127:5198","10.101.72.129:5198"});
     public static final List<String> TairServerAddr = Arrays.asList(new String[]{"192.168.1.161:5198"});
     public static final int  TairNamespace = 1;
+
+    // result path
+    public static final String TaobaoPath = "";
+    public static final String TmallPath = "";
+    public static final String PaymentPaht = "";
+
+    // ckeck duplicated
+    public static final boolean CHECK_ORDER_DUPLICATED = false;
+    public static final boolean CHECK_PAYMENT_DUPLICATED = false;
+
+
 }

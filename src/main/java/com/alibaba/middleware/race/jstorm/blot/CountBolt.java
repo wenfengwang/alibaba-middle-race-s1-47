@@ -7,6 +7,7 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
+import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.RaceUtils;
 import com.alibaba.middleware.race.jstorm.spout.MqTuple;
 import com.alibaba.middleware.race.model.OrderMessage;
@@ -36,6 +37,8 @@ public class CountBolt implements IBasicBolt, Serializable {
     private long currentTime;
     private double amount;
 
+    private final boolean checkDuplicated = RaceConfig.CHECK_ORDER_DUPLICATED;
+
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
         synchronized (orderMap) {
@@ -46,7 +49,6 @@ public class CountBolt implements IBasicBolt, Serializable {
         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         currentTime = 0;
         amount = 0;
-
     }
 
     @Override
@@ -62,14 +64,13 @@ public class CountBolt implements IBasicBolt, Serializable {
                 msg = list.get(i);
                 body = msg.getBody();
                 if (body.length == 2 && body[0] == 0 && body[1] == 0) {
-                    collector.emit(new Values("",""));
+                    collector.emit(new Values("end","end"));
                     return;
                 }
 
                 OrderMessage order = RaceUtils.readKryoObject(OrderMessage.class, body);
 
                 long timeStamp = sdf.parse(sdf.format(new Date(order.getCreateTime()))).getTime()/1000;
-                Long orderId = order.getOrderId();
 
                 if (currentTime != timeStamp) {
                     if (currentTime != 0) {
@@ -79,25 +80,27 @@ public class CountBolt implements IBasicBolt, Serializable {
                     currentTime = timeStamp;
                 }
 
-                HashSet<Long> orderIdSet = orderMap.get(timeStamp);
-                if (orderIdSet == null) { // 创建orderIdSet
-                    synchronized (lockObj) { // TODO 测试多个bolt加锁性能和单个bolt不加锁性能差别
-                        orderIdSet = orderMap.get(timeStamp);
-                        if (orderIdSet == null) {
-                            orderIdSet = new HashSet<>();
-                            orderMap.put(timeStamp, orderIdSet);
+                if (checkDuplicated) {
+                    HashSet<Long> orderIdSet = orderMap.get(timeStamp);
+                    if (orderIdSet == null) { // 创建orderIdSet
+                        synchronized (lockObj) { // TODO 测试多个bolt加锁性能和单个bolt不加锁性能差别
+                            orderIdSet = orderMap.get(timeStamp);
+                            if (orderIdSet == null) {
+                                orderIdSet = new HashSet<>();
+                                orderMap.put(timeStamp, orderIdSet);
+                            }
+                        }
+                    }
+
+                    if (orderIdSet.contains(timeStamp)) {
+                        continue;
+                    } else {
+                        synchronized (orderIdSet) {
+                            orderIdSet.add(order.getOrderId());
                         }
                     }
                 }
-
-                if (orderIdSet.contains(timeStamp)) {
-                    continue;
-                } else {
-                    synchronized (orderIdSet) {
-                        orderIdSet.add(timeStamp);
-                    }
-                    amount += order.getTotalPrice();
-                }
+                amount += order.getTotalPrice();
             }
         } catch (Exception e) {
             e.printStackTrace();

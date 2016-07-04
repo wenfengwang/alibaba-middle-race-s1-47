@@ -91,7 +91,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
                 LOG.info(prefix+minuteTimeStamp + " : " + totalPrice);
             }
         } catch (Exception e) { // 收到结束信号后每次都进行持久化
-            if ("".equals(input.getValue(0)) && "".equals(input.getValue(1))) {
+            if ("end".equals(input.getValue(0)) && "end".equals(input.getValue(1))) {
                 endFlag = true;
                 tairOperator.write(prefix+currentTimeStamp, amountMap.get(currentTimeStamp));
                 LOG.info(prefix+currentTimeStamp + " : " +  amountMap.get(currentTimeStamp));

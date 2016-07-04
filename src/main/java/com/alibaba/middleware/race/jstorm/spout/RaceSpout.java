@@ -126,7 +126,7 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
     public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
         try {
 
-
+            context.getMessageQueue().getTopic();
             MqTuple mqTuple = new MqTuple(new ArrayList<MessageExt>(msgs), context.getMessageQueue());
 
             if (flowControl) {
