@@ -22,9 +22,7 @@ public class Producer {
     private static int count = 200;
     private static AtomicInteger atomInt = new AtomicInteger(0);
     public static void main(String[] args) throws MQClientException, InterruptedException, IOException {
-        String path = "D:\\data.txt";
         DefaultMQProducer producer = new DefaultMQProducer(RaceConfig.MqConsumerGroup);
-        final BufferedWriter bw = new BufferedWriter(new FileWriter(new File(path)));
         producer.setNamesrvAddr("192.168.1.161:9876");
         producer.start();
 
@@ -38,27 +36,22 @@ public class Producer {
                     atomInt.addAndGet(1);
                 }
                 final OrderMessage orderMessage = ( platform == 0 ? OrderMessage.createTbaoMessage() : OrderMessage.createTmallMessage());
-                try {
-                    bw.write(orderMessage.toString());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-//                orderMessage.setCreateTime(System.currentTimeMillis());
-//
-//                byte [] body = RaceUtils.writeKryoObject(orderMessage);
-//
-//                Message msgToBroker = new Message(topics[platform], body);
-//
-//                producer.send(msgToBroker, new SendCallback() {
-//                    public void onSuccess(SendResult sendResult) {
-//
-//                        System.out.println(orderMessage);
-//                        semaphore.release();
-//                    }
-//                    public void onException(Throwable throwable) {
-//                        throwable.printStackTrace();
-//                    }
-//                });
+                orderMessage.setCreateTime(System.currentTimeMillis());
+
+                byte [] body = RaceUtils.writeKryoObject(orderMessage);
+
+                Message msgToBroker = new Message(topics[platform], body);
+
+                producer.send(msgToBroker, new SendCallback() {
+                    public void onSuccess(SendResult sendResult) {
+
+                        System.out.println(orderMessage);
+                        semaphore.release();
+                    }
+                    public void onException(Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
+                });
 
                 //Send Pay message
                 PaymentMessage[] paymentMessages = PaymentMessage.createPayMentMsg(orderMessage);
@@ -71,11 +64,7 @@ public class Producer {
 
                     if (retVal > 0) {
                         amount += paymentMessage.getPayAmount();
-                        try {
-                            bw.write(orderMessage.toString());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+
                         final Message messageToBroker = new Message(RaceConfig.MqPayTopic, RaceUtils.writeKryoObject(paymentMessage));
                         producer.send(messageToBroker, new SendCallback() {
                             public void onSuccess(SendResult sendResult) {
@@ -102,8 +91,6 @@ public class Producer {
             }
             Thread.sleep(50);
         }
-        bw.flush();
-        bw.close();
         semaphore.acquire(count);
 
         byte [] zero = new  byte[]{0,0};

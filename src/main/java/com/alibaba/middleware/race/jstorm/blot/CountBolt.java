@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 // TODO 非事务环境中，尽量使用IBasicBolt -> https://github.com/alibaba/jstorm/wiki/%E5%BC%80%E5%8F%91%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93
 public class CountBolt implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(CountBolt.class);
+
     private static ConcurrentHashMap<Long,HashSet<Long>> orderMap;
     private SimpleDateFormat sdf;
     private final static Object lockObj = new Object();
