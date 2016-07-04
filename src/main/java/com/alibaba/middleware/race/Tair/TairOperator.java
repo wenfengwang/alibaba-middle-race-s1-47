@@ -13,9 +13,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TairOperator {
     public static void main(String[] args) {
 
-        TairOperatorImpl tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr,RaceConfig.TairNamespace);
-        System.out.println("*************************");
-//        tairOperator.write("platformTmall_373058h4iq_1467532980","46546");
-        System.out.println("Result: "+tairOperator.get("platformTmall_373058h4iq_1467532980"));
+//        TairOperatorImpl tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr,RaceConfig.TairNamespace);
+//        System.out.println("*************************");
+////        tairOperator.write("platformTmall_373058h4iq_1467532980","46546");
+//        System.out.println("Result: "+tairOperator.get("platformTmall_373058h4iq_1467532980"));
+        Object str = "";
+        double a = (double) str;
     }
+
 }

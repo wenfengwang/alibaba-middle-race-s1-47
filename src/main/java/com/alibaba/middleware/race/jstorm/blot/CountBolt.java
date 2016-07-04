@@ -32,6 +32,8 @@ public class CountBolt implements IBasicBolt, Serializable {
     private static ConcurrentHashMap<Long,HashSet<Long>> orderMap;
     private SimpleDateFormat sdf;
     private final static Object lockObj = new Object();
+    private long currentTime;
+    private double amount;
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
@@ -41,6 +43,8 @@ public class CountBolt implements IBasicBolt, Serializable {
             }
         }
         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        currentTime = 0;
+        amount = 0;
 
     }
 
@@ -66,22 +70,33 @@ public class CountBolt implements IBasicBolt, Serializable {
                 long timeStamp = sdf.parse(sdf.format(new Date(order.getCreateTime()))).getTime()/1000;
                 Long orderId = order.getOrderId();
 
-                synchronized (lockObj) {
-                    HashSet<Long> orderIdSet = orderMap.get(timeStamp);
-                    if (order == null) {
-                        orderIdSet = new HashSet<>();
-                        orderIdSet.add(orderId);
-                    } else if (orderIdSet.contains(orderId)){
-                        continue;
-                    } else {
-                        orderIdSet.add(orderId);
+                if (currentTime != timeStamp) {
+                    if (currentTime != 0) {
+                        collector.emit(new Values(currentTime,amount));
+                        amount = 0;
+                    }
+                    currentTime = timeStamp;
+                }
+
+                HashSet<Long> orderIdSet = orderMap.get(timeStamp);
+                if (orderIdSet == null) { // 创建orderIdSet
+                    synchronized (lockObj) { // TODO 测试多个bolt加锁性能和单个bolt不加锁性能差别
+                        orderIdSet = orderMap.get(timeStamp);
+                        if (orderIdSet == null) {
+                            orderIdSet = new HashSet<>();
+                            orderMap.put(timeStamp, orderIdSet);
+                        }
                     }
                 }
 
-
-
-                // TODO 每条emit的效率和放到一起直接emit哪个高? 另外, ack的时间会比较高
-                collector.emit(new Values(order.getCreateTime(), order.getTotalPrice()));
+                if (orderIdSet.contains(timeStamp)) {
+                    continue;
+                } else {
+                    synchronized (orderIdSet) {
+                        orderIdSet.add(timeStamp);
+                    }
+                    amount += order.getTotalPrice();
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
