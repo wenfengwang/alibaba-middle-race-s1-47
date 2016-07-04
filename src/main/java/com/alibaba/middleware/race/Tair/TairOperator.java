@@ -12,11 +12,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class TairOperator {
     public static void main(String[] args) {
-        int a,b;
-        a = b = 2;
-        System.out.println(a+" "+b);
+
         TairOperatorImpl tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr,RaceConfig.TairNamespace);
         System.out.println("*************************");
+//        tairOperator.write("platformTmall_373058h4iq_1467532980","46546");
         System.out.println("Result: "+tairOperator.get("platformTmall_373058h4iq_1467532980"));
     }
 }

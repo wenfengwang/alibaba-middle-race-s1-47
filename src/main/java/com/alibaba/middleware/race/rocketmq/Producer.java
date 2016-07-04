@@ -10,6 +10,7 @@ import com.alibaba.middleware.race.model.*;
 import com.alibaba.middleware.race.RaceUtils;
 
 
+import java.io.*;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,11 +19,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Producer {
 
     private static Random rand = new Random();
-    private static int count = 50000;
+    private static int count = 200;
     private static AtomicInteger atomInt = new AtomicInteger(0);
-    public static void main(String[] args) throws MQClientException, InterruptedException {
+    public static void main(String[] args) throws MQClientException, InterruptedException, IOException {
+        String path = "D:\\data.txt";
         DefaultMQProducer producer = new DefaultMQProducer(RaceConfig.MqConsumerGroup);
-
+        final BufferedWriter bw = new BufferedWriter(new FileWriter(new File(path)));
         producer.setNamesrvAddr("192.168.1.161:9876");
         producer.start();
 
@@ -36,21 +38,27 @@ public class Producer {
                     atomInt.addAndGet(1);
                 }
                 final OrderMessage orderMessage = ( platform == 0 ? OrderMessage.createTbaoMessage() : OrderMessage.createTmallMessage());
-                orderMessage.setCreateTime(System.currentTimeMillis());
-
-                byte [] body = RaceUtils.writeKryoObject(orderMessage);
-
-                Message msgToBroker = new Message(topics[platform], body);
-
-                producer.send(msgToBroker, new SendCallback() {
-                    public void onSuccess(SendResult sendResult) {
-                        System.out.println(orderMessage);
-                        semaphore.release();
-                    }
-                    public void onException(Throwable throwable) {
-                        throwable.printStackTrace();
-                    }
-                });
+                try {
+                    bw.write(orderMessage.toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+//                orderMessage.setCreateTime(System.currentTimeMillis());
+//
+//                byte [] body = RaceUtils.writeKryoObject(orderMessage);
+//
+//                Message msgToBroker = new Message(topics[platform], body);
+//
+//                producer.send(msgToBroker, new SendCallback() {
+//                    public void onSuccess(SendResult sendResult) {
+//
+//                        System.out.println(orderMessage);
+//                        semaphore.release();
+//                    }
+//                    public void onException(Throwable throwable) {
+//                        throwable.printStackTrace();
+//                    }
+//                });
 
                 //Send Pay message
                 PaymentMessage[] paymentMessages = PaymentMessage.createPayMentMsg(orderMessage);
@@ -63,9 +71,15 @@ public class Producer {
 
                     if (retVal > 0) {
                         amount += paymentMessage.getPayAmount();
+                        try {
+                            bw.write(orderMessage.toString());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                         final Message messageToBroker = new Message(RaceConfig.MqPayTopic, RaceUtils.writeKryoObject(paymentMessage));
                         producer.send(messageToBroker, new SendCallback() {
                             public void onSuccess(SendResult sendResult) {
+
                                 System.out.println(paymentMessage);
                             }
                             public void onException(Throwable throwable) {
@@ -86,9 +100,10 @@ public class Producer {
                 e.printStackTrace();
                 Thread.sleep(1000);
             }
-//            Thread.sleep(200);
+            Thread.sleep(50);
         }
-
+        bw.flush();
+        bw.close();
         semaphore.acquire(count);
 
         byte [] zero = new  byte[]{0,0};

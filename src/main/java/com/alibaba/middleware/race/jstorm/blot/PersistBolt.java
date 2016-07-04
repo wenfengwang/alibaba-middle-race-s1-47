@@ -29,7 +29,6 @@ public class PersistBolt implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(PersistBolt.class);
 
     private Map<String, Double> counts;
-    private SimpleDateFormat sdf;
     TairOperatorImpl tairOperator;
 
     private volatile String concurrentTimeStamp;
@@ -47,8 +46,6 @@ public class PersistBolt implements IBasicBolt, Serializable {
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
         counts = new ConcurrentHashMap<String, Double>();
-        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
         this.concurrentTimeStamp = "";
         this.oldTimeStamp = "";
         tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr, RaceConfig.TairNamespace);
@@ -59,7 +56,6 @@ public class PersistBolt implements IBasicBolt, Serializable {
         String minuteTimeStamp;
         try {
             // 因外在大概率上消息顺序是有序的,所以仅当时间戳的值改变后我们对当前的值进行持久化操作
-            minuteTimeStamp = String.valueOf(sdf.parse(sdf.format(new Date((Long) input.getValue(0)))).getTime()).substring(0,10);
             if (!minuteTimeStamp.equals(concurrentTimeStamp)) {
                 oldTimeStamp = concurrentTimeStamp;
                 concurrentTimeStamp = minuteTimeStamp;

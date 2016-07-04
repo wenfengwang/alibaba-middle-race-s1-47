@@ -3,6 +3,7 @@ package com.alibaba.middleware.race.Tair;
 import com.alibaba.middleware.race.RaceConfig;
 import com.taobao.tair.DataEntry;
 import com.taobao.tair.Result;
+import com.taobao.tair.ResultCode;
 import com.taobao.tair.impl.DefaultTairManager;
 
 import java.io.Serializable;
@@ -27,8 +28,9 @@ public class TairOperatorImpl implements Serializable {
     }
 
     public boolean write(Serializable key, Serializable value) {
-        tairManager.put(nameSpace, key, value);
-        return false;
+        ResultCode result = tairManager.put(nameSpace, key, value);
+//        ResultCode result = tairManager.put(nameSpace,key,value,0,100000);
+        return result.isSuccess();
     }
 
     public Object get(Serializable key) {

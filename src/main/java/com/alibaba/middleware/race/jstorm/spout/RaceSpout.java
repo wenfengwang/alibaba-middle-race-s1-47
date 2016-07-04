@@ -41,7 +41,7 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
     protected String id;
     private boolean flowControl = false;
     private boolean autoAck = true;
-
+    public RaceSpout(){}
     public RaceSpout(Map conf) {
         this.spoutConf = conf;
     }

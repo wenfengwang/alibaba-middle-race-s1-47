@@ -15,8 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -25,10 +29,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 // TODO 非事务环境中，尽量使用IBasicBolt -> https://github.com/alibaba/jstorm/wiki/%E5%BC%80%E5%8F%91%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93
 public class CountBolt implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(CountBolt.class);
-    private int platForm = -1;
-    private static AtomicInteger[] count = new AtomicInteger[]{new AtomicInteger(0),new AtomicInteger(0)};
+    private static ConcurrentHashMap<Long,HashSet<Long>> orderMap;
+    private SimpleDateFormat sdf;
+    private final static Object lockObj = new Object();
+
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
+        synchronized (orderMap) {
+            if (orderMap == null) {
+               orderMap = new ConcurrentHashMap<>();
+            }
+        }
+        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
     }
 
     @Override
@@ -39,25 +52,34 @@ public class CountBolt implements IBasicBolt, Serializable {
             byte[] body;
             MessageExt msg;// TODO 测试下在for循环内部定义和外部定义的性能差别
             int size = list.size();
-            long start_time = System.currentTimeMillis();
-            for (int i = 0; i < size; i++) {
 
+            for (int i = 0; i < size; i++) {
                 msg = list.get(i);
                 body = msg.getBody();
                 if (body.length == 2 && body[0] == 0 && body[1] == 0) {
                     collector.emit(new Values("",""));
                     return;
                 }
+
                 OrderMessage order = RaceUtils.readKryoObject(OrderMessage.class, body);
-                if (platForm == -1) {
-                    String saler = order.getSalerId();
-                    if (saler.startsWith("tm_")) {
-                        platForm = 0;
-                    }else {
-                        platForm = 1;
+
+                long timeStamp = sdf.parse(sdf.format(new Date(order.getCreateTime()))).getTime()/1000;
+                Long orderId = order.getOrderId();
+
+                synchronized (lockObj) {
+                    HashSet<Long> orderIdSet = orderMap.get(timeStamp);
+                    if (order == null) {
+                        orderIdSet = new HashSet<>();
+                        orderIdSet.add(orderId);
+                    } else if (orderIdSet.contains(orderId)){
+                        continue;
+                    } else {
+                        orderIdSet.add(orderId);
                     }
                 }
-                count[platForm].addAndGet(1);
+
+
+
                 // TODO 每条emit的效率和放到一起直接emit哪个高? 另外, ack的时间会比较高
                 collector.emit(new Values(order.getCreateTime(), order.getTotalPrice()));
             }
