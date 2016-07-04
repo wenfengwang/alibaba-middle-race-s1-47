@@ -37,5 +37,10 @@ public class RaceConfig implements Serializable {
     public static final boolean CHECK_ORDER_DUPLICATED = false;
     public static final boolean CHECK_PAYMENT_DUPLICATED = false;
 
+    // Topology config
+    public static final String SPOUT_NAME = "BigSpout";
+    public static final String TAOBAO_STREAM_ID = "TaoBao_Stream";
+    public static final String TMALL_STREAM_ID = "Tmall_Stream";
+    public static final String PAYMENT_STREAM_ID = "Payment_Stream";
 
 }

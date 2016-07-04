@@ -65,30 +65,20 @@ public class RaceTopology {
         publicSpoutConfig.put(SpoutConfig.META_CONSUMER_GROUP, RaceConfig.MqConsumerGroup);
         publicSpoutConfig.put(SpoutConfig.META_NAMESERVER,RaceConfig.MQNameServerAddr);
 
-        HashMap<Object,Object> confTaobao = new HashMap(publicSpoutConfig);
-        confTaobao.put(SpoutConfig.META_TOPIC,RaceConfig.MqTaobaoTradeTopic);
-
-        HashMap<Object,Object> confTmall = new HashMap(publicSpoutConfig);
-        confTmall.put(SpoutConfig.META_TOPIC,RaceConfig.MqTmallTradeTopic);
-
-        HashMap<Object,Object> confPayment= new HashMap(publicSpoutConfig);
-        confPayment.put(SpoutConfig.META_TOPIC,RaceConfig.MqPayTopic);
-
         int spout_Parallelism_hint = 1;
         int bolt_Parallelism_hint = 2;
         int _bolt_Parallelism_hint = 1;
         TopologyBuilder builder = new TopologyBuilder();
 
-        builder.setSpout("TaobaoSpout",new RaceSpout(confTaobao), spout_Parallelism_hint);
-        builder.setBolt("CountTaobao", new CountBolt(), bolt_Parallelism_hint).shuffleGrouping("TaobaoSpout");
+        builder.setSpout(RaceConfig.SPOUT_NAME,new RaceSpout(publicSpoutConfig), spout_Parallelism_hint);
+
+        builder.setBolt("CountTaobao", new CountBolt(), bolt_Parallelism_hint).shuffleGrouping(RaceConfig.SPOUT_NAME,RaceConfig.TAOBAO_STREAM_ID);
         builder.setBolt("PerisistTaobao", new PersistBolt(RaceConfig.prex_taobao),_bolt_Parallelism_hint).shuffleGrouping("CountTaobao");
 
-        builder.setSpout("TmallSpout",new RaceSpout(confTmall), spout_Parallelism_hint);
-        builder.setBolt("CountTmall", new CountBolt(), bolt_Parallelism_hint).shuffleGrouping("TmallSpout");
+        builder.setBolt("CountTmall", new CountBolt(), bolt_Parallelism_hint).shuffleGrouping(RaceConfig.SPOUT_NAME,RaceConfig.TMALL_STREAM_ID);
         builder.setBolt("PerisistTmall", new PersistBolt(RaceConfig.prex_tmall),_bolt_Parallelism_hint).shuffleGrouping("CountTmall");
 
-        builder.setSpout("PaymentSpout",new RaceSpout(confPayment), spout_Parallelism_hint);
-        builder.setBolt("splitPayment", new RatioBolt(), bolt_Parallelism_hint).shuffleGrouping("PaymentSpout");
+        builder.setBolt("splitPayment", new RatioBolt(), bolt_Parallelism_hint).shuffleGrouping(RaceConfig.SPOUT_NAME,RaceConfig.PAYMENT_STREAM_ID);
         builder.setBolt("CountPayment", new RatioCount(),_bolt_Parallelism_hint).shuffleGrouping("splitPayment");
         builder.setBolt("PersistRatio", new PersistRatio(),_bolt_Parallelism_hint).shuffleGrouping("CountPayment");
         return builder.createTopology();

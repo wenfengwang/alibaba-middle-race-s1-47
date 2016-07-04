@@ -8,6 +8,7 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import com.alibaba.jstorm.client.spout.IAckValueSpout;
 import com.alibaba.jstorm.client.spout.IFailValueSpout;
+import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.rocketmq.client.consumer.DefaultMQPushConsumer;
 import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
@@ -189,7 +190,17 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
     }
     private void sendTuple(MqTuple mqTuple) {
         mqTuple.updateEmitMs();
-        collector.emit(new Values(mqTuple), mqTuple.getCreateMs());
+        switch (mqTuple.getMq().getTopic()) {
+            case RaceConfig.TAOBAO_STREAM_ID:
+                collector.emit(RaceConfig.TAOBAO_STREAM_ID,new Values(mqTuple), mqTuple.getCreateMs());
+                break;
+            case RaceConfig.TMALL_STREAM_ID:
+                collector.emit(RaceConfig.TMALL_STREAM_ID,new Values(mqTuple), mqTuple.getCreateMs());
+                break;
+            case RaceConfig.PAYMENT_STREAM_ID:
+                collector.emit(RaceConfig.PAYMENT_STREAM_ID,new Values(mqTuple), mqTuple.getCreateMs());
+                break;
+        }
     }
 
     public void finishTuple(MqTuple mqTuple) {

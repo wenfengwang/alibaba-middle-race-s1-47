@@ -32,7 +32,6 @@ public class ConsumerFactory {
     public static synchronized DefaultMQPushConsumer mkInstance(SpoutConfig config,
                                                                 MessageListenerConcurrently listener)  throws Exception{
 
-        String topic = config.getTopic();
         String groupId = config.getConsumerGroup();
 
         String key = groupId;
@@ -40,8 +39,6 @@ public class ConsumerFactory {
         DefaultMQPushConsumer consumer = consumers.get(key);
         if (consumer != null) {
             LOG.info("Consumer of " + key + " has been created, don't recreate it ");
-            //Attention, this place return null to info duplicated consumer
-            consumer.subscribe(config.getTopic(),config.getSubExpress());
             return consumer;
         }
 
