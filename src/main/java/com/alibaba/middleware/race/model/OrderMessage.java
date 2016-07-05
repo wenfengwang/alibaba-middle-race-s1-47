@@ -19,7 +19,7 @@ public class OrderMessage implements Serializable{
 
 
     //Kryo默认需要无参数构造函数
-    private OrderMessage() {
+    public OrderMessage() {
 
     }
 

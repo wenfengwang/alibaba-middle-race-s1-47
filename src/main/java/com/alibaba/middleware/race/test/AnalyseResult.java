@@ -5,10 +5,7 @@ import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 import com.alibaba.middleware.race.model.OrderMessage;
 import com.alibaba.middleware.race.model.PaymentMessage;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -21,9 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by wangwenfeng on 7/4/16.
  */
 public class AnalyseResult {
-    private static final ConcurrentHashMap<Long,Double> producerTaobaoOrder = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<Long,Double> producerTmallOrder = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<Long,double[]> producerPayment = new ConcurrentHashMap<>();
 
     private final TairOperatorImpl tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr, RaceConfig.TairNamespace);
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -36,56 +30,65 @@ public class AnalyseResult {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     public AnalyseResult() {
     }
 
-    public void addOrder(OrderMessage orderMessage, int platform) { // 0 taobao 1 tmall
-        try {
-            long timeStamp = sdf.parse(sdf.format(new Date(orderMessage.getCreateTime()))).getTime()/1000;
-
-            if (platform == 0) {
-                Double totalPrice = producerTaobaoOrder.get(timeStamp);
-                if (totalPrice == null) totalPrice = 0.0;
-                totalPrice += orderMessage.getTotalPrice();
-                producerTaobaoOrder.put(timeStamp,totalPrice);
-            } else {
-                Double totalPrice = producerTmallOrder.get(timeStamp);
-                if (totalPrice == null) totalPrice = 0.0;
-                totalPrice += orderMessage.getTotalPrice();
-                producerTmallOrder.put(timeStamp,totalPrice);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        System.out.println("added order...");
-    }
-
-    public void addPayment(PaymentMessage paymentMessage) {
-        try {
-            long timeStamp = sdf.parse(sdf.format(new Date(paymentMessage.getCreateTime()))).getTime()/1000;
-            double[] amountArr = producerPayment.get(timeStamp);
-            if (amountArr == null) {
-                amountArr = new double[]{0,0};
-            }
-
-            short platForm = paymentMessage.getPayPlatform();
-            amountArr[platForm] += paymentMessage.getPayAmount();
-            producerPayment.put(timeStamp,amountArr);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        System.out.println("added payment...");
-
-    }
+//    public void addOrder(OrderMessage orderMessage, int platform) { // 0 taobao 1 tmall
+//        try {
+//            long timeStamp = sdf.parse(sdf.format(new Date(orderMessage.getCreateTime()))).getTime()/1000;
+//
+//            if (platform == 0) {
+//                Double totalPrice = producerTaobaoOrder.get(timeStamp);
+//                if (totalPrice == null) totalPrice = 0.0;
+//                totalPrice += orderMessage.getTotalPrice();
+//                producerTaobaoOrder.put(timeStamp,totalPrice);
+//            } else {
+//                Double totalPrice = producerTmallOrder.get(timeStamp);
+//                if (totalPrice == null) totalPrice = 0.0;
+//                totalPrice += orderMessage.getTotalPrice();
+//                producerTmallOrder.put(timeStamp,totalPrice);
+//            }
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println("added order...");
+//    }
+//
+//    public void addPayment(PaymentMessage paymentMessage) {
+//        try {
+//            long timeStamp = sdf.parse(sdf.format(new Date(paymentMessage.getCreateTime()))).getTime()/1000;
+//            double[] amountArr = producerPayment.get(timeStamp);
+//            if (amountArr == null) {
+//                amountArr = new double[]{0,0};
+//            }
+//
+//            short platForm = paymentMessage.getPayPlatform();
+//            amountArr[platForm] += paymentMessage.getPayAmount();
+//            producerPayment.put(timeStamp,amountArr);
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println("added payment...");
+//
+//    }
 
 
     public void analyseTaobao() throws IOException, InterruptedException {
         Thread.sleep(5000);
-        ConcurrentHashMap a = producerTaobaoOrder;
-        Set<Map.Entry<Long, Double>> tbEntrySet = producerTaobaoOrder.entrySet();
+        BufferedWriter tb_bw_result = new BufferedWriter(new FileWriter(new File("E:\\mdw_data\\tb_result.txt")));
+        BufferedReader tb_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\complete\\tb_result.txt")));
+        HashMap<Long, Double> resutltMap = new HashMap<>();
+        String result_str = tb_br.readLine();
+        while (result_str!=null) {
+            String[] result = result_str.split(",");
+            resutltMap.put(Long.valueOf(result[0]), Double.valueOf(result[1]));
+        }
+
+        Set<Map.Entry<Long, Double>> tbEntrySet = resutltMap.entrySet();
         HashMap<Long, String> tbResultMap = new HashMap<>();
         int tbEntrySetSize = tbEntrySet.size();
         float tbSuccess = 0;
@@ -112,8 +115,16 @@ public class AnalyseResult {
 
     public void analyseTmall() throws IOException, InterruptedException {
         Thread.sleep(5000);
-        ConcurrentHashMap a = producerTmallOrder;
-        Set<Map.Entry<Long, Double>> tmEntrySet = producerTmallOrder.entrySet();
+        BufferedWriter tm_bw_result = new BufferedWriter(new FileWriter(new File("E:\\mdw_data\\tm_result.txt")));
+        BufferedReader tb_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\complete\\tm_result.txt")));
+        HashMap<Long, Double> resutltMap = new HashMap<>();
+        String result_str = tb_br.readLine();
+        while (result_str!=null) {
+            String[] result = result_str.split(",");
+            resutltMap.put(Long.valueOf(result[0]), Double.valueOf(result[1]));
+        }
+
+        Set<Map.Entry<Long, Double>> tmEntrySet = resutltMap.entrySet();
         HashMap<Long, String> tmResultMap = new HashMap<>();
         int tmEntrySetSize = tmEntrySet.size();
         float tmSuccess = 0;
@@ -140,10 +151,18 @@ public class AnalyseResult {
 
     public void analysePayment() throws IOException, InterruptedException {
         Thread.sleep(5000);
-        ConcurrentHashMap a = producerPayment;
+        BufferedWriter py_bw_result = new BufferedWriter(new FileWriter(new File("E:\\mdw_data\\py_result.txt")));
+        BufferedReader tb_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\complete\\py_result.txt")));
+        HashMap<Long, double[]> resutltMap = new HashMap<>();
+        String result_str = tb_br.readLine();
+        while (result_str!=null) {
+            String[] result = result_str.split(",");
+            resutltMap.put(Long.valueOf(result[0]), new double[]{Double.valueOf(result[1]),Double.valueOf(result[2])});
+        }
+
         double pcTotalPrice = 0;
         double moTotalPrice = 0;
-        Set<Map.Entry<Long, double[]>> EntrySet = producerPayment.entrySet();
+        Set<Map.Entry<Long, double[]>> EntrySet = resutltMap.entrySet();
         HashMap<Long, String> ResultMap = new HashMap<>();
         int EntrySetSize = EntrySet.size();
         float success = 0;

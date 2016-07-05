@@ -109,4 +109,8 @@ public class PaymentMessage implements Serializable{
     public short getPayPlatform() {
         return payPlatform;
     }
+
+    public void setPlatForm(short platForm ) {
+        this.payPlatform = platForm;
+    }
 }

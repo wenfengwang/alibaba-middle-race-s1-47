@@ -43,7 +43,7 @@ public class Producer {
                 }
                 final OrderMessage orderMessage = ( platform == 0 ? OrderMessage.createTbaoMessage() : OrderMessage.createTmallMessage());
                 orderMessage.setCreateTime(System.currentTimeMillis());
-                analyseResult.addOrder(orderMessage, platform);
+//                analyseResult.addOrder(orderMessage, platform);
                 byte [] body = RaceUtils.writeKryoObject(orderMessage);
                 Message msgToBroker = new Message(topics[platform], body);
                 producer.send(msgToBroker, new SendCallback() {
@@ -69,7 +69,7 @@ public class Producer {
 
                     if (retVal > 0) {
                         amount += paymentMessage.getPayAmount();
-                        analyseResult.addPayment(paymentMessage);
+//                        analyseResult.addPayment(paymentMessage);
                         final Message messageToBroker = new Message(RaceConfig.MqPayTopic, RaceUtils.writeKryoObject(paymentMessage));
                         producer.send(messageToBroker, new SendCallback() {
                             public void onSuccess(SendResult sendResult) {

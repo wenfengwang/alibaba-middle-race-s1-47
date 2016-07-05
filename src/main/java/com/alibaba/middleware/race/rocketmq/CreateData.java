@@ -48,7 +48,7 @@ public class CreateData {
         String str = "";
         long starttime = System.currentTimeMillis();
         int count = 0;
-        while (count < 1000){
+        while (count < 20000){
             for (int i = 0; i < 100; i++) {
                 try {
                     final int platform = rand.nextInt(2);
@@ -111,10 +111,10 @@ public class CreateData {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                tb_bw_data.flush();
-                tm_bw_data.flush();
-                py_bw_data.flush();
             }
+            tb_bw_data.flush();
+            tm_bw_data.flush();
+            py_bw_data.flush();
             Thread.sleep(945);
             System.out.println(count);
             count += 100;
