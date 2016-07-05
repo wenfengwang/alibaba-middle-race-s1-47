@@ -33,6 +33,7 @@ public class CountBolt implements IBasicBolt, Serializable {
 
     private static ConcurrentHashMap<Long,HashSet<Long>> orderMap;
     private SimpleDateFormat sdf;
+    private final static AtomicInteger[] atomicIntegers = new AtomicInteger[]{new AtomicInteger(0),new AtomicInteger(0)};
     private final static Object lockObj = new Object();
     private long currentTime;
     private double amount;
@@ -56,10 +57,18 @@ public class CountBolt implements IBasicBolt, Serializable {
         try {
             MqTuple mqTuple = (MqTuple) input.getValue(0);
             List<MessageExt> list = mqTuple.getMsgList();
+            String topic = mqTuple.getMq().getTopic();
             byte[] body;
             MessageExt msg;// TODO 测试下在for循环内部定义和外部定义的性能差别
             int size = list.size();
-
+            if (RaceConfig.MqTaobaoTradeTopic.equals(topic)) {
+                atomicIntegers[0].addAndGet(size);
+                LOG.info("***** Taobao Message Numbers: " + atomicIntegers[0].get() + " *****");
+            } else if (RaceConfig.MqTmallTradeTopic.equals(topic)){
+                atomicIntegers[1].addAndGet(size);
+                LOG.info("***** Tmall Message Numbers: " + atomicIntegers[1].get() + " *****");
+            }
+            // TODO 肯定是一个Tuple的 -> 肯定来自一个topic
             for (int i = 0; i < size; i++) {
                 msg = list.get(i);
                 body = msg.getBody();

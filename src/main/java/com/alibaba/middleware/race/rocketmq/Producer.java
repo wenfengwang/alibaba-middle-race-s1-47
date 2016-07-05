@@ -33,10 +33,6 @@ public class Producer {
         final String [] topics = new String[]{RaceConfig.MqTaobaoTradeTopic, RaceConfig.MqTmallTradeTopic};
         final Semaphore semaphore = new Semaphore(0);
 
-        AnalyseResult analyseResult1 = new AnalyseResult("E:\\taobao.txt");
-        AnalyseResult analyseResult2 = new AnalyseResult("E:\\tmall.txt");
-        AnalyseResult analyseResult3 = new AnalyseResult("E:\\payment.txt");
-
         for (int i = 0; i < count; i++) {
             try {
                 final int platform = rand.nextInt(2);
@@ -47,7 +43,6 @@ public class Producer {
                 }
                 final OrderMessage orderMessage = ( platform == 0 ? OrderMessage.createTbaoMessage() : OrderMessage.createTmallMessage());
                 orderMessage.setCreateTime(System.currentTimeMillis());
-                analyseResult1.addOrder(orderMessage,platform);
 
                 byte [] body = RaceUtils.writeKryoObject(orderMessage);
 
@@ -78,7 +73,6 @@ public class Producer {
                         amount += paymentMessage.getPayAmount();
 
                         final Message messageToBroker = new Message(RaceConfig.MqPayTopic, RaceUtils.writeKryoObject(paymentMessage));
-                        analyseResult3.addPayment(paymentMessage);
                         producer.send(messageToBroker, new SendCallback() {
                             public void onSuccess(SendResult sendResult) {
 
@@ -106,11 +100,6 @@ public class Producer {
         }
         semaphore.acquire(count);
 
-
-        analyseResult1.analyseTaobao();
-        analyseResult2.analyseTmall();
-        analyseResult3.analysePayment();
-
         byte [] zero = new  byte[]{0,0};
         Message endMsgTB = new Message(RaceConfig.MqTaobaoTradeTopic, zero);
         Message endMsgTM = new Message(RaceConfig.MqTmallTradeTopic, zero);
@@ -120,9 +109,6 @@ public class Producer {
             producer.send(endMsgTB);
             producer.send(endMsgTM);
             producer.send(endMsgPay);
-            System.out.println("TB: "+atomIntTb.get());
-            System.out.println("TM: "+atomIntTm.get());
-            System.out.println("PY: "+atomIntPy.get());
 
         } catch (Exception e) {
             e.printStackTrace();

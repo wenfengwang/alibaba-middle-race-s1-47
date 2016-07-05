@@ -31,7 +31,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IAckValueSpout, IFailValueSpout {
     private static Logger LOG = LoggerFactory.getLogger(RaceSpout.class);
     protected SpoutConfig mqClientConfig;
-    private static final Object lock = new Object();
     private static ConcurrentHashMap<String,Integer> counts = new ConcurrentHashMap<>();
     private LinkedBlockingDeque<MqTuple> sendingQueue;
     private SpoutOutputCollector collector;
@@ -127,15 +126,6 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
     @Override
     public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
         try {
-            String topic = context.getMessageQueue().getTopic();
-            Integer count = counts.get(topic);
-            if (count == null) {
-                counts.put(topic,msgs.size());
-            } else {
-                count += msgs.size();
-                counts.put(topic,count);
-                LOG.info("***** " + topic + " :" + count + " *****");
-            }
             MqTuple mqTuple = new MqTuple(new ArrayList<MessageExt>(msgs), context.getMessageQueue());
 
             if (flowControl) {
@@ -172,9 +162,7 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
     public void fail(Object msgId, List<Object> values) {
         MqTuple mqTuple = (MqTuple) values.get(0);
         AtomicInteger failTimes = mqTuple.getFailureTimes();
-
         int failNum = failTimes.incrementAndGet();
-
 
         if (failNum > mqClientConfig.getMaxFailTimes()) {
             LOG.warn("Message " + mqTuple.getMq() + " fail times " + failNum);
@@ -204,8 +192,6 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
     }
 
     public void finishTuple(MqTuple mqTuple) {
-//        waithHistogram.update(metaTuple.getEmitMs() - metaTuple.getCreateMs());
-//        processHistogram.update(System.currentTimeMillis() - metaTuple.getEmitMs());
         mqTuple.done();
     }
 }

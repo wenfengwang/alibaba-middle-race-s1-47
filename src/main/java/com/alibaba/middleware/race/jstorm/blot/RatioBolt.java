@@ -33,6 +33,8 @@ public class RatioBolt implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(RatioBolt.class);
 
     private static ConcurrentHashMap<Long,HashSet<Long>> paymentMap;
+    private final static AtomicInteger atomicInteger = new AtomicInteger(0);
+
     private SimpleDateFormat sdf;
     private final static Object lockObj = new Object();
     private long currentTime;
@@ -60,7 +62,10 @@ public class RatioBolt implements IBasicBolt, Serializable {
             byte[] body;
             MessageExt msg;
             int size = list.size();
-            HashMap<Long,double[]> emitTuple = new HashMap<Long, double[]>();
+            atomicInteger.addAndGet(size);
+            LOG.info("***** Payment Message Numbers: " + atomicInteger.get() + " *****");
+
+            HashMap<Long,double[]> emitTuple = new HashMap<>();
             for (int i = 0; i < size; i++) {
                 msg = list.get(i);
                 body = msg.getBody();
