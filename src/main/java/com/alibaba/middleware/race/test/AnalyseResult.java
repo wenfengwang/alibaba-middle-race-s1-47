@@ -2,17 +2,12 @@ package com.alibaba.middleware.race.test;
 
 import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
-import com.alibaba.middleware.race.model.OrderMessage;
-import com.alibaba.middleware.race.model.PaymentMessage;
 
 import java.io.*;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by wangwenfeng on 7/4/16.
@@ -30,7 +25,6 @@ public class AnalyseResult {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     public AnalyseResult() {
@@ -115,7 +109,6 @@ public class AnalyseResult {
 
     public void analyseTmall() throws IOException, InterruptedException {
         Thread.sleep(5000);
-        BufferedWriter tm_bw_result = new BufferedWriter(new FileWriter(new File("E:\\mdw_data\\tm_result.txt")));
         BufferedReader tb_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\complete\\tm_result.txt")));
         HashMap<Long, Double> resutltMap = new HashMap<>();
         String result_str = tb_br.readLine();

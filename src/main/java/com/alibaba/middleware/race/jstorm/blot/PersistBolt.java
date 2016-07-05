@@ -47,7 +47,6 @@ public class PersistBolt implements IBasicBolt, Serializable {
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
         this.context = context;
-        // TODO 判断下上下文
         String filePath = "";
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
         switch (context.getThisComponentId()) {
@@ -124,7 +123,6 @@ public class PersistBolt implements IBasicBolt, Serializable {
 
     @Override
     public void cleanup() {
-
     }
 
     @Override
