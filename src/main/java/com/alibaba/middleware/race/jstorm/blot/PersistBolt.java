@@ -7,6 +7,7 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
 import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
+import com.alibaba.middleware.race.test.AnalyseResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,8 @@ public class PersistBolt implements IBasicBolt, Serializable {
     private static volatile boolean endFlag = false;
     private double amount;
     private String prefix;
-
+    private AnalyseResult analyseResult;
+    private TopologyContext context;
     public PersistBolt() {}
 
     public PersistBolt(String prefix) {
@@ -44,6 +46,9 @@ public class PersistBolt implements IBasicBolt, Serializable {
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
+        this.context = context;
+        // TODO 判断下上下文
+        analyseResult = new AnalyseResult(RaceConfig.TaobaoPath+"_"+System.currentTimeMillis()+".log");
         amountMap = new ConcurrentHashMap<>();
         this.currentTimeStamp = "started";
         amount = 0;
@@ -61,9 +66,6 @@ public class PersistBolt implements IBasicBolt, Serializable {
             // 空指针异常并不是仅仅限于调用者为空，异常的null变量赋值也会导致空指针异常
             minuteTimeStamp = String.valueOf(input.getValue(0));
             double price = (double) input.getValue(1);
-
-
-
 
             if (!currentTimeStamp.equals(minuteTimeStamp)) {
                 if (currentTimeStamp.equals("started")) { // 初始化
@@ -93,6 +95,15 @@ public class PersistBolt implements IBasicBolt, Serializable {
         } catch (Exception e) { // 收到结束信号后每次都进行持久化
             if ("end".equals(input.getValue(0)) && "end".equals(input.getValue(1))) {
                 endFlag = true;
+                try {
+                    if (context.getThisComponentId() == "") {
+                        analyseResult.analyseTaobao();
+                    } else {
+                        analyseResult.analyseTmall();
+                    }
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
                 tairOperator.write(prefix+currentTimeStamp, amountMap.get(currentTimeStamp));
                 LOG.info(prefix+currentTimeStamp + " : " +  amountMap.get(currentTimeStamp));
             }

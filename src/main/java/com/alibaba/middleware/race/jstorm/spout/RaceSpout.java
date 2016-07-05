@@ -30,8 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IAckValueSpout, IFailValueSpout {
     private static Logger LOG = LoggerFactory.getLogger(RaceSpout.class);
-    protected SpoutConfig mqClientConfig;
-    private static ConcurrentHashMap<String,Integer> counts = new ConcurrentHashMap<>();
+    private SpoutConfig mqClientConfig;
     private LinkedBlockingDeque<MqTuple> sendingQueue;
     private SpoutOutputCollector collector;
     private static DefaultMQPushConsumer consumer;
@@ -95,6 +94,7 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
         try {
             mqTuple = sendingQueue.take();
         } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         if (mqTuple == null) {
@@ -115,7 +115,9 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("taobao"));
+        declarer.declareStream(RaceConfig.TAOBAO_STREAM_ID,new Fields("taobao"));
+        declarer.declareStream(RaceConfig.TMALL_STREAM_ID,new Fields("tmall"));
+        declarer.declareStream(RaceConfig.PAYMENT_STREAM_ID,new Fields("payment"));
     }
 
     @Override
@@ -126,8 +128,7 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
     @Override
     public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
         try {
-            MqTuple mqTuple = new MqTuple(new ArrayList<MessageExt>(msgs), context.getMessageQueue());
-
+            MqTuple mqTuple = new MqTuple(new ArrayList<>(msgs), context.getMessageQueue());
             if (flowControl) {
                 sendingQueue.offer(mqTuple);
             } else {
@@ -138,7 +139,7 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
             } else {
                 mqTuple.waitFinish();
-                if (mqTuple.isSuccess() == true) {
+                if (mqTuple.isSuccess()) {
                     return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                 } else {
                     return ConsumeConcurrentlyStatus.RECONSUME_LATER;
@@ -162,7 +163,9 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
     public void fail(Object msgId, List<Object> values) {
         MqTuple mqTuple = (MqTuple) values.get(0);
         AtomicInteger failTimes = mqTuple.getFailureTimes();
+
         int failNum = failTimes.incrementAndGet();
+
 
         if (failNum > mqClientConfig.getMaxFailTimes()) {
             LOG.warn("Message " + mqTuple.getMq() + " fail times " + failNum);
@@ -191,7 +194,7 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
         }
     }
 
-    public void finishTuple(MqTuple mqTuple) {
+    private void finishTuple(MqTuple mqTuple) {
         mqTuple.done();
     }
 }

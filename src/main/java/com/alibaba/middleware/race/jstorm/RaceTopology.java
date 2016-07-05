@@ -65,7 +65,7 @@ public class RaceTopology {
         publicSpoutConfig.put(SpoutConfig.META_CONSUMER_GROUP, RaceConfig.MqConsumerGroup);
         publicSpoutConfig.put(SpoutConfig.META_NAMESERVER,RaceConfig.MQNameServerAddr);
 
-        int spout_Parallelism_hint = 1;
+        int spout_Parallelism_hint = 2;
         int bolt_Parallelism_hint = 2;
         int _bolt_Parallelism_hint = 1;
         TopologyBuilder builder = new TopologyBuilder();

@@ -82,8 +82,6 @@ public class Producer {
                                 throwable.printStackTrace();
                             }
                         });
-                    }else {
-                        //
                     }
                 }
 

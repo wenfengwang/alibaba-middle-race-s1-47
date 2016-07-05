@@ -90,7 +90,7 @@ public class MqTuple implements Serializable {
     }
 
     public boolean waitFinish() throws InterruptedException {
-        return latch.await(4, TimeUnit.HOURS);
+        return latch.await(15, TimeUnit.MINUTES);
     }
 
     @Override
