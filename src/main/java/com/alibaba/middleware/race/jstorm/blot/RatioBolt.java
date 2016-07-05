@@ -60,7 +60,7 @@ public class RatioBolt implements IBasicBolt, Serializable {
             byte[] body;
             MessageExt msg;
             int size = list.size();
-            HashMap<Long,double[]> emitTuple = new HashMap<Long, double[]>();
+            HashMap<Long,double[]> emitTuple = new HashMap<>();
             for (int i = 0; i < size; i++) {
                 msg = list.get(i);
                 body = msg.getBody();

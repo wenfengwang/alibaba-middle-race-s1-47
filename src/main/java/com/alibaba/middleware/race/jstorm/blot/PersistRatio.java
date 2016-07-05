@@ -9,9 +9,11 @@ import backtype.storm.tuple.Values;
 import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 import com.alibaba.middleware.race.model.Ratio;
+import com.alibaba.middleware.race.test.AnalyseResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,6 +34,7 @@ public class PersistRatio implements IBasicBolt, Serializable {
     private long minTimeStamp;
     private long maxTimeStamp;
     private TairOperatorImpl tairOperator;
+    private AnalyseResult analyseResult;
 
     private Ratio headNode;
     private Ratio tailNode;
@@ -40,6 +43,7 @@ public class PersistRatio implements IBasicBolt, Serializable {
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
+        analyseResult = new AnalyseResult(RaceConfig.PaymentPaht);
         ratioMap = new ConcurrentHashMap<Long, Ratio>();
         tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr,RaceConfig.TairNamespace);
         currentTimeStamp = 0;
@@ -52,6 +56,11 @@ public class PersistRatio implements IBasicBolt, Serializable {
         long minuteTimeStamp = (Long) input.getValue(0);
         double[] amount = (double[]) input.getValue(1); // 0 PC 1 MOBILE
         if (minuteTimeStamp == -1 && amount[0] == -1 && amount[1] == -1 ) {
+            try {
+                analyseResult.analysePayment();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             endFlag = true;
             return;
         }

@@ -13,7 +13,6 @@ import com.alibaba.rocketmq.client.consumer.DefaultMQPushConsumer;
 import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import com.alibaba.rocketmq.client.consumer.listener.MessageListenerConcurrently;
-import com.alibaba.rocketmq.client.exception.MQClientException;
 import com.alibaba.rocketmq.common.message.MessageExt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,18 +20,15 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by wangwenfeng on 5/31/16.
  */
-public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IAckValueSpout, IFailValueSpout {
+public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckValueSpout, IFailValueSpout {
     private static Logger LOG = LoggerFactory.getLogger(RaceSpout.class);
-    protected SpoutConfig mqClientConfig;
-    private static final Object lock = new Object();
-    private static ConcurrentHashMap<String,Integer> counts = new ConcurrentHashMap<>();
+    private SpoutConfig mqClientConfig;
     private LinkedBlockingDeque<MqTuple> sendingQueue;
     private SpoutOutputCollector collector;
     private static DefaultMQPushConsumer consumer;
@@ -41,8 +37,8 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
     private Map tpConf;
     private Map spoutConf;
     protected String id;
-    private boolean flowControl = false;
-    private boolean autoAck = true;
+    private static final boolean flowControl = false;
+    private static final boolean autoAck = true;
     public RaceSpout(){}
     public RaceSpout(Map conf) {
         this.spoutConf = conf;
@@ -53,7 +49,7 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
         this.tpConf = conf;
         this.collector = collector;
         this.id = context.getThisComponentId() + ":" + context.getThisTaskId();
-        this.sendingQueue = new LinkedBlockingDeque<MqTuple>();
+        this.sendingQueue = new LinkedBlockingDeque<>();
 
         tpConf.putAll(spoutConf);
         mqClientConfig = SpoutConfig.mkInstance(conf);
@@ -96,6 +92,7 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
         try {
             mqTuple = sendingQueue.take();
         } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         if (mqTuple == null) {
@@ -116,7 +113,9 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("taobao"));
+        declarer.declareStream(RaceConfig.TAOBAO_STREAM_ID,new Fields("taobao"));
+        declarer.declareStream(RaceConfig.TMALL_STREAM_ID,new Fields("tmall"));
+        declarer.declareStream(RaceConfig.PAYMENT_STREAM_ID,new Fields("payment"));
     }
 
     @Override
@@ -127,17 +126,7 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
     @Override
     public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
         try {
-            String topic = context.getMessageQueue().getTopic();
-            Integer count = counts.get(topic);
-            if (count == null) {
-                counts.put(topic,msgs.size());
-            } else {
-                count += msgs.size();
-                counts.put(topic,count);
-                LOG.info("***** " + topic + " :" + count + " *****");
-            }
-            MqTuple mqTuple = new MqTuple(new ArrayList<MessageExt>(msgs), context.getMessageQueue());
-
+            MqTuple mqTuple = new MqTuple(new ArrayList<>(msgs), context.getMessageQueue());
             if (flowControl) {
                 sendingQueue.offer(mqTuple);
             } else {
@@ -148,7 +137,7 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
             } else {
                 mqTuple.waitFinish();
-                if (mqTuple.isSuccess() == true) {
+                if (mqTuple.isSuccess()) {
                     return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                 } else {
                     return ConsumeConcurrentlyStatus.RECONSUME_LATER;
@@ -203,9 +192,7 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
         }
     }
 
-    public void finishTuple(MqTuple mqTuple) {
-//        waithHistogram.update(metaTuple.getEmitMs() - metaTuple.getCreateMs());
-//        processHistogram.update(System.currentTimeMillis() - metaTuple.getEmitMs());
+    private void finishTuple(MqTuple mqTuple) {
         mqTuple.done();
     }
 }
