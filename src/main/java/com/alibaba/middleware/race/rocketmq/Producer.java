@@ -29,12 +29,11 @@ public class Producer {
         DefaultMQProducer producer = new DefaultMQProducer(RaceConfig.MqConsumerGroup);
         producer.setNamesrvAddr("192.168.1.161:9876");
         producer.start();
-
+        AnalyseResult analyseResult = new AnalyseResult();
         final String [] topics = new String[]{RaceConfig.MqTaobaoTradeTopic, RaceConfig.MqTmallTradeTopic};
         final Semaphore semaphore = new Semaphore(0);
 
         for (int i = 0; i < count; i++) {
-//            System.out.println("*******");
             try {
                 final int platform = rand.nextInt(2);
                 if (platform == 0) {
@@ -44,11 +43,9 @@ public class Producer {
                 }
                 final OrderMessage orderMessage = ( platform == 0 ? OrderMessage.createTbaoMessage() : OrderMessage.createTmallMessage());
                 orderMessage.setCreateTime(System.currentTimeMillis());
-
+                analyseResult.addOrder(orderMessage, platform);
                 byte [] body = RaceUtils.writeKryoObject(orderMessage);
-
                 Message msgToBroker = new Message(topics[platform], body);
-
                 producer.send(msgToBroker, new SendCallback() {
                     public void onSuccess(SendResult sendResult) {
 
@@ -72,7 +69,7 @@ public class Producer {
 
                     if (retVal > 0) {
                         amount += paymentMessage.getPayAmount();
-
+                        analyseResult.addPayment(paymentMessage);
                         final Message messageToBroker = new Message(RaceConfig.MqPayTopic, RaceUtils.writeKryoObject(paymentMessage));
                         producer.send(messageToBroker, new SendCallback() {
                             public void onSuccess(SendResult sendResult) {

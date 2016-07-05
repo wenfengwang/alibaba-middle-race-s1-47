@@ -67,9 +67,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
 
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) { // TODO review
-        LOG.info("+++++ " + context.getThisComponentId());
         String minuteTimeStamp;
-//        context.getZkCluster().
         try {
             // 因外在大概率上消息顺序是有序的,所以仅当时间戳的值改变后我们对当前的值进行持久化操作
 
@@ -82,14 +80,15 @@ public class PersistBolt implements IBasicBolt, Serializable {
                 if (currentTimeStamp.equals("started")) { // 初始化
                     currentTimeStamp = minuteTimeStamp;
                     amount += price;
+                    amountMap.put(currentTimeStamp,amount);
                 } else {
                     double totalPrice = amountMap.get(minuteTimeStamp) + amount;
                     amountMap.put(minuteTimeStamp,totalPrice);
                     tairOperator.write(prefix+currentTimeStamp, totalPrice);
                     LOG.info(prefix+currentTimeStamp + " : " + totalPrice);
-                    amount = 0;
                     currentTimeStamp = minuteTimeStamp;
                 }
+                amount = 0;
                 return;
             }
 
@@ -106,7 +105,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
             if ("end".equals(input.getValue(0)) && "end".equals(input.getValue(1))) {
                 endFlag = true;
                 try {
-                    if (context.getThisComponentId() == "") {
+                    if (context.getThisComponentId().equals(RaceConfig.TAOBAO_PERSIST_BOLT_ID)) {
                         analyseResult.analyseTaobao();
                     } else {
                         analyseResult.analyseTmall();
@@ -114,7 +113,10 @@ public class PersistBolt implements IBasicBolt, Serializable {
                 } catch (Exception e1) {
                     e1.printStackTrace();
                 }
-                tairOperator.write(prefix+currentTimeStamp, amountMap.get(currentTimeStamp));
+                double totalPrice = amountMap.get(currentTimeStamp) + amount;
+                amountMap.put(currentTimeStamp,totalPrice);
+                amount = 0;
+                tairOperator.write(prefix+currentTimeStamp, totalPrice);
                 LOG.info(prefix+currentTimeStamp + " : " +  amountMap.get(currentTimeStamp));
             }
         }

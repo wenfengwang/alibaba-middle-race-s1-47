@@ -38,6 +38,9 @@ public class AnalyseResult {
         }
     }
 
+    public AnalyseResult() {
+    }
+
     public void addOrder(OrderMessage orderMessage, int platform) { // 0 taobao 1 tmall
         try {
             long timeStamp = sdf.parse(sdf.format(new Date(orderMessage.getCreateTime()))).getTime()/1000;
@@ -61,9 +64,8 @@ public class AnalyseResult {
     }
 
     public void addPayment(PaymentMessage paymentMessage) {
-        long timeStamp = 0;
         try {
-            timeStamp = sdf.parse(sdf.format(new Date(paymentMessage.getCreateTime()))).getTime()/1000;
+            long timeStamp = sdf.parse(sdf.format(new Date(paymentMessage.getCreateTime()))).getTime()/1000;
             double[] amountArr = producerPayment.get(timeStamp);
             if (amountArr == null) {
                 amountArr = new double[]{0,0};
@@ -82,6 +84,7 @@ public class AnalyseResult {
 
     public void analyseTaobao() throws IOException, InterruptedException {
         Thread.sleep(5000);
+        ConcurrentHashMap a = producerTaobaoOrder;
         Set<Map.Entry<Long, Double>> tbEntrySet = producerTaobaoOrder.entrySet();
         HashMap<Long, String> tbResultMap = new HashMap<>();
         int tbEntrySetSize = tbEntrySet.size();
@@ -109,6 +112,7 @@ public class AnalyseResult {
 
     public void analyseTmall() throws IOException, InterruptedException {
         Thread.sleep(5000);
+        ConcurrentHashMap a = producerTmallOrder;
         Set<Map.Entry<Long, Double>> tmEntrySet = producerTmallOrder.entrySet();
         HashMap<Long, String> tmResultMap = new HashMap<>();
         int tmEntrySetSize = tmEntrySet.size();
@@ -136,6 +140,7 @@ public class AnalyseResult {
 
     public void analysePayment() throws IOException, InterruptedException {
         Thread.sleep(5000);
+        ConcurrentHashMap a = producerPayment;
         double pcTotalPrice = 0;
         double moTotalPrice = 0;
         Set<Map.Entry<Long, double[]>> EntrySet = producerPayment.entrySet();
