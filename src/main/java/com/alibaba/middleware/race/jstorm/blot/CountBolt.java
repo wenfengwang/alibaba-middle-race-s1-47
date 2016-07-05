@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -37,6 +38,7 @@ public class CountBolt implements IBasicBolt, Serializable {
     private final static Object lockObj = new Object();
     private long currentTime;
     private double amount;
+    private AtomicBoolean endFlag = new AtomicBoolean(false);
 
     private final boolean checkDuplicated = RaceConfig.CHECK_ORDER_DUPLICATED;
 
@@ -61,18 +63,15 @@ public class CountBolt implements IBasicBolt, Serializable {
             byte[] body;
             MessageExt msg;// TODO 测试下在for循环内部定义和外部定义的性能差别
             int size = list.size();
-            if (RaceConfig.MqTaobaoTradeTopic.equals(topic)) {
-                atomicIntegers[0].addAndGet(size);
-                LOG.info("***** Taobao Message Numbers: " + atomicIntegers[0].get() + " *****");
-            } else if (RaceConfig.MqTmallTradeTopic.equals(topic)){
-                atomicIntegers[1].addAndGet(size);
-                LOG.info("***** Tmall Message Numbers: " + atomicIntegers[1].get() + " *****");
-            }
+
             // TODO 肯定是一个Tuple的 -> 肯定来自一个topic
             for (int i = 0; i < size; i++) {
                 msg = list.get(i);
                 body = msg.getBody();
                 if (body.length == 2 && body[0] == 0 && body[1] == 0) {
+                    endFlag.set(true);
+                    collector.emit(new Values(currentTime,amount));
+                    amount = 0;
                     collector.emit(new Values("end","end"));
                     return;
                 }
@@ -108,9 +107,21 @@ public class CountBolt implements IBasicBolt, Serializable {
                             orderIdSet.add(order.getOrderId());
                         }
                     }
+                    if (RaceConfig.MqTaobaoTradeTopic.equals(topic)) {
+                        atomicIntegers[0].addAndGet(1);
+                        LOG.info("***** Taobao Message Numbers: " + atomicIntegers[0].get() + " *****");
+                    } else if (RaceConfig.MqTmallTradeTopic.equals(topic)){
+                        atomicIntegers[1].addAndGet(1);
+                        LOG.info("***** Tmall Message Numbers: " + atomicIntegers[1].get() + " *****");
+                    }
                 }
                 amount += order.getTotalPrice();
+                if (endFlag.get()) {
+                    collector.emit(new Values(currentTime,amount));
+                    amount = 0;
+                }
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }

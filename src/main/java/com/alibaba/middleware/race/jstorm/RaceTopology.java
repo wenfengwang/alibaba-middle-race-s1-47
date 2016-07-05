@@ -72,15 +72,15 @@ public class RaceTopology {
 
         builder.setSpout(RaceConfig.SPOUT_NAME,new RaceSpout(publicSpoutConfig), spout_Parallelism_hint);
 
-        builder.setBolt("CountTaobao", new CountBolt(), bolt_Parallelism_hint).shuffleGrouping(RaceConfig.SPOUT_NAME,RaceConfig.TAOBAO_STREAM_ID);
-        builder.setBolt("PerisistTaobao", new PersistBolt(RaceConfig.prex_taobao),_bolt_Parallelism_hint).shuffleGrouping("CountTaobao");
+        builder.setBolt(RaceConfig.TAOBAO_COUNT_BOLT_ID, new CountBolt(), bolt_Parallelism_hint).shuffleGrouping(RaceConfig.SPOUT_NAME,RaceConfig.TAOBAO_STREAM_ID);
+        builder.setBolt(RaceConfig.TAOBAO_PERSIST_BOLT_ID, new PersistBolt(RaceConfig.prex_taobao),_bolt_Parallelism_hint).shuffleGrouping(RaceConfig.TAOBAO_COUNT_BOLT_ID);
 
-        builder.setBolt("CountTmall", new CountBolt(), bolt_Parallelism_hint).shuffleGrouping(RaceConfig.SPOUT_NAME,RaceConfig.TMALL_STREAM_ID);
-        builder.setBolt("PerisistTmall", new PersistBolt(RaceConfig.prex_tmall),_bolt_Parallelism_hint).shuffleGrouping("CountTmall");
+        builder.setBolt(RaceConfig.TMALL_COUNT_BOLT_ID, new CountBolt(), bolt_Parallelism_hint).shuffleGrouping(RaceConfig.SPOUT_NAME,RaceConfig.TMALL_STREAM_ID);
+        builder.setBolt(RaceConfig.TMALL_PERSIST_BOLT_ID, new PersistBolt(RaceConfig.prex_tmall),_bolt_Parallelism_hint).shuffleGrouping(RaceConfig.TMALL_COUNT_BOLT_ID);
 
-        builder.setBolt("splitPayment", new RatioBolt(), bolt_Parallelism_hint).shuffleGrouping(RaceConfig.SPOUT_NAME,RaceConfig.PAYMENT_STREAM_ID);
-        builder.setBolt("CountPayment", new RatioCount(),_bolt_Parallelism_hint).shuffleGrouping("splitPayment");
-        builder.setBolt("PersistRatio", new PersistRatio(),_bolt_Parallelism_hint).shuffleGrouping("CountPayment");
+        builder.setBolt(RaceConfig.RATIO_SPLIT_BOLT_ID, new RatioBolt(), bolt_Parallelism_hint).shuffleGrouping(RaceConfig.SPOUT_NAME,RaceConfig.PAYMENT_STREAM_ID);
+        builder.setBolt(RaceConfig.RATIO_COUNT_BOLT_ID, new RatioCount(),_bolt_Parallelism_hint).shuffleGrouping(RaceConfig.RATIO_SPLIT_BOLT_ID);
+        builder.setBolt(RaceConfig.RATIO_PERSIST_BOLT_ID, new PersistRatio(),_bolt_Parallelism_hint).shuffleGrouping(RaceConfig.RATIO_COUNT_BOLT_ID);
         return builder.createTopology();
     }
 }

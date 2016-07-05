@@ -48,7 +48,17 @@ public class PersistBolt implements IBasicBolt, Serializable {
     public void prepare(Map stormConf, TopologyContext context) {
         this.context = context;
         // TODO 判断下上下文
-        analyseResult = new AnalyseResult(RaceConfig.TaobaoPath+"_"+System.currentTimeMillis()+".log");
+        String filePath = "";
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+        switch (context.getThisComponentId()) {
+            case RaceConfig.TAOBAO_PERSIST_BOLT_ID:
+                filePath = RaceConfig.TB_LOG_PATH + sdf.format(new Date(System.currentTimeMillis()));
+                break;
+            case RaceConfig.TMALL_PERSIST_BOLT_ID:
+                filePath = RaceConfig.TM_LOG_PATH + sdf.format(new Date(System.currentTimeMillis()));
+                break;
+        }
+        analyseResult = new AnalyseResult(filePath+".log");
         amountMap = new ConcurrentHashMap<>();
         this.currentTimeStamp = "started";
         amount = 0;
@@ -57,7 +67,9 @@ public class PersistBolt implements IBasicBolt, Serializable {
 
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) { // TODO review
+        LOG.info("+++++ " + context.getThisComponentId());
         String minuteTimeStamp;
+//        context.getZkCluster().
         try {
             // 因外在大概率上消息顺序是有序的,所以仅当时间戳的值改变后我们对当前的值进行持久化操作
 
@@ -66,7 +78,6 @@ public class PersistBolt implements IBasicBolt, Serializable {
             // 空指针异常并不是仅仅限于调用者为空，异常的null变量赋值也会导致空指针异常
             minuteTimeStamp = String.valueOf(input.getValue(0));
             double price = (double) input.getValue(1);
-
             if (!currentTimeStamp.equals(minuteTimeStamp)) {
                 if (currentTimeStamp.equals("started")) { // 初始化
                     currentTimeStamp = minuteTimeStamp;
@@ -76,7 +87,6 @@ public class PersistBolt implements IBasicBolt, Serializable {
                     amountMap.put(minuteTimeStamp,totalPrice);
                     tairOperator.write(prefix+currentTimeStamp, totalPrice);
                     LOG.info(prefix+currentTimeStamp + " : " + totalPrice);
-
                     amount = 0;
                     currentTimeStamp = minuteTimeStamp;
                 }

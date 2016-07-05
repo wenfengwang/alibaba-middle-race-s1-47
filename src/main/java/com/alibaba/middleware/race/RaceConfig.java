@@ -29,9 +29,9 @@ public class RaceConfig implements Serializable {
     public static final int  TairNamespace = 1;
 
     // result path
-    public static final String TaobaoPath = "";
-    public static final String TmallPath = "";
-    public static final String PaymentPaht = "";
+    public static final String TB_LOG_PATH = "E:\\mdw_log\\Tb_";
+    public static final String TM_LOG_PATH = "E:\\mdw_log\\Tm_";
+    public static final String PY_LOG_PATH = "E:\\mdw_log\\Py_";
 
     // ckeck duplicated
     public static final boolean CHECK_ORDER_DUPLICATED = false;
@@ -42,5 +42,14 @@ public class RaceConfig implements Serializable {
     public static final String TAOBAO_STREAM_ID = "TaoBao_Stream";
     public static final String TMALL_STREAM_ID = "Tmall_Stream";
     public static final String PAYMENT_STREAM_ID = "Payment_Stream";
+
+    public static final String TAOBAO_COUNT_BOLT_ID = "CountTaobao";
+    public static final String TAOBAO_PERSIST_BOLT_ID = "PerisistTaobao";
+    public static final String TMALL_COUNT_BOLT_ID = "CountTmall";
+    public static final String TMALL_PERSIST_BOLT_ID = "PerisistTmall";
+    public static final String RATIO_SPLIT_BOLT_ID = "splitPayment";
+    public static final String RATIO_COUNT_BOLT_ID = "CountPayment";
+    public static final String RATIO_PERSIST_BOLT_ID = "PersistRatio";
+
 
 }

@@ -34,6 +34,7 @@ public class Producer {
         final Semaphore semaphore = new Semaphore(0);
 
         for (int i = 0; i < count; i++) {
+//            System.out.println("*******");
             try {
                 final int platform = rand.nextInt(2);
                 if (platform == 0) {
@@ -104,6 +105,10 @@ public class Producer {
         Message endMsgPay = new Message(RaceConfig.MqPayTopic, zero);
 
         try {
+            System.out.println("TB: "+atomIntTb);
+            System.out.println("TM: "+atomIntTm);
+            System.out.println("PY: "+atomIntPy);
+
             producer.send(endMsgTB);
             producer.send(endMsgTM);
             producer.send(endMsgPay);

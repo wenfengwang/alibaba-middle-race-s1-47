@@ -182,14 +182,14 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
     private void sendTuple(MqTuple mqTuple) {
         mqTuple.updateEmitMs();
         switch (mqTuple.getMq().getTopic()) {
-            case RaceConfig.TAOBAO_STREAM_ID:
-                collector.emit(RaceConfig.TAOBAO_STREAM_ID,new Values(mqTuple), mqTuple.getCreateMs());
+            case RaceConfig.MqTaobaoTradeTopic:
+                collector.emit(RaceConfig.TAOBAO_STREAM_ID,new Values(mqTuple));//, mqTuple.getCreateMs());
                 break;
-            case RaceConfig.TMALL_STREAM_ID:
-                collector.emit(RaceConfig.TMALL_STREAM_ID,new Values(mqTuple), mqTuple.getCreateMs());
+            case RaceConfig.MqTmallTradeTopic:
+                collector.emit(RaceConfig.TMALL_STREAM_ID,new Values(mqTuple));//, mqTuple.getCreateMs());
                 break;
-            case RaceConfig.PAYMENT_STREAM_ID:
-                collector.emit(RaceConfig.PAYMENT_STREAM_ID,new Values(mqTuple), mqTuple.getCreateMs());
+            case RaceConfig.MqPayTopic:
+                collector.emit(RaceConfig.PAYMENT_STREAM_ID,new Values(mqTuple));//, mqTuple.getCreateMs());
                 break;
         }
     }

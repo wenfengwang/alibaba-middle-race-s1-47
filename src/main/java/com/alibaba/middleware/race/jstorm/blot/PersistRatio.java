@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,8 +45,10 @@ public class PersistRatio implements IBasicBolt, Serializable {
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
-        analyseResult = new AnalyseResult(RaceConfig.PaymentPaht);
-        ratioMap = new ConcurrentHashMap<Long, Ratio>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+        String filePath = RaceConfig.PY_LOG_PATH + sdf.format(new Date(System.currentTimeMillis()));
+        analyseResult = new AnalyseResult(filePath+".log");
+        ratioMap = new ConcurrentHashMap<>();
         tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr,RaceConfig.TairNamespace);
         currentTimeStamp = 0;
         endFlag = false;

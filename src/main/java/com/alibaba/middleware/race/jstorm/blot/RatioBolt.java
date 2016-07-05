@@ -62,8 +62,6 @@ public class RatioBolt implements IBasicBolt, Serializable {
             byte[] body;
             MessageExt msg;
             int size = list.size();
-            atomicInteger.addAndGet(size);
-            LOG.info("***** Payment Message Numbers: " + atomicInteger.get() + " *****");
 
             HashMap<Long,double[]> emitTuple = new HashMap<>();
             for (int i = 0; i < size; i++) {
@@ -73,6 +71,7 @@ public class RatioBolt implements IBasicBolt, Serializable {
                     emitTuple.put(-1l,new double[]{-1,-1});
                     continue;
                 }
+                atomicInteger.addAndGet(1);
                 PaymentMessage paymentMessage = RaceUtils.readKryoObject(PaymentMessage.class, body);
 
                 long timeStamp = sdf.parse(sdf.format(new Date(paymentMessage.getCreateTime()))).getTime()/1000;
@@ -104,6 +103,7 @@ public class RatioBolt implements IBasicBolt, Serializable {
                 node[paymentMessage.getPayPlatform()] += paymentMessage.getPayAmount();
                 emitTuple.put(timeStamp,node);
             }
+            LOG.info("***** Payment Message Numbers: " + atomicInteger.get() + " *****");
             collector.emit(new Values(emitTuple));
         } catch (Exception e) {
             e.printStackTrace();
