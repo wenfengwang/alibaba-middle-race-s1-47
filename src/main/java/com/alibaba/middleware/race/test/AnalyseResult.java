@@ -79,13 +79,13 @@ public class AnalyseResult {
 
     public void analyseTaobao() throws IOException, InterruptedException {
         Thread.sleep(5000);
-        BufferedWriter tb_bw_result = new BufferedWriter(new FileWriter(new File("E:\\mdw_data\\tb_result.txt")));
-        BufferedReader tb_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\complete\\tb_result.txt")));
+        BufferedReader tb_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\tb_result.txt")));
         HashMap<Long, Double> resutltMap = new HashMap<>();
         String result_str = tb_br.readLine();
         while (result_str!=null) {
             String[] result = result_str.split(",");
             resutltMap.put(Long.valueOf(result[0]), Double.valueOf(result[1]));
+            result_str = tb_br.readLine();
         }
 
         Set<Map.Entry<Long, Double>> tbEntrySet = resutltMap.entrySet();
@@ -115,13 +115,13 @@ public class AnalyseResult {
 
     public void analyseTmall() throws IOException, InterruptedException {
         Thread.sleep(5000);
-        BufferedWriter tm_bw_result = new BufferedWriter(new FileWriter(new File("E:\\mdw_data\\tm_result.txt")));
-        BufferedReader tb_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\complete\\tm_result.txt")));
+        BufferedReader tm_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\tm_result.txt")));
         HashMap<Long, Double> resutltMap = new HashMap<>();
-        String result_str = tb_br.readLine();
+        String result_str = tm_br.readLine();
         while (result_str!=null) {
             String[] result = result_str.split(",");
             resutltMap.put(Long.valueOf(result[0]), Double.valueOf(result[1]));
+            result_str = tm_br.readLine();
         }
 
         Set<Map.Entry<Long, Double>> tmEntrySet = resutltMap.entrySet();
@@ -151,13 +151,13 @@ public class AnalyseResult {
 
     public void analysePayment() throws IOException, InterruptedException {
         Thread.sleep(5000);
-        BufferedWriter py_bw_result = new BufferedWriter(new FileWriter(new File("E:\\mdw_data\\py_result.txt")));
-        BufferedReader tb_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\complete\\py_result.txt")));
+        BufferedReader py_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\py_result.txt")));
         HashMap<Long, double[]> resutltMap = new HashMap<>();
-        String result_str = tb_br.readLine();
+        String result_str = py_br.readLine();
         while (result_str!=null) {
             String[] result = result_str.split(",");
             resutltMap.put(Long.valueOf(result[0]), new double[]{Double.valueOf(result[1]),Double.valueOf(result[2])});
+            result_str = py_br.readLine();
         }
 
         double pcTotalPrice = 0;

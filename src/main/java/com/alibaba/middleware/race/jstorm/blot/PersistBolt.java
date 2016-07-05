@@ -82,10 +82,12 @@ public class PersistBolt implements IBasicBolt, Serializable {
                     amount += price;
                     amountMap.put(currentTimeStamp,amount);
                 } else {
-                    double totalPrice = amountMap.get(minuteTimeStamp) + amount;
-                    amountMap.put(minuteTimeStamp,totalPrice);
+                    Double totalPrice = amountMap.get(minuteTimeStamp);
+                    if (totalPrice == null) {
+                        totalPrice = 0.0;
+                    }
+                    amountMap.put(minuteTimeStamp,totalPrice + amount + price);
                     tairOperator.write(prefix+currentTimeStamp, totalPrice);
-                    LOG.info(prefix+currentTimeStamp + " : " + totalPrice);
                     currentTimeStamp = minuteTimeStamp;
                 }
                 amount = 0;
@@ -99,7 +101,6 @@ public class PersistBolt implements IBasicBolt, Serializable {
                 amountMap.put(minuteTimeStamp,totalPrice);
                 amount = 0;
                 tairOperator.write(prefix+minuteTimeStamp, totalPrice);
-                LOG.info(prefix+minuteTimeStamp + " : " + totalPrice);
             }
         } catch (Exception e) { // 收到结束信号后每次都进行持久化
             if ("end".equals(input.getValue(0)) && "end".equals(input.getValue(1))) {
@@ -117,7 +118,6 @@ public class PersistBolt implements IBasicBolt, Serializable {
                 amountMap.put(currentTimeStamp,totalPrice);
                 amount = 0;
                 tairOperator.write(prefix+currentTimeStamp, totalPrice);
-                LOG.info(prefix+currentTimeStamp + " : " +  amountMap.get(currentTimeStamp));
             }
         }
     }
