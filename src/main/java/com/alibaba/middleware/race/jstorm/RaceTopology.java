@@ -2,6 +2,7 @@ package com.alibaba.middleware.race.jstorm;
 
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
+import backtype.storm.StormSubmitter;
 import backtype.storm.generated.StormTopology;
 import backtype.storm.topology.TopologyBuilder;
 import com.alibaba.middleware.race.RaceConfig;
@@ -28,12 +29,12 @@ public class RaceTopology {
         tpConf.put(Config.TOPOLOGY_WORKERS, 4);
 
         try {
-//            StormSubmitter.submitTopology(RaceConfig.JstormTopologyName, tpConf, setBuilderWithPush);
-            LocalCluster localCluster = new LocalCluster();
-            localCluster.submitTopology(RaceConfig.JstormTopologyName, tpConf, setBuilderWithPush());
-            Thread.sleep(1000000);
-            localCluster.shutdown();
-            LOG.info("Topology submitted!!!!");
+            StormSubmitter.submitTopology(RaceConfig.JstormTopologyName, tpConf, setBuilderWithPush());
+//            LocalCluster localCluster = new LocalCluster();
+//            localCluster.submitTopology(RaceConfig.JstormTopologyName, tpConf, setBuilderWithPush());
+//            Thread.sleep(1000000);
+//            localCluster.shutdown();
+//            LOG.info("Topology submitted!!!!");
         } catch (Exception e) {
             e.printStackTrace();
         }

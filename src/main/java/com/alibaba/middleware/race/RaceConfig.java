@@ -29,10 +29,13 @@ public class RaceConfig implements Serializable {
     public static final int  TairNamespace = 1;
 
     // result path
-    public static final String TB_LOG_PATH = "E:\\mdw_log\\Tb_";
-    public static final String TM_LOG_PATH = "E:\\mdw_log\\Tm_";
-    public static final String PY_LOG_PATH = "E:\\mdw_log\\Py_";
+//    public static final String TB_LOG_PATH = "E:\\mdw_log\\Tb_";
+//    public static final String TM_LOG_PATH = "E:\\mdw_log\\Tm_";
+//    public static final String PY_LOG_PATH = "E:\\mdw_log\\Py_";
 
+    public static final String TB_LOG_PATH = "/home/dev/mdw_log/Tb_";
+    public static final String TM_LOG_PATH = "/home/dev/mdw_log/Tm_";
+    public static final String PY_LOG_PATH = "/home/dev/mdw_log/Py_";
     // ckeck duplicated
     public static final boolean CHECK_ORDER_DUPLICATED = false;
     public static final boolean CHECK_PAYMENT_DUPLICATED = false;
