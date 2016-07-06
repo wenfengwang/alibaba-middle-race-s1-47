@@ -45,6 +45,7 @@ public class FileProducer {
         String str = br.readLine();
         final String [] topics = new String[]{RaceConfig.MqTaobaoTradeTopic, RaceConfig.MqTmallTradeTopic};
         int count = 0;
+        double amount = 0.0;
         while (str != null) {
             String[] fileds = str.split(", ");
 
@@ -68,9 +69,10 @@ public class FileProducer {
 //                }
 //            });
             count++;
+            amount += orderMessage.getTotalPrice();
             str = br.readLine();
         }
-        System.out.println("***** " + topics[platform] + " : " + count + " *****");
+        System.out.println("***** " + topics[platform] + " : " + count + " *****; " +amount);
         byte [] zero = new  byte[]{0,0};
         Message endMsg = new Message(topics[platform], zero);
         producer.send(endMsg);

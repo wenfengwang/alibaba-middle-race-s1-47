@@ -122,7 +122,7 @@ public class AnalyseResult {
         float tmSuccess = 0;
         for (Map.Entry<Long, Double> entry : tmEntrySet) {
             long timeStamp = entry.getKey();
-            double tairTmallPrice = tairOperator.get(RaceConfig.prex_taobao+timeStamp) == null ? 0.0 :(double)  tairOperator.get(RaceConfig.prex_taobao+timeStamp) ;
+            double tairTmallPrice = tairOperator.get(RaceConfig.prex_tmall+timeStamp) == null ? 0.0 :(double)  tairOperator.get(RaceConfig.prex_tmall+timeStamp) ;
 
             String str;
             if (tairTmallPrice >= entry.getValue()*0.99 && tairTmallPrice <= entry.getValue()*1.01) {
