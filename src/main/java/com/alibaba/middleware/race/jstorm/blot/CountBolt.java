@@ -92,11 +92,11 @@ public class CountBolt implements IBasicBolt, Serializable {
                         }
                     }
                 }
-                if (RaceConfig.MqTaobaoTradeTopic.equals(topic)) {
-                    atomicIntegers[0].addAndGet(1);
-                } else if (RaceConfig.MqTmallTradeTopic.equals(topic)){
-                    atomicIntegers[1].addAndGet(1);
-                }
+//                if (RaceConfig.MqTaobaoTradeTopic.equals(topic)) {
+//                    atomicIntegers[0].addAndGet(1);
+//                } else if (RaceConfig.MqTmallTradeTopic.equals(topic)){
+//                    atomicIntegers[1].addAndGet(1);
+//                }
                 amount += order.getTotalPrice();
                 emitTuple.put(timeStamp,amount);
             }
