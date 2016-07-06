@@ -37,8 +37,6 @@ public class RatioBolt implements IBasicBolt, Serializable {
 
     private SimpleDateFormat sdf;
     private final static Object lockObj = new Object();
-    private long currentTime;
-    private double amount;
 
     private final boolean checkDuplicated = RaceConfig.CHECK_PAYMENT_DUPLICATED;
 
@@ -50,12 +48,12 @@ public class RatioBolt implements IBasicBolt, Serializable {
             }
         }
         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        currentTime = 0;
-        amount = 0;
     }
 
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) {
+        LOG.info("***** Executing Payment Messages... *****");
+
         try {
             MqTuple mqTuple = (MqTuple) input.getValue(0);
             List<MessageExt> list = mqTuple.getMsgList();
@@ -73,7 +71,6 @@ public class RatioBolt implements IBasicBolt, Serializable {
                 }
                 atomicInteger.addAndGet(1);
                 PaymentMessage paymentMessage = RaceUtils.readKryoObject(PaymentMessage.class, body);
-
                 long timeStamp = sdf.parse(sdf.format(new Date(paymentMessage.getCreateTime()))).getTime()/1000;
                 double[] node = emitTuple.get(timeStamp); // 0 PC 1 MOBILE
                 if (node == null) {
@@ -103,6 +100,7 @@ public class RatioBolt implements IBasicBolt, Serializable {
                 node[paymentMessage.getPayPlatform()] += paymentMessage.getPayAmount();
                 emitTuple.put(timeStamp,node);
             }
+//            LOG.info("***** Payment Message Numbers: " + atomicInteger.get() + " *****");
             collector.emit(new Values(emitTuple));
         } catch (Exception e) {
             e.printStackTrace();

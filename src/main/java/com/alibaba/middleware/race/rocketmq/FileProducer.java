@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class FileProducer {
     private static Random rand = new Random();
-    private static int count = 2000;
     private static final Object lockObj = new Object();
     private static DefaultMQProducer producer;
     public static AtomicInteger atomicInteger = new AtomicInteger(0);
@@ -45,8 +44,7 @@ public class FileProducer {
             throws IOException, RemotingException, MQClientException, InterruptedException, MQBrokerException {
         String str = br.readLine();
         final String [] topics = new String[]{RaceConfig.MqTaobaoTradeTopic, RaceConfig.MqTmallTradeTopic};
-
-
+        int count = 0;
         while (str != null) {
             String[] fileds = str.split(", ");
 
@@ -69,8 +67,10 @@ public class FileProducer {
 //                    throwable.printStackTrace();
 //                }
 //            });
+            count++;
             str = br.readLine();
         }
+        System.out.println("***** " + topics[platform] + " : " + count + " *****");
         byte [] zero = new  byte[]{0,0};
         Message endMsg = new Message(topics[platform], zero);
         producer.send(endMsg);
@@ -80,6 +80,7 @@ public class FileProducer {
         BufferedReader py_br_data = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + "py_data.txt")));
         String str = py_br_data.readLine();
 
+        int count = 0;
         while (str != null) {
             String[] fileds = str.split(", ");
 
@@ -100,8 +101,10 @@ public class FileProducer {
 //                    throwable.printStackTrace();
 //                }
 //            });
+            count++;
             str = py_br_data.readLine();
         }
+        System.out.println("***** " + RaceConfig.MqPayTopic + " : " + count + " *****");
         byte [] zero = new  byte[]{0,0};
         Message endMsg = new Message(RaceConfig.MqPayTopic, zero);
         producer.send(endMsg);

@@ -67,6 +67,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) {
         try {
+            // TODO 最后的持久化有问题  天猫的生成数据是不是有问题
             HashMap<Long, Double> tuple = (HashMap<Long, Double>) input.getValue(0);
             Set<Map.Entry<Long, Double>> entrySet = tuple.entrySet();
             for (Map.Entry<Long, Double> entry : entrySet) {
@@ -107,7 +108,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
                         amount = 0;
                         continue;
                     } else {
-                        amountMap.put(currentTimeStamp, totalPrice);  // 将当前值写入
+                        amountMap.put(currentTimeStamp, totalPrice);
                         tairOperator.write(prefix+currentTimeStamp, totalPrice);
                         currentTimeStamp = minuteTimeStamp;
                         amount = 0;
@@ -115,7 +116,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
                 }
                 amount += price;
             }
-        } catch (Exception e) { // 收到结束信号后每次都进行持久化
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

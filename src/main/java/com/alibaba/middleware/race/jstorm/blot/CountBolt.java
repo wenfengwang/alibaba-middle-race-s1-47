@@ -47,6 +47,7 @@ public class CountBolt implements IBasicBolt, Serializable {
 
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) {
+        LOG.info("***** Executing Order Messages... *****");
         try {
             MqTuple mqTuple = (MqTuple) input.getValue(0);
             List<MessageExt> list = mqTuple.getMsgList();
@@ -54,14 +55,16 @@ public class CountBolt implements IBasicBolt, Serializable {
             byte[] body;
             MessageExt msg;
             int size = list.size();
-
+//            if (atomicIntegers[0].get() >9900 || atomicIntegers[1].get() > 9900) {
+//                System.out.println("--------");
+//            }
             HashMap<Long, Double> emitTuple = new HashMap<>();
             for (int i = 0; i < size; i++) {
                 msg = list.get(i);
                 body = msg.getBody();
                 if (body.length == 2 && body[0] == 0 && body[1] == 0) {
                     emitTuple.put(-1l,-1.0);
-                    return;
+                    continue;
                 }
 
                 OrderMessage order = RaceUtils.readKryoObject(OrderMessage.class, body);
@@ -90,17 +93,20 @@ public class CountBolt implements IBasicBolt, Serializable {
                             orderIdSet.add(order.getOrderId());
                         }
                     }
-                    if (RaceConfig.MqTaobaoTradeTopic.equals(topic)) {
-                        atomicIntegers[0].addAndGet(1);
-                        LOG.info("***** Taobao Message Numbers: " + atomicIntegers[0].get() + " *****");
-                    } else if (RaceConfig.MqTmallTradeTopic.equals(topic)){
-                        atomicIntegers[1].addAndGet(1);
-                        LOG.info("***** Tmall Message Numbers: " + atomicIntegers[1].get() + " *****");
-                    }
+                }
+                if (RaceConfig.MqTaobaoTradeTopic.equals(topic)) {
+                    atomicIntegers[0].addAndGet(1);
+                } else if (RaceConfig.MqTmallTradeTopic.equals(topic)){
+                    atomicIntegers[1].addAndGet(1);
                 }
                 amount += order.getTotalPrice();
                 emitTuple.put(timeStamp,amount);
             }
+//            if (RaceConfig.MqTaobaoTradeTopic.equals(topic)) {
+//                LOG.info("***** Taobao Message Numbers: " + atomicIntegers[0].get() + " *****");
+//            } else if (RaceConfig.MqTmallTradeTopic.equals(topic)){
+//                LOG.info("***** Tmall Message Numbers: " + atomicIntegers[1].get() + " *****");
+//            }
             collector.emit(new Values(emitTuple));
         } catch (Exception e) {
             e.printStackTrace();

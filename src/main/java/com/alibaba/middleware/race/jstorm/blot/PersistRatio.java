@@ -107,10 +107,11 @@ public class PersistRatio implements IBasicBolt, Serializable {
         } while (ratioNode != null);
 
         if (endFlag) {
+            Ratio _ratio = ratioMap.get(minuteTimeStamp);
             do {
-                ratioNode.toTair(tairOperator);
-                ratioNode = ratioNode.getNextRtaio();
-            } while (ratioNode != null && ratioNode.toBeTair == true);
+                _ratio.toTair(tairOperator);
+                _ratio = _ratio.getNextRtaio();
+            } while (_ratio != null && _ratio.toBeTair == true);
             return;
         }
 
