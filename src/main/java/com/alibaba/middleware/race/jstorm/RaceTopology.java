@@ -29,12 +29,15 @@ public class RaceTopology {
         tpConf.put(Config.TOPOLOGY_WORKERS, 4);
 
         try {
-            StormSubmitter.submitTopology(RaceConfig.JstormTopologyName, tpConf, setBuilderWithPush());
-//            LocalCluster localCluster = new LocalCluster();
-//            localCluster.submitTopology(RaceConfig.JstormTopologyName, tpConf, setBuilderWithPush());
-//            Thread.sleep(1000000);
-//            localCluster.shutdown();
-//            LOG.info("Topology submitted!!!!");
+            if (RaceConfig.ONLINE) {
+                StormSubmitter.submitTopology(RaceConfig.JstormTopologyName, tpConf, setBuilderWithPush());
+            } else {
+                LocalCluster localCluster = new LocalCluster();
+                localCluster.submitTopology(RaceConfig.JstormTopologyName, tpConf, setBuilderWithPush());
+                Thread.sleep(1000000);
+                localCluster.shutdown();
+                LOG.info("Topology submitted!!!!");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -64,7 +67,8 @@ public class RaceTopology {
     public static StormTopology setBuilderWithPush() {
         HashMap<Object, Object> publicSpoutConfig = new HashMap();
         publicSpoutConfig.put(SpoutConfig.META_CONSUMER_GROUP, RaceConfig.MqConsumerGroup);
-        publicSpoutConfig.put(SpoutConfig.META_NAMESERVER,RaceConfig.MQNameServerAddr);
+        if (!RaceConfig.ONLINE)
+            publicSpoutConfig.put(SpoutConfig.META_NAMESERVER,RaceConfig.MQNameServerAddr);
 
         int spout_Parallelism_hint = 2;
         int bolt_Parallelism_hint = 2;

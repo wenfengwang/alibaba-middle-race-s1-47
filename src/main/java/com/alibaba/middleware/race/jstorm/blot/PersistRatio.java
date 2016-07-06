@@ -45,8 +45,10 @@ public class PersistRatio implements IBasicBolt, Serializable {
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
-        String filePath = RaceConfig.PY_LOG_PATH + sdf.format(new Date(System.currentTimeMillis()));
-        analyseResult = new AnalyseResult(filePath+".log");
+        if (!RaceConfig.ONLINE) {
+            String filePath = RaceConfig.PY_LOG_PATH + sdf.format(new Date(System.currentTimeMillis()));
+            analyseResult = new AnalyseResult(filePath+".log");
+        }
         ratioMap = new ConcurrentHashMap<>();
         tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr,RaceConfig.TairNamespace);
         currentTimeStamp = 0;
@@ -59,10 +61,12 @@ public class PersistRatio implements IBasicBolt, Serializable {
         long minuteTimeStamp = (Long) input.getValue(0);
         double[] amount = (double[]) input.getValue(1); // 0 PC 1 MOBILE
         if (minuteTimeStamp == -1 && amount[0] == -1 && amount[1] == -1 ) {
-            try {
-                analyseResult.analysePayment();
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (!RaceConfig.ONLINE) {
+                try {
+                    analyseResult.analysePayment();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             endFlag = true;
             return;

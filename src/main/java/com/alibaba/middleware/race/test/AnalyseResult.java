@@ -74,7 +74,7 @@ public class AnalyseResult {
 
     public void analyseTaobao() throws IOException, InterruptedException {
         Thread.sleep(5000);
-        BufferedReader tb_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\tb_result.txt")));
+        BufferedReader tb_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + "tb_result.txt")));
         HashMap<Long, Double> resutltMap = new HashMap<>();
         String result_str = tb_br.readLine();
         while (result_str!=null) {
@@ -110,7 +110,7 @@ public class AnalyseResult {
 
     public void analyseTmall() throws IOException, InterruptedException {
         Thread.sleep(5000);
-        BufferedReader tm_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\tm_result.txt")));
+        BufferedReader tm_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + "tm_result.txt")));
         HashMap<Long, Double> resutltMap = new HashMap<>();
         String result_str = tm_br.readLine();
         while (result_str!=null) {
@@ -146,7 +146,7 @@ public class AnalyseResult {
 
     public void analysePayment() throws IOException, InterruptedException {
         Thread.sleep(5000);
-        BufferedReader py_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\py_result.txt")));
+        BufferedReader py_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + "py_result.txt")));
         HashMap<Long, double[]> resutltMap = new HashMap<>();
         String result_str = py_br.readLine();
         while (result_str!=null) {

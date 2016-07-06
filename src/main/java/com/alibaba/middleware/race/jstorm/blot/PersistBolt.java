@@ -45,17 +45,19 @@ public class PersistBolt implements IBasicBolt, Serializable {
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
         this.context = context;
-        String filePath = "";
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
-        switch (context.getThisComponentId()) {
-            case RaceConfig.TAOBAO_PERSIST_BOLT_ID:
-                filePath = RaceConfig.TB_LOG_PATH + sdf.format(new Date(System.currentTimeMillis()));
-                break;
-            case RaceConfig.TMALL_PERSIST_BOLT_ID:
-                filePath = RaceConfig.TM_LOG_PATH + sdf.format(new Date(System.currentTimeMillis()));
-                break;
+        if (!RaceConfig.ONLINE) {
+            String filePath = "";
+            switch (context.getThisComponentId()) {
+                case RaceConfig.TAOBAO_PERSIST_BOLT_ID:
+                    filePath = RaceConfig.TB_LOG_PATH + sdf.format(new Date(System.currentTimeMillis()));
+                    break;
+                case RaceConfig.TMALL_PERSIST_BOLT_ID:
+                    filePath = RaceConfig.TM_LOG_PATH + sdf.format(new Date(System.currentTimeMillis()));
+                    break;
+            }
+            analyseResult = new AnalyseResult(filePath+".log");
         }
-        analyseResult = new AnalyseResult(filePath+".log");
         amountMap = new ConcurrentHashMap<>();
         this.currentTimeStamp = 0;
         amount = 0;
@@ -92,10 +94,12 @@ public class PersistBolt implements IBasicBolt, Serializable {
                         amountMap.put(currentTimeStamp, price);
                         continue;
                     } else if (minuteTimeStamp == -1 && price == -1) {
-                        if (context.getThisComponentId().equals(RaceConfig.TAOBAO_PERSIST_BOLT_ID)) {
-                            analyseResult.analyseTaobao();
-                        } else {
-                            analyseResult.analyseTmall();
+                        if (!RaceConfig.ONLINE) {
+                            if (context.getThisComponentId().equals(RaceConfig.TAOBAO_PERSIST_BOLT_ID)) {
+                                analyseResult.analyseTaobao();
+                            } else {
+                                analyseResult.analyseTmall();
+                            }
                         }
                         endFlag = true;
                         amountMap.put(currentTimeStamp, totalPrice);

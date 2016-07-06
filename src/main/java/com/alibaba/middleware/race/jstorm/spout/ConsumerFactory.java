@@ -96,7 +96,9 @@ public class ConsumerFactory {
     public static synchronized DefaultMQPullConsumer mkPullInstance(String topic) throws MQClientException {
         if (pullConsumer == null) {
             pullConsumer = new DefaultMQPullConsumer(RaceConfig.MqConsumerGroup);
-            pullConsumer.setNamesrvAddr(RaceConfig.MQNameServerAddr);
+            if (!RaceConfig.ONLINE)
+                pullConsumer.setNamesrvAddr(RaceConfig.MQNameServerAddr);
+
             pullConsumer.start();
             LOG.info("Successfully create pullConsumer");
         }

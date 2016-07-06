@@ -32,12 +32,12 @@ public class CreateData {
 
 
     public static void main(String[] args) throws MQClientException, InterruptedException, IOException {
-        BufferedWriter tb_bw_data = new BufferedWriter(new FileWriter(new File("E:\\mdw_data\\tb_data.txt")));
-        BufferedWriter tb_bw_result = new BufferedWriter(new FileWriter(new File("E:\\mdw_data\\tb_result.txt")));
-        BufferedWriter tm_bw_data = new BufferedWriter(new FileWriter(new File("E:\\mdw_data\\tm_data.txt")));
-        BufferedWriter tm_bw_result = new BufferedWriter(new FileWriter(new File("E:\\mdw_data\\tm_result.txt")));
-        BufferedWriter py_bw_data = new BufferedWriter(new FileWriter(new File("E:\\mdw_data\\py_data.txt")));
-        BufferedWriter py_bw_result = new BufferedWriter(new FileWriter(new File("E:\\mdw_data\\py_result.txt")));
+        BufferedWriter tb_bw_data = new BufferedWriter(new FileWriter(new File(RaceConfig.CREATE_DATA_PREFIX + "tb_data.txt")));
+        BufferedWriter tb_bw_result = new BufferedWriter(new FileWriter(new File(RaceConfig.CREATE_DATA_PREFIX + "tb_result.txt")));
+        BufferedWriter tm_bw_data = new BufferedWriter(new FileWriter(new File(RaceConfig.CREATE_DATA_PREFIX + "tm_data.txt")));
+        BufferedWriter tm_bw_result = new BufferedWriter(new FileWriter(new File(RaceConfig.CREATE_DATA_PREFIX + "tm_result.txt")));
+        BufferedWriter py_bw_data = new BufferedWriter(new FileWriter(new File(RaceConfig.CREATE_DATA_PREFIX + "py_data.txt")));
+        BufferedWriter py_bw_result = new BufferedWriter(new FileWriter(new File(RaceConfig.CREATE_DATA_PREFIX + "py_result.txt")));
 
 
         HashMap<Long, Double> tbMap = new HashMap<>();

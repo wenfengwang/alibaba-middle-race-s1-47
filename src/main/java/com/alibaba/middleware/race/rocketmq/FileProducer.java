@@ -77,8 +77,7 @@ public class FileProducer {
     }
 
     public void producePayment() throws IOException, RemotingException, MQClientException, InterruptedException, MQBrokerException {
-//        BufferedReader py_br_data = new BufferedReader(new FileReader(new File("E:\\mdw_data\\complete\\py_data.txt")));
-        BufferedReader py_br_data = new BufferedReader(new FileReader(new File("E:\\mdw_data\\py_data.txt")));
+        BufferedReader py_br_data = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + "py_data.txt")));
         String str = py_br_data.readLine();
 
         while (str != null) {
@@ -122,13 +121,11 @@ public class FileProducer {
                                 fp.producePayment();
                                 break;
                             case 2:
-//                                BufferedReader tb_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\complete\\tb_data.txt")));
-                                BufferedReader tb_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\tb_data.txt")));
+                                BufferedReader tb_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + "tb_data.txt")));
                                 fp.produceOrder(tb_br,0);
                                 break;
                             case 3:
-//                                BufferedReader tm_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\complete\\tm_data.txt")));
-                                BufferedReader tm_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\tm_data.txt")));
+                                BufferedReader tm_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + "tm_data.txt")));
                                 fp.produceOrder(tm_br,1);
                                 break;
                             default:
