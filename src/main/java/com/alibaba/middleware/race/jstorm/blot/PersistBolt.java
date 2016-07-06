@@ -13,9 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -29,17 +27,17 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PersistBolt implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(PersistBolt.class);
 
-    private Map<String, Double> amountMap;
+    private Map<Long, Double> amountMap;
     TairOperatorImpl tairOperator;
 
-    private volatile String currentTimeStamp;
+    private volatile long currentTimeStamp;
     private static volatile boolean endFlag = false;
     private double amount;
     private String prefix;
     private AnalyseResult analyseResult;
     private TopologyContext context;
-    public PersistBolt() {}
 
+    public PersistBolt() {}
     public PersistBolt(String prefix) {
         this.prefix = prefix;
     }
@@ -59,65 +57,62 @@ public class PersistBolt implements IBasicBolt, Serializable {
         }
         analyseResult = new AnalyseResult(filePath+".log");
         amountMap = new ConcurrentHashMap<>();
-        this.currentTimeStamp = "started";
+        this.currentTimeStamp = 0;
         amount = 0;
         tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr, RaceConfig.TairNamespace);
     }
 
     @Override
-    public void execute(Tuple input, BasicOutputCollector collector) { // TODO review
-        String minuteTimeStamp;
+    public void execute(Tuple input, BasicOutputCollector collector) {
         try {
-            // 因外在大概率上消息顺序是有序的,所以仅当时间戳的值改变后我们对当前的值进行持久化操作
+            HashMap<Long, Double> tuple = (HashMap<Long, Double>) input.getValue(0);
+            Set<Map.Entry<Long, Double>> entrySet = tuple.entrySet();
+            for (Map.Entry<Long, Double> entry : entrySet) {
+                long minuteTimeStamp = entry.getKey();
+                double price = entry.getValue();
 
-            // 为什么一直会抛出空指针异常 -> 因为当get找不到值的时候，会返回null，而等号的左边是double类型，不接受null，也不
-            // 自动转换，所以就抛出了空指针异常。
-            // 空指针异常并不是仅仅限于调用者为空，异常的null变量赋值也会导致空指针异常
-            minuteTimeStamp = String.valueOf(input.getValue(0));
-            double price = (double) input.getValue(1);
-            if (!currentTimeStamp.equals(minuteTimeStamp)) {
-                if (currentTimeStamp.equals("started")) { // 初始化
-                    currentTimeStamp = minuteTimeStamp;
-                    amount += price;
-                    amountMap.put(currentTimeStamp,amount);
-                } else {
-                    double totalPrice = amountMap.get(minuteTimeStamp) + amount;
+                if (endFlag) {
+                    // 这里面应该不会存在极端情况吧?
+                    Double totalPrice = amountMap.get(minuteTimeStamp); // 收到endflag的时候current相关的已被处理。
+                    if (totalPrice == null) {
+                        totalPrice = 0.0;
+                    }
+                    totalPrice += price;
                     amountMap.put(minuteTimeStamp,totalPrice);
-                    tairOperator.write(prefix+currentTimeStamp, totalPrice);
-                    LOG.info(prefix+currentTimeStamp + " : " + totalPrice);
-                    currentTimeStamp = minuteTimeStamp;
+                    tairOperator.write(prefix+minuteTimeStamp, totalPrice);
+                    continue;
                 }
-                amount = 0;
-                return;
-            }
 
-            amount += price;
-
-            if (endFlag) {
-                double totalPrice = amountMap.get(minuteTimeStamp) + amount;
-                amountMap.put(minuteTimeStamp,totalPrice);
-                amount = 0;
-                tairOperator.write(prefix+minuteTimeStamp, totalPrice);
-                LOG.info(prefix+minuteTimeStamp + " : " + totalPrice);
+                // 因外在大概率上消息顺序是有序的,所以仅当时间戳的值改变后我们对当前的值进行持久化操作
+                // 每次应该都是写current的时间戳
+                if (currentTimeStamp != minuteTimeStamp) {
+                    double totalPrice = amountMap.get(currentTimeStamp) == null ? amount : amountMap.get(currentTimeStamp) + amount;
+                    if (currentTimeStamp == 0 ) { // 初始化
+                        currentTimeStamp = minuteTimeStamp;
+                        amountMap.put(currentTimeStamp, price);
+                        continue;
+                    } else if (minuteTimeStamp == -1 && price == -1) {
+                        if (context.getThisComponentId().equals(RaceConfig.TAOBAO_PERSIST_BOLT_ID)) {
+                            analyseResult.analyseTaobao();
+                        } else {
+                            analyseResult.analyseTmall();
+                        }
+                        endFlag = true;
+                        amountMap.put(currentTimeStamp, totalPrice);
+                        tairOperator.write(prefix+currentTimeStamp, totalPrice);
+                        amount = 0;
+                        continue;
+                    } else {
+                        amountMap.put(currentTimeStamp, totalPrice);  // 将当前值写入
+                        tairOperator.write(prefix+currentTimeStamp, totalPrice);
+                        currentTimeStamp = minuteTimeStamp;
+                        amount = 0;
+                    }
+                }
+                amount += price;
             }
         } catch (Exception e) { // 收到结束信号后每次都进行持久化
-            if ("end".equals(input.getValue(0)) && "end".equals(input.getValue(1))) {
-                endFlag = true;
-                try {
-                    if (context.getThisComponentId().equals(RaceConfig.TAOBAO_PERSIST_BOLT_ID)) {
-                        analyseResult.analyseTaobao();
-                    } else {
-                        analyseResult.analyseTmall();
-                    }
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-                }
-                double totalPrice = amountMap.get(currentTimeStamp) + amount;
-                amountMap.put(currentTimeStamp,totalPrice);
-                amount = 0;
-                tairOperator.write(prefix+currentTimeStamp, totalPrice);
-                LOG.info(prefix+currentTimeStamp + " : " +  amountMap.get(currentTimeStamp));
-            }
+            e.printStackTrace();
         }
     }
 

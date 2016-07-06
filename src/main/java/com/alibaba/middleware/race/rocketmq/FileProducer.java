@@ -23,19 +23,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class FileProducer {
     private static Random rand = new Random();
     private static int count = 2000;
+    private static final Object lockObj = new Object();
     private static DefaultMQProducer producer;
     public static AtomicInteger atomicInteger = new AtomicInteger(0);
     public FileProducer() {
-        if (producer == null) {
-            producer = new DefaultMQProducer(RaceConfig.MqConsumerGroup);
-            producer.setNamesrvAddr("192.168.1.161:9876");
-            try {
-                producer.start();
-            } catch (MQClientException e) {
-                e.printStackTrace();
+        synchronized (lockObj) {
+            if (producer == null) {
+                producer = new DefaultMQProducer(RaceConfig.MqConsumerGroup);
+                producer.setNamesrvAddr("192.168.1.161:9876");
+                try {
+                    producer.start();
+                } catch (MQClientException e) {
+                    e.printStackTrace();
+                }
             }
+            atomicInteger.addAndGet(1);
         }
-        atomicInteger.addAndGet(1);
     }
 
     public void produceOrder(BufferedReader br, int platform)
@@ -74,7 +77,8 @@ public class FileProducer {
     }
 
     public void producePayment() throws IOException, RemotingException, MQClientException, InterruptedException, MQBrokerException {
-        BufferedReader py_br_data = new BufferedReader(new FileReader(new File("E:\\mdw_data\\complete\\py_data.txt")));
+//        BufferedReader py_br_data = new BufferedReader(new FileReader(new File("E:\\mdw_data\\complete\\py_data.txt")));
+        BufferedReader py_br_data = new BufferedReader(new FileReader(new File("E:\\mdw_data\\py_data.txt")));
         String str = py_br_data.readLine();
 
         while (str != null) {
@@ -106,7 +110,7 @@ public class FileProducer {
     public static void main(String[] args)
             throws MQClientException, InterruptedException, IOException, RemotingException, MQBrokerException {
         int count = 0;
-        while (count < 3) {
+        while (count++ < 3) {
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -118,12 +122,16 @@ public class FileProducer {
                                 fp.producePayment();
                                 break;
                             case 2:
-                                BufferedReader tb_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\complete\\tb_data.txt")));
+//                                BufferedReader tb_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\complete\\tb_data.txt")));
+                                BufferedReader tb_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\tb_data.txt")));
                                 fp.produceOrder(tb_br,0);
                                 break;
                             case 3:
-                                BufferedReader tm_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\complete\\tm_data.txt")));
+//                                BufferedReader tm_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\complete\\tm_data.txt")));
+                                BufferedReader tm_br = new BufferedReader(new FileReader(new File("E:\\mdw_data\\tm_data.txt")));
                                 fp.produceOrder(tm_br,1);
+                                break;
+                            default:
                                 break;
                         }
                     } catch (Exception e) {
