@@ -17,21 +17,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class MqTuple implements Serializable {
 
-    protected final List<MessageExt> msgList;
-    protected final MessageQueue mq;
+    protected List<MessageExt> msgList;
+    protected MessageQueue mq;
 
-    protected final AtomicInteger failureTimes;
-    protected final long createMs;
+    protected AtomicInteger failureTimes;
+    protected long createMs;
     protected long emitMs;
 
     protected transient CountDownLatch latch;
     protected transient boolean isSuccess;
 
     public MqTuple(){
-        msgList = null;;
-        mq = null;
-        failureTimes = new AtomicInteger(0);
-        createMs = System.currentTimeMillis();
     }
 
     public MqTuple(List<MessageExt> msgs) {
