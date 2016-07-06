@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by wangwenfeng on 5/31/16.
  */
-public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IAckValueSpout, IFailValueSpout {
+public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckValueSpout, IFailValueSpout {
     private static Logger LOG = LoggerFactory.getLogger(RaceSpout.class);
     private SpoutConfig mqClientConfig;
     private LinkedBlockingDeque<MqTuple> sendingQueue;
@@ -51,7 +51,7 @@ public class RaceSpout<T> implements IRichSpout, MessageListenerConcurrently, IA
         this.tpConf = conf;
         this.collector = collector;
         this.id = context.getThisComponentId() + ":" + context.getThisTaskId();
-        this.sendingQueue = new LinkedBlockingDeque<MqTuple>();
+        this.sendingQueue = new LinkedBlockingDeque<>();
 
         tpConf.putAll(spoutConf);
         mqClientConfig = SpoutConfig.mkInstance(conf);
