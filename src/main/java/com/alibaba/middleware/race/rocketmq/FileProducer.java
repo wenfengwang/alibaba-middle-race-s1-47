@@ -24,7 +24,7 @@ public class FileProducer {
     private static Random rand = new Random();
     private static final Object lockObj = new Object();
     private static DefaultMQProducer producer;
-    public static AtomicInteger atomicInteger = new AtomicInteger(0);
+    public static final AtomicInteger atomicInteger = new AtomicInteger(0);
     public FileProducer() {
         synchronized (lockObj) {
             if (producer == null) {
@@ -113,12 +113,11 @@ public class FileProducer {
             throws MQClientException, InterruptedException, IOException, RemotingException, MQBrokerException {
         int count = 0;
         while (count++ < 3) {
-            Thread thread = new Thread(new Runnable() {
+            new Thread(new Runnable() {
                 @Override
                 public void run() {
                     FileProducer fp = new FileProducer();
                     try {
-
                         switch (fp.atomicInteger.get()) {
                             case 1:
                                 fp.producePayment();
@@ -138,8 +137,8 @@ public class FileProducer {
                         e.printStackTrace();
                     }
                 }
-            });
-            thread.start();
+            }).start();
+            Thread.sleep(100);
         }
     }
 }

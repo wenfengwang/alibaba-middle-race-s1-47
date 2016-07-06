@@ -84,28 +84,26 @@ public class AnalyseResult {
         }
 
         Set<Map.Entry<Long, Double>> tbEntrySet = resutltMap.entrySet();
-        HashMap<Long, String> tbResultMap = new HashMap<>();
         int tbEntrySetSize = tbEntrySet.size();
         float tbSuccess = 0;
-        for (Map.Entry entry : tbEntrySet) {
-            long timeStamp = (long) entry.getKey();
+        for (Map.Entry<Long, Double> entry : tbEntrySet) {
+            long timeStamp = entry.getKey();
             double tairTaobaoPrice = tairOperator.get(RaceConfig.prex_taobao+timeStamp) == null ? 0.0 :(double)  tairOperator.get(RaceConfig.prex_taobao+timeStamp) ;
 
             String str;
-            if (tairTaobaoPrice == (double) entry.getValue()) {
+            if (tairTaobaoPrice >= entry.getValue()*0.99 && tairTaobaoPrice <= entry.getValue()*1.01) {
                 tbSuccess++;
-                str = RaceConfig.prex_taobao+timeStamp + ", Result: Success. Amount is " + String.valueOf(tairTaobaoPrice) + "\n";
+                str = RaceConfig.prex_taobao+timeStamp + ", Result: Success. Tair: " + tairTaobaoPrice +
+                                                                ", Producer: "+ entry.getValue() + "\n";
             } else {
                 str = RaceConfig.prex_taobao+timeStamp + ", Result: Failed. Tair: " + tairTaobaoPrice +
                                                                 ", Producer: "+ entry.getValue() + "\n";
             }
-            tbResultMap.put(timeStamp,str);
             bw.write(str);
         }
         bw.write("Taobao准确率: " + tbSuccess/tbEntrySetSize + "\n");
         bw.flush();
         bw.close();
-        System.out.println("Taobao准确率: " + tbSuccess/tbEntrySetSize);
     }
 
     public void analyseTmall() throws IOException, InterruptedException {
@@ -120,28 +118,26 @@ public class AnalyseResult {
         }
 
         Set<Map.Entry<Long, Double>> tmEntrySet = resutltMap.entrySet();
-        HashMap<Long, String> tmResultMap = new HashMap<>();
         int tmEntrySetSize = tmEntrySet.size();
         float tmSuccess = 0;
-        for (Map.Entry entry : tmEntrySet) {
-            long timeStamp = (long) entry.getKey();
-            double tairTaobaoPrice = tairOperator.get(RaceConfig.prex_taobao+timeStamp) == null ? 0.0 :(double)  tairOperator.get(RaceConfig.prex_taobao+timeStamp) ;
+        for (Map.Entry<Long, Double> entry : tmEntrySet) {
+            long timeStamp = entry.getKey();
+            double tairTmallPrice = tairOperator.get(RaceConfig.prex_taobao+timeStamp) == null ? 0.0 :(double)  tairOperator.get(RaceConfig.prex_taobao+timeStamp) ;
 
             String str;
-            if (tairTaobaoPrice == (double) entry.getValue()) {
+            if (tairTmallPrice >= entry.getValue()*0.99 && tairTmallPrice <= entry.getValue()*1.01) {
                 tmSuccess++;
-                str = RaceConfig.prex_tmall+timeStamp + ", Result: Success. Amount is " + String.valueOf(tairTaobaoPrice) + "\n";
+                str = RaceConfig.prex_tmall+timeStamp + ", Result: Success. Tair: " + tairTmallPrice +
+                                                            ", Producer: "+ entry.getValue() + "\n";
             } else {
-                str = RaceConfig.prex_tmall+timeStamp + ", Result: Failed. Tair: " + tairTaobaoPrice +
-                        ", Producer: "+ entry.getValue() + "\n";
+                str = RaceConfig.prex_tmall+timeStamp + ", Result: Failed. Tair: " + tairTmallPrice +
+                                                            ", Producer: "+ entry.getValue() + "\n";
             }
-            tmResultMap.put(timeStamp,str);
             bw.write(str);
         }
         bw.write("Tmall准确率: " + tmSuccess/tmEntrySetSize + "\n");
         bw.flush();
         bw.close();
-        System.out.println("Tmall准确率: " + tmSuccess/tmEntrySetSize);
     }
 
     public void analysePayment() throws IOException, InterruptedException {
@@ -168,12 +164,13 @@ public class AnalyseResult {
             moTotalPrice += entry.getValue()[1];
             double ratio = moTotalPrice/pcTotalPrice;
             String str;
-            if (tairRatio == ratio) {
+            if (tairRatio >= ratio*0.99 && tairRatio <= ratio*1.01) {
                 success++;
-                str = RaceConfig.prex_ratio+timeStamp + ", Result: Success. Ratio is " + tairRatio + "\n";
+                str = RaceConfig.prex_ratio+timeStamp + ", Result: Success. Tair: " + tairRatio +
+                                                            ", Producer: "+ ratio + "\n";
             } else {
                 str = RaceConfig.prex_ratio+timeStamp + ", Result: Failed. Tair: " + tairRatio +
-                        ", Producer: "+ ratio + "\n";
+                                                            ", Producer: "+ ratio + "\n";
             }
             ResultMap.put(timeStamp,str);
             bw.write(str);
@@ -181,7 +178,6 @@ public class AnalyseResult {
         bw.write("支付信息准确率: " + success/EntrySetSize + "\n");
         bw.flush();
         bw.close();
-        System.out.println("支付信息准确率: " + success/EntrySetSize);
     }
 
     public void startTime(){
