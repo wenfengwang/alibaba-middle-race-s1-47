@@ -127,17 +127,14 @@ public class CreateData {
         for (Map.Entry entry : tbEntrySet) {
             tb_bw_result.write(entry.getKey()+","+entry.getValue()+"\n");
         }
-        tb_bw_result.write("0,0");
 
         for (Map.Entry entry : tmEntrySet) {
             tm_bw_result.write(entry.getKey()+","+entry.getValue()+"\n");
         }
-        tm_bw_result.write("0,0");
 
         for (Map.Entry<Long,double[]> entry : pyEntrySet) {
             py_bw_result.write(entry.getKey()+","+entry.getValue()[0]+","+entry.getValue()[1]+","+entry.getValue()[1]/entry.getValue()[0]+"\n");
         }
-        py_bw_result.write("0,0,0");
         System.out.println(System.currentTimeMillis() - starttime);
 
         System.out.println("TB: "+atomIntTb);
