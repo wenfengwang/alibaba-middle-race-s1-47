@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 public class Ratio {
     private static Logger LOG = LoggerFactory.getLogger(RaceSpoutPull.class);
     private final long timeStamp; // 整分时间戳
-    private final String  prex;
+    private final String  key;
     private volatile double ratio; // 比值
     public volatile boolean toBeTair = false;
 
@@ -30,13 +30,12 @@ public class Ratio {
         this.currentPCAmount = 0;
         this.currentMobileAmount = 0;
         this.preRatio = preRatio;
-        prex = RaceConfig.prex_ratio + timeStamp;
+        key = RaceConfig.prex_ratio + timeStamp;
 
         if (preRatio == null) {
             PCAmount = 0;
             MobileAmount = 0;
             ratio = 0;
-            this.preRatio = null;
             this.nextRtaio = null;
             return;
         }
@@ -45,9 +44,8 @@ public class Ratio {
         ratio = preRatio.ratio;
 
         try {
-            // preRatio nextRatio肯定不为null
+            // preRatio nextRatio肯定不为null  调用这个构造方法的逻辑保证的
             this.nextRtaio = preRatio.getNextRtaio();
-            this.preRatio = preRatio;
             this.nextRtaio.setPreRatio(this);
             preRatio.setNextRtaio(this);
         } catch (Exception e) {
@@ -59,10 +57,10 @@ public class Ratio {
         this.timeStamp = timeStamp;
         this.currentPCAmount = 0;
         this.currentMobileAmount = 0;
-        prex = RaceConfig.prex_ratio + timeStamp;
+        key = RaceConfig.prex_ratio + timeStamp;
         switch (flag) {
             case 0:
-                this.ratio = 0;
+                this.ratio = 0; // TODO ratio在构造器里面设置不设置无所谓?
                 preRatio = null;
                 nextRtaio = ratio;
                 ratio.setPreRatio(this);
@@ -144,8 +142,8 @@ public class Ratio {
     }
 
     public void toTair(TairOperatorImpl tairOperator) {
-        tairOperator.write(prex,ratio);
-        LOG.info(prex+": "+ ratio);
+        tairOperator.write(key,ratio);
+        LOG.info(key+": "+ ratio);
         toBeTair = false;
     }
 

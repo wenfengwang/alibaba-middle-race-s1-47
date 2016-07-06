@@ -27,7 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * 然后判断前一个节点的nextRatio是否为空, 如果是, 则说明该节点是当前最后面一个节点, 不需要对已有的节点进行更新. 如果否, 用当前节点的nextRatio
  * 开始遍历, 将这个Tuple的的节点金额给后面的全部加上. 刷到Tair的策略是当minuteTimeStamp发生改变后进行刷盘, 并对nextRatio进行遍历.
  * 如果get到的Ratio不是null, 就需要开始对nextRatio进行遍历.
- * TODO 能不能有个任务队列来进行nextRatio的遍历?
  */
 public class PersistRatio implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(PersistRatio.class);
@@ -70,36 +69,31 @@ public class PersistRatio implements IBasicBolt, Serializable {
         }
 
         Ratio ratioNode = ratioMap.get(minuteTimeStamp);
-        ;
         if (ratioNode == null) {
             if (currentTimeStamp == 0) { // 0 init
                 ratioNode = new Ratio(minuteTimeStamp,null);
                 maxTimeStamp = minTimeStamp = currentTimeStamp = minuteTimeStamp;
                 headNode = tailNode = ratioNode;
-            } else if (minuteTimeStamp < minTimeStamp) {
-                //TODO 完善构造器
-                ratioNode = new Ratio(minuteTimeStamp,headNode,0); // flag 位，0是head节点 ，1是tair节点
+            } else if (minuteTimeStamp < minTimeStamp) { // TODO 存不存在相等为null的情况?
+                ratioNode = new Ratio(minuteTimeStamp,headNode,0); // flag 位，0是head节点 ，1是tail节点
                 minTimeStamp = minuteTimeStamp;
                 headNode = ratioNode;
             } else if (minuteTimeStamp > maxTimeStamp) {
-                ratioNode = new Ratio(minuteTimeStamp,tailNode,1); // flag 位，0是head节点 ，1是tair节点
+                ratioNode = new Ratio(minuteTimeStamp,tailNode,1); // flag 位，0是head节点 ，1是tail节点
                 maxTimeStamp = minuteTimeStamp;
                 tailNode = ratioNode;
             } else {
                 long preTimeStamp = minuteTimeStamp - 60;
-                Ratio preRatio = ratioMap.get(preTimeStamp);
-                do {
-                    if (preRatio == null) {
-                        preTimeStamp -= 60;
-                        preRatio = ratioMap.get(preTimeStamp);
-                    } else {
+                Ratio preRatio = null;
+                while (preRatio == null) {
+                    preRatio = ratioMap.get(preTimeStamp);
+                    if (preRatio != null) {
                         ratioNode = new Ratio(minuteTimeStamp,preRatio);
+                    } else {
+                        preTimeStamp -= 60;
                     }
-                } while (preRatio == null);
+                }
             }
-            if (ratioMap == null || /*minuteTimeStamp == null ||*/ ratioNode == null)
-                System.out.println();
-
             ratioMap.put(minuteTimeStamp,ratioNode);
         }
         do {
@@ -108,7 +102,15 @@ public class PersistRatio implements IBasicBolt, Serializable {
             ratioNode = ratioNode.getNextRtaio();
         } while (ratioNode != null);
 
-        if (minuteTimeStamp != currentTimeStamp || endFlag) {
+        if (endFlag) {
+            do {
+                ratioNode.toTair(tairOperator);
+                ratioNode = ratioNode.getNextRtaio();
+            } while (ratioNode != null && ratioNode.toBeTair == true);
+            return;
+        }
+
+        if (minuteTimeStamp != currentTimeStamp) {
             Ratio _ratio = ratioMap.get(currentTimeStamp);
             currentTimeStamp = minuteTimeStamp;
             do {

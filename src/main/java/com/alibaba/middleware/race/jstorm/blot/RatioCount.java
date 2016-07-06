@@ -27,46 +27,50 @@ import static com.twitter.chill.config.ReflectingInstantiator.prefix;
  */
 public class RatioCount implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(RatioCount.class);
-    private long currentTime;
+    private long currentTimeStamp;
     private double[] sumAmount;
     private boolean endFlag = false;
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
-        currentTime = 0;
+        currentTimeStamp = 0;
         sumAmount = new double[]{0,0};
     }
 
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) {
-        // 仅作切分
-        HashMap<Long, double[]> tuple = (HashMap<Long, double[]>) input.getValue(0);
+        try {
+            HashMap<Long, double[]> tuple = (HashMap<Long, double[]>) input.getValue(0);
+            Set<Map.Entry<Long,double[]>> entrySet = tuple.entrySet();
+            for (Map.Entry<Long, double[]> entry : entrySet) {
+                long minuteTimeStamp = entry.getKey();
+                double[] platFormPrice = entry.getValue();
 
-        Set<Map.Entry<Long,double[]>> entrySet = tuple.entrySet();
-        for (Map.Entry<Long, double[]> entry : entrySet) {
-            long minuteTimeStamp = entry.getKey();
-            if (currentTime == 0) {
-                currentTime = minuteTimeStamp;
-            }
-            double[] amount = entry.getValue();
-            if (minuteTimeStamp == -1 && amount[0] == -1 && amount[1] == -1 ) {
-                collector.emit(new Values(-1l,new double[]{-1,-1}));
-                endFlag = true;
-                return;
-            }
-            if (minuteTimeStamp != currentTime) {
+                if (endFlag) {
+                    collector.emit(new Values(minuteTimeStamp, platFormPrice));
+                    continue;
+                }
 
-                LOG.info(String.valueOf(minuteTimeStamp));
-                collector.emit(new Values(currentTime, sumAmount));
-                currentTime = minuteTimeStamp;
-                sumAmount[0] = sumAmount[1] = 0;
+                if (currentTimeStamp != minuteTimeStamp) {
+                    if (currentTimeStamp == 0) {
+                        currentTimeStamp = minuteTimeStamp;
+                        sumAmount = platFormPrice;
+                        continue;
+                    } else if (minuteTimeStamp == -1 && platFormPrice[0] == -1 && platFormPrice[1] == 0) {
+                        collector.emit(new Values(-1l,new double[]{-1,-1}));
+                        endFlag = true;
+                        continue;
+                    } else {
+                        collector.emit(new Values(currentTimeStamp, sumAmount));
+                        currentTimeStamp = minuteTimeStamp;
+                        sumAmount[0] = sumAmount[1] = 0;
+                    }
+                }
+                sumAmount[0] += platFormPrice[0];
+                sumAmount[1] += platFormPrice[1];
             }
-            sumAmount[0] += amount[0];
-            sumAmount[1] += amount[1];
-            if (endFlag) {
-                collector.emit(new Values(currentTime, sumAmount));
-                sumAmount[0] = sumAmount[1] = 0;
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

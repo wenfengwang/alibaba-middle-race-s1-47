@@ -83,7 +83,7 @@ public class RatioBolt implements IBasicBolt, Serializable {
 //                if (checkDuplicated) {
 //                    HashSet<Long> orderIdSet = paymentMap.get(timeStamp);
 //                    if (orderIdSet == null) { // 创建orderIdSet
-//                        synchronized (lockObj) { // TODO 测试多个bolt加锁性能和单个bolt不加锁性能差别
+//                        synchronized (lockObj) {
 //                            orderIdSet = paymentMap.get(timeStamp);
 //                            if (orderIdSet == null) {
 //                                orderIdSet = new HashSet<>();
