@@ -61,10 +61,9 @@ public class CountBolt implements IBasicBolt, Serializable {
             List<MessageExt> list = mqTuple.getMsgList();
             String topic = mqTuple.getMq().getTopic();
             byte[] body;
-            MessageExt msg;// TODO 测试下在for循环内部定义和外部定义的性能差别
+            MessageExt msg;
             int size = list.size();
 
-            // TODO 肯定是一个Tuple的 -> 肯定来自一个topic
             for (int i = 0; i < size; i++) {
                 msg = list.get(i);
                 body = msg.getBody();
@@ -81,7 +80,7 @@ public class CountBolt implements IBasicBolt, Serializable {
                 long timeStamp = sdf.parse(sdf.format(new Date(order.getCreateTime()))).getTime()/1000;
 
                 if (currentTime != timeStamp) {
-                    if (currentTime != 0) {
+                    if (currentTime != 0) { // 不是第一次进来
                         collector.emit(new Values(currentTime,amount));
                         amount = 0;
                     }
@@ -91,7 +90,7 @@ public class CountBolt implements IBasicBolt, Serializable {
                 if (checkDuplicated) {
                     HashSet<Long> orderIdSet = orderMap.get(timeStamp);
                     if (orderIdSet == null) { // 创建orderIdSet
-                        synchronized (lockObj) { // TODO 测试多个bolt加锁性能和单个bolt不加锁性能差别
+                        synchronized (lockObj) {
                             orderIdSet = orderMap.get(timeStamp);
                             if (orderIdSet == null) {
                                 orderIdSet = new HashSet<>();
@@ -133,7 +132,7 @@ public class CountBolt implements IBasicBolt, Serializable {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("createTime","totalPrice"));
+        declarer.declare(new Fields("timeStamp","totalPrice"));
     }
 
     @Override
