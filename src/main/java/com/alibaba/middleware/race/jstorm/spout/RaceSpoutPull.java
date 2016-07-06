@@ -17,6 +17,7 @@ import com.alibaba.rocketmq.common.message.MessageQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -90,7 +91,7 @@ public class RaceSpoutPull implements IRichSpout, IAckValueSpout, IFailValueSpou
 
                 switch (result.getPullStatus()) {
                     case FOUND:
-                        List<MessageExt> list = result.getMsgFoundList();
+                        ArrayList<MessageExt> list = (ArrayList<MessageExt>) result.getMsgFoundList();
                         MqTuple mqTuple = new MqTuple(list);
                         if (list == null || list.size() == 0) {
                             break;

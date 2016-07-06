@@ -29,7 +29,9 @@ public class RaceTopology {
         tpConf.put(Config.TOPOLOGY_WORKERS, 4);
 
         try {
-            if (!RaceConfig.TOPOLOGY_MODEL.equals("local")) {
+            String str = RaceConfig.TOPOLOGY_MODEL;
+            boolean a = RaceConfig.TOPOLOGY_MODEL.equals("local");
+            if (!RaceConfig.TOPOLOGY_MODEL.equals("cluster")) {
                 StormSubmitter.submitTopology(RaceConfig.JstormTopologyName, tpConf, setBuilderWithPush());
             } else {
                 LocalCluster localCluster = new LocalCluster();

@@ -7,6 +7,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class MqTuple implements Serializable {
 
-    protected List<MessageExt> msgList;
+    protected ArrayList<MessageExt> msgList;
     protected MessageQueue mq;
 
     protected AtomicInteger failureTimes;
@@ -30,7 +31,7 @@ public class MqTuple implements Serializable {
     public MqTuple(){
     }
 
-    public MqTuple(List<MessageExt> msgs) {
+    public MqTuple(ArrayList<MessageExt> msgs) {
         this.msgList = msgs;
         mq = null;
         createMs = System.currentTimeMillis();
@@ -39,7 +40,7 @@ public class MqTuple implements Serializable {
         isSuccess = false;
     }
 
-    public MqTuple(List<MessageExt> msgs, MessageQueue messageQueue) {
+    public MqTuple(ArrayList<MessageExt> msgs, MessageQueue messageQueue) {
         msgList = msgs;
         mq = messageQueue;
         createMs = System.currentTimeMillis();
