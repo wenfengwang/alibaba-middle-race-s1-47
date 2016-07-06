@@ -55,9 +55,7 @@ public class CountBolt implements IBasicBolt, Serializable {
             byte[] body;
             MessageExt msg;
             int size = list.size();
-//            if (atomicIntegers[0].get() >9900 || atomicIntegers[1].get() > 9900) {
-//                System.out.println("--------");
-//            }
+
             HashMap<Long, Double> emitTuple = new HashMap<>();
             for (int i = 0; i < size; i++) {
                 msg = list.get(i);

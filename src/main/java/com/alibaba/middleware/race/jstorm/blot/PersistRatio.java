@@ -10,6 +10,7 @@ import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 import com.alibaba.middleware.race.model.Ratio;
 import com.alibaba.middleware.race.test.AnalyseResult;
+import com.alibaba.middleware.race.test.AnalyseThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,6 @@ public class PersistRatio implements IBasicBolt, Serializable {
     private long minTimeStamp;
     private long maxTimeStamp;
     private TairOperatorImpl tairOperator;
-    private AnalyseResult analyseResult;
 
     private Ratio headNode;
     private Ratio tailNode;
@@ -44,11 +44,6 @@ public class PersistRatio implements IBasicBolt, Serializable {
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
-        if (!RaceConfig.ONLINE) {
-            String filePath = RaceConfig.PY_LOG_PATH + sdf.format(new Date(System.currentTimeMillis()));
-            analyseResult = new AnalyseResult(filePath+".log");
-        }
         ratioMap = new ConcurrentHashMap<>();
         tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr,RaceConfig.TairNamespace);
         currentTimeStamp = 0;
@@ -63,7 +58,7 @@ public class PersistRatio implements IBasicBolt, Serializable {
         if (minuteTimeStamp == -1 && amount[0] == -1 && amount[1] == -1 ) {
             if (!RaceConfig.ONLINE) {
                 try {
-                    analyseResult.analysePayment();
+                    new Thread(new AnalyseThread(RaceConfig.PY_LOG_PATH,3)).start();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

@@ -8,6 +8,7 @@ import backtype.storm.tuple.Tuple;
 import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 import com.alibaba.middleware.race.test.AnalyseResult;
+import com.alibaba.middleware.race.test.AnalyseThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,9 +98,9 @@ public class PersistBolt implements IBasicBolt, Serializable {
                     } else if (minuteTimeStamp == -1 && price == -1) {
                         if (!RaceConfig.ONLINE) {
                             if (context.getThisComponentId().equals(RaceConfig.TAOBAO_PERSIST_BOLT_ID)) {
-                                analyseResult.analyseTaobao();
+                                new Thread(new AnalyseThread(RaceConfig.TB_LOG_PATH,1)).start();
                             } else {
-                                analyseResult.analyseTmall();
+                                new Thread(new AnalyseThread(RaceConfig.TM_LOG_PATH,2)).start();
                             }
                         }
                         endFlag = true;
