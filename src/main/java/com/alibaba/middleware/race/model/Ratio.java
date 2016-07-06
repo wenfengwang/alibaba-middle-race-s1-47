@@ -142,9 +142,11 @@ public class Ratio {
     }
 
     public void toTair(TairOperatorImpl tairOperator) {
+      if (toBeTair) {
         tairOperator.write(key,ratio);
         LOG.info(key+": "+ ratio);
         toBeTair = false;
+      }
     }
 
 }
