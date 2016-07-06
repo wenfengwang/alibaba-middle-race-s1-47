@@ -28,11 +28,12 @@ public class MqTuple implements Serializable {
     protected transient boolean isSuccess;
 
     public MqTuple(){
-        msgList = null;
+        msgList = null;;
         mq = null;
         failureTimes = new AtomicInteger(0);
         createMs = System.currentTimeMillis();
     }
+
     public MqTuple(List<MessageExt> msgs) {
         this.msgList = msgs;
         mq = null;

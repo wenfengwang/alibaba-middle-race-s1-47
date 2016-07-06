@@ -7,7 +7,7 @@ import java.util.List;
 public class RaceConfig implements Serializable {
     public static final String TeamCode = "373058h4iq";
 
-    public static final boolean ONLINE = false;
+    public static final boolean ONLINE = true;
 
     // jstorm
     public static final String JstormTopologyName = "373058h4iq";

@@ -74,7 +74,6 @@ public class PersistBolt implements IBasicBolt, Serializable {
             for (Map.Entry<Long, Double> entry : entrySet) {
                 long minuteTimeStamp = entry.getKey();
                 double price = entry.getValue();
-
                 if (endFlag) {
                     // 这里面应该不会存在极端情况吧?
                     Double totalPrice = amountMap.get(minuteTimeStamp); // 收到endflag的时候current相关的已被处理。

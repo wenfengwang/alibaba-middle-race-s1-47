@@ -52,7 +52,7 @@ public class RatioBolt implements IBasicBolt, Serializable {
 
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) {
-        LOG.info("***** Executing Payment Messages... *****");
+//        LOG.info("***** Executing Payment Messages... *****");
 
         try {
             MqTuple mqTuple = (MqTuple) input.getValue(0);

@@ -63,6 +63,11 @@ public class PersistRatio implements IBasicBolt, Serializable {
                     e.printStackTrace();
                 }
             }
+            Ratio _ratio = ratioMap.get(currentTimeStamp);
+            do {
+                _ratio.toTair(tairOperator);
+                _ratio = _ratio.getNextRtaio();
+            } while (_ratio != null && _ratio.toBeTair == true);
             endFlag = true;
             return;
         }
@@ -101,22 +106,13 @@ public class PersistRatio implements IBasicBolt, Serializable {
             ratioNode = ratioNode.getNextRtaio();
         } while (ratioNode != null);
 
-        if (endFlag) {
-            Ratio _ratio = ratioMap.get(minuteTimeStamp);
+        if (minuteTimeStamp != currentTimeStamp || endFlag) {
+            Ratio _ratio = endFlag ? ratioMap.get(minuteTimeStamp) : ratioMap.get(currentTimeStamp);
             do {
                 _ratio.toTair(tairOperator);
                 _ratio = _ratio.getNextRtaio();
             } while (_ratio != null && _ratio.toBeTair == true);
-            return;
-        }
-
-        if (minuteTimeStamp != currentTimeStamp) {
-            Ratio _ratio = ratioMap.get(currentTimeStamp);
             currentTimeStamp = minuteTimeStamp;
-            do {
-                _ratio.toTair(tairOperator);
-                _ratio = _ratio.getNextRtaio();
-            } while (_ratio != null && _ratio.toBeTair == true);
         }
     }
 
