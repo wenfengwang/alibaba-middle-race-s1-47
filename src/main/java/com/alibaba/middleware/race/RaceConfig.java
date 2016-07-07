@@ -8,13 +8,13 @@ public class RaceConfig implements Serializable {
     public static final String TeamCode = "373058h4iq";
 
     public static final boolean ONLINE = false;
-    public static final String TOPOLOGY_MODEL = "local";
+    public static final String TOPOLOGY_MODEL = "cluster";
 
     // jstorm
     public static final String JstormTopologyName = "373058h4iq";
 
     // Rocketmq
-//    public static final String MQNameServerAddr = "192.168.1.161:9876";
+    public static final String MQNameServerAddr = "192.168.1.161:9876";
     public static final String MqConsumerGroup = "373058h4iq";
     public static final String MqPayTopic = "MiddlewareRaceTestData_Pay";
     public static final String MqTmallTradeTopic = "MiddlewareRaceTestData_TMOrder";

@@ -49,7 +49,9 @@ public class ConsumerFactory {
 
         consumer = new DefaultMQPushConsumer(config.getConsumerGroup());
 
-        consumer.setNamesrvAddr(config.getNameServer());
+        if (!RaceConfig.ONLINE) {
+            consumer.setNamesrvAddr(config.getNameServer());
+        }
 
         String instanceName = groupId +"@" +	JStormUtils.process_pid();
         consumer.setInstanceName(instanceName);
