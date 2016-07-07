@@ -1,10 +1,14 @@
 package com.alibaba.middleware.race.Tair;
 
 import com.alibaba.middleware.race.RaceConfig;
+import com.alibaba.middleware.race.RaceUtils;
+import com.alibaba.middleware.race.jstorm.blot.PersistRatio;
 import com.taobao.tair.DataEntry;
 import com.taobao.tair.Result;
 import com.taobao.tair.ResultCode;
 import com.taobao.tair.impl.DefaultTairManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.List;
@@ -16,7 +20,7 @@ import java.util.List;
  */
 public class TairOperatorImpl implements Serializable {
     public static int nameSpace;
-
+    private static Logger LOG = LoggerFactory.getLogger(TairOperatorImpl.class);
     DefaultTairManager tairManager = new DefaultTairManager();
 
     public TairOperatorImpl(List confServers, int nameSpace) {
@@ -27,8 +31,10 @@ public class TairOperatorImpl implements Serializable {
     }
 
     public boolean write(Serializable key, Serializable value) {
-        ResultCode result = tairManager.put(nameSpace, key, value);
-//        ResultCode result = tairManager.put(nameSpace,key,value,0,100000);
+
+
+        LOG.warn("Tair: " + key +", " + RaceUtils.round((double) value));
+        ResultCode result = tairManager.put(nameSpace, key, RaceUtils.round((double) value));
         return result.isSuccess();
     }
 

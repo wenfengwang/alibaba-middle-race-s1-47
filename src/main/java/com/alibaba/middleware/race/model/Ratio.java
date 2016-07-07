@@ -136,6 +136,8 @@ public class Ratio {
         tairOperator.write(key,ratio);
         LOG.info(key+": "+ ratio);
         toBeTair = false;
+      } else {
+          LOG.warn("Ratio to be Tair error.");
       }
     }
 
