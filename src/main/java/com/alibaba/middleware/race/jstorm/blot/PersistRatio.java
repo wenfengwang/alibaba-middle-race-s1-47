@@ -65,6 +65,7 @@ public class PersistRatio implements IBasicBolt, Serializable {
             }
             Ratio _ratio = ratioMap.get(currentTimeStamp);
             do {
+                // TODO 线上环境爆空指针异常
                 _ratio.toTair(tairOperator);
                 _ratio = _ratio.getNextRtaio();
             } while (_ratio != null && _ratio.toBeTair == true);

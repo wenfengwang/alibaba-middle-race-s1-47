@@ -7,7 +7,7 @@ import java.util.List;
 public class RaceConfig implements Serializable {
     public static final String TeamCode = "373058h4iq";
 
-    public static final boolean ONLINE = false;
+    public static final boolean ONLINE = true;
     public static final String TOPOLOGY_MODEL = "cluster";
 
     // jstorm
@@ -26,10 +26,10 @@ public class RaceConfig implements Serializable {
     public static final String prex_taobao = "platformTaobao_" + TeamCode + "_";
     public static final String prex_ratio = "ratio_" + TeamCode + "_";
 
-    //    public static final int TairNamespace = 19542;
-//    public static final List<String> TairServerAddr = Arrays.asList(new String[]{"10.101.72.127:5198","10.101.72.129:5198"});
-    public static final List<String> TairServerAddr = Arrays.asList(new String[]{"192.168.1.161:5198"});
-    public static final int  TairNamespace = 1;
+    public static final int TairNamespace = 19542;
+    public static final List<String> TairServerAddr = Arrays.asList(new String[]{"10.101.72.127:5198","10.101.72.129:5198"});
+//    public static final List<String> TairServerAddr = Arrays.asList(new String[]{"192.168.1.161:5198"});
+//    public static final int  TairNamespace = 1;
 
 
 //    result path

@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Producer {
 
     private static Random rand = new Random();
-    private static int count = 2000;
+    private static int count = 200000000;
     private static AtomicInteger atomIntTb = new AtomicInteger(0);
     private static AtomicInteger atomIntTm = new AtomicInteger(0);
     private static AtomicInteger atomIntPy = new AtomicInteger(0);
