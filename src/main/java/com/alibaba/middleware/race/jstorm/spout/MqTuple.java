@@ -18,8 +18,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class MqTuple implements Serializable {
 
-    protected ArrayList<MessageExt> msgList;
-    protected MessageQueue mq;
+    protected ArrayList<byte[]> msgList;
+    protected String topic;
 
     protected AtomicInteger failureTimes;
     protected long createMs;
@@ -31,18 +31,9 @@ public class MqTuple implements Serializable {
     public MqTuple(){
     }
 
-    public MqTuple(ArrayList<MessageExt> msgs) {
+    public MqTuple(ArrayList<byte[]> msgs, String topic) {
         this.msgList = msgs;
-        mq = null;
-        createMs = System.currentTimeMillis();
-        failureTimes = new AtomicInteger(0);
-        latch = new CountDownLatch(1);
-        isSuccess = false;
-    }
-
-    public MqTuple(ArrayList<MessageExt> msgs, MessageQueue messageQueue) {
-        msgList = msgs;
-        mq = messageQueue;
+        this.topic = topic;
         createMs = System.currentTimeMillis();
         failureTimes = new AtomicInteger(0);
         latch = new CountDownLatch(1);
@@ -57,8 +48,8 @@ public class MqTuple implements Serializable {
         return failureTimes;
     }
 
-    public MessageQueue getMq() {
-        return mq;
+    public String getTopic() {
+        return topic;
     }
 
     public void done() {
@@ -83,7 +74,7 @@ public class MqTuple implements Serializable {
         return emitMs;
     }
 
-    public List<MessageExt> getMsgList() {
+    public List<byte[]> getMsgList() {
         return msgList;
     }
 

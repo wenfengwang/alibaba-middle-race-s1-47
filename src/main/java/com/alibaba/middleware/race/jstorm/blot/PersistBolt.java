@@ -35,7 +35,6 @@ public class PersistBolt implements IBasicBolt, Serializable {
     private static volatile boolean endFlag = false;
     private double amount;
     private String prefix;
-    private AnalyseResult analyseResult;
     private TopologyContext context;
 
     public PersistBolt() {}
@@ -46,19 +45,6 @@ public class PersistBolt implements IBasicBolt, Serializable {
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
         this.context = context;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
-        if (!RaceConfig.ONLINE) {
-            String filePath = "";
-            switch (context.getThisComponentId()) {
-                case RaceConfig.TAOBAO_PERSIST_BOLT_ID:
-                    filePath = RaceConfig.TB_LOG_PATH + sdf.format(new Date(System.currentTimeMillis()));
-                    break;
-                case RaceConfig.TMALL_PERSIST_BOLT_ID:
-                    filePath = RaceConfig.TM_LOG_PATH + sdf.format(new Date(System.currentTimeMillis()));
-                    break;
-            }
-            analyseResult = new AnalyseResult(filePath+".log");
-        }
         amountMap = new ConcurrentHashMap<>();
         this.currentTimeStamp = 0;
         amount = 0;

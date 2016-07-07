@@ -128,7 +128,11 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
     @Override
     public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
         try {
-            MqTuple mqTuple = new MqTuple(new ArrayList<>(msgs), context.getMessageQueue());
+            ArrayList<byte[]> emitList = new ArrayList<>();
+            for (int i = 0; i < msgs.size();i++) {
+                emitList.add(msgs.get(i).getBody());
+            }
+            MqTuple mqTuple = new MqTuple(emitList, context.getMessageQueue().getTopic());
             if (flowControl) {
                 sendingQueue.offer(mqTuple);
             } else {
@@ -168,7 +172,7 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
 
 
         if (failNum > mqClientConfig.getMaxFailTimes()) {
-            LOG.warn("Message " + mqTuple.getMq() + " fail times " + failNum);
+            LOG.warn("Message " + mqTuple.getTopic() + ": " + mqTuple.createMs + " fail times " + failNum);
             finishTuple(mqTuple);
             return;
         }
@@ -181,7 +185,7 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
     }
     private void sendTuple(MqTuple mqTuple) {
         mqTuple.updateEmitMs();
-        switch (mqTuple.getMq().getTopic()) {
+        switch (mqTuple.getTopic()) {
             case RaceConfig.MqTaobaoTradeTopic:
                 collector.emit(RaceConfig.TAOBAO_STREAM_ID,new Values(mqTuple));//, mqTuple.getCreateMs());
                 break;

@@ -15,7 +15,6 @@ import java.util.Set;
 public class AnalyseResult {
 
     private final TairOperatorImpl tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr, RaceConfig.TairNamespace);
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     private BufferedWriter bw;
     private volatile static long startTime = 0;
 

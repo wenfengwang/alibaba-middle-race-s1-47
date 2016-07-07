@@ -26,7 +26,6 @@ public class CreateData {
     private static AtomicInteger atomIntTb = new AtomicInteger(0);
     private static AtomicInteger atomIntTm = new AtomicInteger(0);
     private static AtomicInteger atomIntPy = new AtomicInteger(0);
-    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
 
 
@@ -61,7 +60,7 @@ public class CreateData {
                     orderMessage.setCreateTime(System.currentTimeMillis());
                     PaymentMessage[] paymentMessages = PaymentMessage.createPayMentMsg(orderMessage);
 
-                    long timeStamp = sdf.parse(sdf.format(new Date(orderMessage.getCreateTime()))).getTime()/1000;
+                    long timeStamp = RaceUtils.toMinuteTimeStamp(orderMessage.getCreateTime());
                     if (platform == 0) {
                         Double totalPrice = tbMap.get(timeStamp);
                         tb_bw_data.write(orderMessage.toString().split("([{|}])")[1] + "\n");
@@ -84,7 +83,7 @@ public class CreateData {
 
                     double amount = 0;
                     for (final PaymentMessage paymentMessage : paymentMessages) {
-                        timeStamp = sdf.parse(sdf.format(new Date(paymentMessage.getCreateTime()))).getTime()/1000;
+                        timeStamp = RaceUtils.toMinuteTimeStamp(paymentMessage.getCreateTime());
                         double[] amounts = pyMap.get(timeStamp);
                         if (amounts == null) {
                             amounts = new double[]{0,0};

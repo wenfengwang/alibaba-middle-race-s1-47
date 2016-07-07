@@ -29,7 +29,6 @@ public class CountBolt implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(CountBolt.class);
 
     private static ConcurrentHashMap<Long,HashSet<Long>> orderMap;
-    private SimpleDateFormat sdf;
     private final static AtomicInteger[] atomicIntegers = new AtomicInteger[]{new AtomicInteger(0),new AtomicInteger(0)};
     private final static Object lockObj = new Object();
 
@@ -42,7 +41,6 @@ public class CountBolt implements IBasicBolt, Serializable {
                orderMap = new ConcurrentHashMap<>();
             }
         }
-        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     }
 
     @Override
@@ -50,23 +48,21 @@ public class CountBolt implements IBasicBolt, Serializable {
         LOG.info("***** Executing Order Messages... *****");
         try {
             MqTuple mqTuple = (MqTuple) input.getValue(0);
-            List<MessageExt> list = mqTuple.getMsgList();
-            String topic = mqTuple.getMq().getTopic();
+            List<byte[]> list = mqTuple.getMsgList();
+            String topic = mqTuple.getTopic();
             byte[] body;
-            MessageExt msg;
             int size = list.size();
 
             HashMap<Long, Double> emitTuple = new HashMap<>();
             for (int i = 0; i < size; i++) {
-                msg = list.get(i);
-                body = msg.getBody();
+                body = list.get(i);
                 if (body.length == 2 && body[0] == 0 && body[1] == 0) {
                     emitTuple.put(-1l,-1.0);
                     continue;
                 }
 
                 OrderMessage order = RaceUtils.readKryoObject(OrderMessage.class, body);
-                long timeStamp = sdf.parse(sdf.format(new Date(order.getCreateTime()))).getTime()/1000;
+                long timeStamp = RaceUtils.toMinuteTimeStamp(order.getCreateTime());
                 Double amount = emitTuple.get(timeStamp);
                 if (amount == null) {
                     amount = 0.0;

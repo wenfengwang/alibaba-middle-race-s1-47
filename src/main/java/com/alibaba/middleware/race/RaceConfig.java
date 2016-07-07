@@ -34,16 +34,16 @@ public class RaceConfig implements Serializable {
 
 //    result path
 
-    public static final String TM_LOG_PATH = "E:\\mdw_log\\Tm_";
-    public static final String TB_LOG_PATH = "E:\\mdw_log\\Tb_";
-    public static final String PY_LOG_PATH = "E:\\mdw_log\\Py_";
+//    public static final String TM_LOG_PATH = "E:\\mdw_log\\Tm_";
+//    public static final String TB_LOG_PATH = "E:\\mdw_log\\Tb_";
+//    public static final String PY_LOG_PATH = "E:\\mdw_log\\Py_";
 
     public static final String CREATE_DATA_PREFIX = "E:\\mdw_data\\";
     public static final String FILE_PRODUCER_SOURCE_PREFIX = "E:\\mdw_data\\";
 
-//    public static final String TB_LOG_PATH = "/home/dev/mdw_log/Tb_";
-//    public static final String TM_LOG_PATH = "/home/dev/mdw_log/Tm_";
-//    public static final String PY_LOG_PATH = "/home/dev/mdw_log/Py_";
+    public static final String TB_LOG_PATH = "/home/dev/mdw_log/Tb_";
+    public static final String TM_LOG_PATH = "/home/dev/mdw_log/Tm_";
+    public static final String PY_LOG_PATH = "/home/dev/mdw_log/Py_";
 
     // ckeck duplicated
     public static final boolean CHECK_ORDER_DUPLICATED = false;

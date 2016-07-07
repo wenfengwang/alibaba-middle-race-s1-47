@@ -21,10 +21,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by sxian.wang on 2016/7/5.
  */
 public class FileProducer {
-    private static Random rand = new Random();
     private static final Object lockObj = new Object();
     private static DefaultMQProducer producer;
-    public static final AtomicInteger atomicInteger = new AtomicInteger(0);
+
     public FileProducer() {
         synchronized (lockObj) {
             if (producer == null) {
@@ -36,7 +35,6 @@ public class FileProducer {
                     e.printStackTrace();
                 }
             }
-            atomicInteger.addAndGet(1);
         }
     }
 
@@ -114,33 +112,41 @@ public class FileProducer {
     public static void main(String[] args)
             throws MQClientException, InterruptedException, IOException, RemotingException, MQBrokerException {
         int count = 0;
-        while (count++ < 3) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    FileProducer fp = new FileProducer();
-                    try {
-                        switch (fp.atomicInteger.get()) {
-                            case 1:
-                                fp.producePayment();
-                                break;
-                            case 2:
-                                BufferedReader tb_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + "tb_data.txt")));
-                                fp.produceOrder(tb_br,0);
-                                break;
-                            case 3:
-                                BufferedReader tm_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + "tm_data.txt")));
-                                fp.produceOrder(tm_br,1);
-                                break;
-                            default:
-                                break;
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                FileProducer fp = new FileProducer();
+                fp.producePayment();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            }).start();
-            Thread.sleep(100);
-        }
+            }
+        }).start();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    FileProducer fp = new FileProducer();
+                    BufferedReader tb_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + "tb_data.txt")));
+                    fp.produceOrder(tb_br,0);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    FileProducer fp = new FileProducer();
+                    BufferedReader tm_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + "tm_data.txt")));
+                    fp.produceOrder(tm_br,1);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 }

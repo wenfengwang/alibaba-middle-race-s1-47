@@ -41,4 +41,8 @@ public class RaceUtils {
         return null;
     }
 
+    public static long toMinuteTimeStamp(long timeStamp) {
+        return  (timeStamp / 1000 / 60) * 60;
+    }
+
 }

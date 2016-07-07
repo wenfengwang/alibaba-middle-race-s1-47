@@ -35,7 +35,6 @@ public class RatioBolt implements IBasicBolt, Serializable {
     private static ConcurrentHashMap<Long,HashSet<Long>> paymentMap;
     private final static AtomicInteger atomicInteger = new AtomicInteger(0);
 
-    private SimpleDateFormat sdf;
     private final static Object lockObj = new Object();
 
     private final boolean checkDuplicated = RaceConfig.CHECK_PAYMENT_DUPLICATED;
@@ -47,7 +46,6 @@ public class RatioBolt implements IBasicBolt, Serializable {
                 paymentMap = new ConcurrentHashMap<>();
             }
         }
-        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     }
 
     @Override
@@ -56,22 +54,20 @@ public class RatioBolt implements IBasicBolt, Serializable {
 
         try {
             MqTuple mqTuple = (MqTuple) input.getValue(0);
-            List<MessageExt> list = mqTuple.getMsgList();
+            List<byte[]> list = mqTuple.getMsgList();
             byte[] body;
-            MessageExt msg;
             int size = list.size();
 
             HashMap<Long,double[]> emitTuple = new HashMap<>();
             for (int i = 0; i < size; i++) {
-                msg = list.get(i);
-                body = msg.getBody();
+                body = list.get(i);
                 if (body.length == 2 && body[0] == 0 && body[1] == 0) {
                     emitTuple.put(-1l,new double[]{-1,-1});
                     continue;
                 }
                 atomicInteger.addAndGet(1);
                 PaymentMessage paymentMessage = RaceUtils.readKryoObject(PaymentMessage.class, body);
-                long timeStamp = sdf.parse(sdf.format(new Date(paymentMessage.getCreateTime()))).getTime()/1000;
+                long timeStamp = RaceUtils.toMinuteTimeStamp(paymentMessage.getCreateTime());
                 double[] node = emitTuple.get(timeStamp); // 0 PC 1 MOBILE
                 if (node == null) {
                     node = new double[]{0,0};

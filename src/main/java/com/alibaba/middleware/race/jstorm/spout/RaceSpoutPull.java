@@ -91,11 +91,15 @@ public class RaceSpoutPull implements IRichSpout, IAckValueSpout, IFailValueSpou
 
                 switch (result.getPullStatus()) {
                     case FOUND:
-                        ArrayList<MessageExt> list = (ArrayList<MessageExt>) result.getMsgFoundList();
-                        MqTuple mqTuple = new MqTuple(list);
+                        ArrayList<byte[]> emitlist = new ArrayList<>();
+                        List<MessageExt> list = result.getMsgFoundList();
                         if (list == null || list.size() == 0) {
                             break;
                         }
+                        for (int i = 0; i<list.size();i++) {
+                            emitlist.add(list.get(i).getBody());
+                        }
+                        MqTuple mqTuple = new MqTuple(emitlist,topic);
                         sendTuple(mqTuple);
                         // 获取下一个下标位置
                         // TODO 为啥
@@ -159,7 +163,8 @@ public class RaceSpoutPull implements IRichSpout, IAckValueSpout, IFailValueSpou
         int failNum = failTimes.incrementAndGet();
 
         if (failNum > 5) {
-            LOG.warn("Message " + mqTuple.getMq() + " fail times " + failNum);
+            LOG.warn("Message " + mqTuple.getTopic()+ ": " + mqTuple.getCreateMs() + " fail times " + failNum);
+
             finishTuple(mqTuple);
             return;
         }
