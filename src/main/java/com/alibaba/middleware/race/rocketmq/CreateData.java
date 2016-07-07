@@ -103,7 +103,6 @@ public class CreateData {
                         throw new RuntimeException("totalprice is not equal.");
                     }
 
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
