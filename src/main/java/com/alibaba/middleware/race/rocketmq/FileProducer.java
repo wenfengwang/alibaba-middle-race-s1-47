@@ -65,6 +65,8 @@ public class FileProducer {
 //                }
 //            });
             count++;
+            if (count %1000 == 0 )
+                System.out.println(count);
             amount += orderMessage.getTotalPrice();
             str = br.readLine();
         }
@@ -100,6 +102,8 @@ public class FileProducer {
 //                }
 //            });
             count++;
+            if (count %1000 == 0 )
+                System.out.println(count);
             str = py_br_data.readLine();
         }
         System.out.println("***** " + RaceConfig.MqPayTopic + " : " + count + " *****");
