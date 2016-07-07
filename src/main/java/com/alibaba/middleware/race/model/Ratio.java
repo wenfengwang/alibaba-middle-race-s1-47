@@ -119,30 +119,20 @@ public class Ratio {
         this.nextRtaio = nextRtaio;
     }
 
-    public void updateMobileAmount(double v) {
-        currentMobileAmount += v;
-        MobileAmount += v;
-        updateRatio();
-    }
-
-    public void updatePCAmount(double v) {
-        currentPCAmount += v;
-        PCAmount += v;
-        updateRatio();
-    }
-
-    private void updateRatio() {
-        if (MobileAmount == 0 || PCAmount == 0 ){
-            return;
+    public void updateAmount(double pc, double mobile, boolean flag) {
+        if (flag) {
+            currentPCAmount += pc;
+            currentMobileAmount += mobile;
         }
-        ratio = MobileAmount/PCAmount;
-
+        PCAmount += pc;
+        MobileAmount += mobile;
         if (!toBeTair)
             toBeTair = true;
     }
 
     public void toTair(TairOperatorImpl tairOperator) {
       if (toBeTair) {
+        ratio = (MobileAmount == 0 || PCAmount == 0) ? 0 : MobileAmount/PCAmount;
         tairOperator.write(key,ratio);
         LOG.info(key+": "+ ratio);
         toBeTair = false;

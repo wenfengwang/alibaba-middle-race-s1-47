@@ -42,6 +42,7 @@ public class PersistRatio implements IBasicBolt, Serializable {
 
     private boolean endFlag;
 
+    private int WTF = 0;
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
         ratioMap = new ConcurrentHashMap<>();
@@ -54,6 +55,7 @@ public class PersistRatio implements IBasicBolt, Serializable {
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) {
         long minuteTimeStamp = (Long) input.getValue(0);
+        // input.getValue(1) 他妈的这个地方这个对象是复用的！！！在没有收到endFlag的时候，一直引用的是RatioCount中的sumAmout WHAT THE FUCK!
         double[] amount = (double[]) input.getValue(1); // 0 PC 1 MOBILE
         if (minuteTimeStamp == -1 && amount[0] == -1 && amount[1] == -1 ) {
             if (!RaceConfig.ONLINE) {
@@ -64,15 +66,15 @@ public class PersistRatio implements IBasicBolt, Serializable {
                 }
             }
             Ratio _ratio = ratioMap.get(currentTimeStamp);
-            do {
-                // TODO 线上环境爆空指针异常
+            while (_ratio != null && _ratio.toBeTair) {
                 _ratio.toTair(tairOperator);
                 _ratio = _ratio.getNextRtaio();
-            } while (_ratio != null && _ratio.toBeTair == true);
+            }
             endFlag = true;
             return;
         }
 
+        // TODO 最后一个时刻的结果一直挂
         Ratio ratioNode = ratioMap.get(minuteTimeStamp);
         if (ratioNode == null) {
             if (currentTimeStamp == 0) { // 0 init
@@ -101,18 +103,24 @@ public class PersistRatio implements IBasicBolt, Serializable {
             }
             ratioMap.put(minuteTimeStamp,ratioNode);
         }
+
+        boolean updateFlag = true;
         do {
-            ratioNode.updatePCAmount(amount[0]);
-            ratioNode.updateMobileAmount(amount[1]);
+            ratioNode.updateAmount(amount[0],amount[1],updateFlag);
+            updateFlag = false;
             ratioNode = ratioNode.getNextRtaio();
         } while (ratioNode != null);
 
         if (minuteTimeStamp != currentTimeStamp || endFlag) {
+            if (endFlag) {
+                LOG.info("***** ENDFLAG *****");
+            }
             Ratio _ratio = endFlag ? ratioMap.get(minuteTimeStamp) : ratioMap.get(currentTimeStamp);
-            do {
+
+            while (_ratio != null && _ratio.toBeTair) {
                 _ratio.toTair(tairOperator);
                 _ratio = _ratio.getNextRtaio();
-            } while (_ratio != null && _ratio.toBeTair == true);
+            }
             currentTimeStamp = minuteTimeStamp;
         }
     }

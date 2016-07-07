@@ -61,7 +61,7 @@ public class RatioCount implements IBasicBolt, Serializable {
                         endFlag = true;
                         continue;
                     } else {
-                        collector.emit(new Values(currentTimeStamp, sumAmount));
+                        collector.emit(new Values(currentTimeStamp, new double[]{sumAmount[0],sumAmount[1]}));
                         currentTimeStamp = minuteTimeStamp;
                         sumAmount[0] = sumAmount[1] = 0;
                     }

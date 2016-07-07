@@ -90,7 +90,7 @@ public class AnalyseResult {
             double tairTaobaoPrice = tairOperator.get(RaceConfig.prex_taobao+timeStamp) == null ? 0.0 :(double)  tairOperator.get(RaceConfig.prex_taobao+timeStamp) ;
 
             String str;
-            if (tairTaobaoPrice >= entry.getValue()*0.99 && tairTaobaoPrice <= entry.getValue()*1.01) {
+            if (tairTaobaoPrice > entry.getValue()-1 && tairTaobaoPrice < entry.getValue()+1) {
                 tbSuccess++;
                 str = RaceConfig.prex_taobao+timeStamp + ", Result: Success. Tair: " + tairTaobaoPrice +
                                                                 ", Producer: "+ entry.getValue() + "\n";
@@ -124,7 +124,7 @@ public class AnalyseResult {
             double tairTmallPrice = tairOperator.get(RaceConfig.prex_tmall+timeStamp) == null ? 0.0 :(double)  tairOperator.get(RaceConfig.prex_tmall+timeStamp) ;
 
             String str;
-            if (tairTmallPrice >= entry.getValue()*0.99 && tairTmallPrice <= entry.getValue()*1.01) {
+            if (tairTmallPrice > entry.getValue()-1 && tairTmallPrice <= entry.getValue()+1) {
                 tmSuccess++;
                 str = RaceConfig.prex_tmall+timeStamp + ", Result: Success. Tair: " + tairTmallPrice +
                                                             ", Producer: "+ entry.getValue() + "\n";
@@ -163,7 +163,7 @@ public class AnalyseResult {
             moTotalPrice += entry.getValue()[1];
             double ratio = moTotalPrice/pcTotalPrice;
             String str;
-            if (tairRatio >= ratio*0.99 && tairRatio <= ratio*1.01) {
+            if (tairRatio > ratio-0.01 && tairRatio < ratio+0.01) {
                 success++;
                 str = RaceConfig.prex_ratio+timeStamp + ", Result: Success. Tair: " + tairRatio +
                                                             ", Producer: "+ ratio + "\n";
