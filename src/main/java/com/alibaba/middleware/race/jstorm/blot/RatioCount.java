@@ -50,6 +50,8 @@ public class RatioCount implements IBasicBolt, Serializable {
                         sumAmount = platFormPrice;
                         continue;
                     } else if (minuteTimeStamp == -1 && platFormPrice[0] == -1 && platFormPrice[1] == -1) {
+                        collector.emit(new Values(currentTimeStamp,new double[]{sumAmount[0],sumAmount[1]}));
+                        sumAmount[0] = sumAmount[1] = 0;
                         collector.emit(new Values(-1l,new double[]{-1,-1}));
                         endFlag = true;
                         continue;

@@ -65,7 +65,7 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
             LOG.warn(id + " already exist consumer in current worker, don't need to fetch data ");
         }
         count.addAndGet(1);
-        LOG.info("Successfully init " + id);
+        LOG.info("Spout Successfully init: " + id);
     }
 
     @Override
@@ -159,7 +159,6 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
         MqTuple metaTuple = (MqTuple) values.get(0);
         finishTuple(metaTuple);
     }
-
 
     @Override
     public void fail(Object msgId, List<Object> values) {
