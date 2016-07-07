@@ -1,26 +1,19 @@
 package com.alibaba.middleware.race.jstorm.blot;
 
-import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.BasicOutputCollector;
 import backtype.storm.topology.IBasicBolt;
-import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
-import com.alibaba.middleware.race.RaceConfig;
-import com.alibaba.middleware.race.Tair.TairOperatorImpl;
-import com.alibaba.middleware.race.model.Ratio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static com.twitter.chill.config.ReflectingInstantiator.prefix;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by wangwenfeng on 6/29/16.

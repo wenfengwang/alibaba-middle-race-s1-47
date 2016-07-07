@@ -5,19 +5,16 @@ import com.alibaba.middleware.race.RaceUtils;
 import com.alibaba.middleware.race.model.OrderMessage;
 import com.alibaba.middleware.race.model.PaymentMessage;
 import com.alibaba.rocketmq.client.exception.MQClientException;
-import com.alibaba.rocketmq.client.producer.SendCallback;
-import com.alibaba.rocketmq.client.producer.SendResult;
-import com.alibaba.rocketmq.common.message.Message;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.Semaphore;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.SimpleFormatter;
 
 
 public class CreateData {

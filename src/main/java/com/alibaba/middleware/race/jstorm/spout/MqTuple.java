@@ -1,8 +1,5 @@
 package com.alibaba.middleware.race.jstorm.spout;
 
-import backtype.storm.task.ICollectorCallback;
-import com.alibaba.rocketmq.common.message.MessageExt;
-import com.alibaba.rocketmq.common.message.MessageQueue;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 

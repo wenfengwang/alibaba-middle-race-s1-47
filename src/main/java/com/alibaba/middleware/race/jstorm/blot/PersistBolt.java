@@ -7,14 +7,14 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
 import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
-import com.alibaba.middleware.race.test.AnalyseResult;
 import com.alibaba.middleware.race.test.AnalyseThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**

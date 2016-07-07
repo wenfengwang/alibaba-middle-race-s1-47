@@ -7,7 +7,6 @@ import com.taobao.tair.ResultCode;
 import com.taobao.tair.impl.DefaultTairManager;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 

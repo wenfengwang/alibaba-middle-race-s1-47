@@ -1,16 +1,15 @@
 package com.alibaba.middleware.race.jstorm.spout;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
-import java.util.Properties;
-
+import com.alibaba.jstorm.utils.JStormUtils;
+import com.alibaba.jstorm.utils.TimeFormat;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-import com.alibaba.jstorm.utils.JStormUtils;
-import com.alibaba.jstorm.utils.TimeFormat;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Meta Spout Setting
