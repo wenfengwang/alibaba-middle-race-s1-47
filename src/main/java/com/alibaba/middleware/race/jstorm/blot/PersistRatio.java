@@ -57,7 +57,7 @@ public class PersistRatio implements IBasicBolt, Serializable {
         // input.getValue(1) 他妈的这个地方这个对象是复用的！！！在没有收到endFlag的时候，一直引用的是RatioCount中的sumAmout WHAT THE FUCK!
         double[] amount = (double[]) input.getValue(1); // 0 PC 1 MOBILE
         if (minuteTimeStamp == -1 && amount[0] == -1 && amount[1] == -1 ) {
-            LOG.warn("!!! Payment Recieved End Message !!!");
+
             if (!RaceConfig.ONLINE) {
                 try {
                     new Thread(new AnalyseThread(RaceConfig.PY_LOG_PATH,3)).start();
@@ -67,9 +67,8 @@ public class PersistRatio implements IBasicBolt, Serializable {
                 }
             }
             Ratio _ratio = ratioMap.get(currentTimeStamp);
-            while (_ratio != null && _ratio.toBeTair) {
-//                _ratio.toTair(tairOperator);
-                _ratio = _ratio.getNextRtaio();
+            while (_ratio != null) {
+                ratioProcess.updateRatio(_ratio);
             }
             endFlag = true;
             return;
@@ -107,19 +106,18 @@ public class PersistRatio implements IBasicBolt, Serializable {
             ratioMap.put(minuteTimeStamp,ratioNode);
         }
 
-//        ratioNode.updateAmount(amount); // TODO
-
         ratioProcess.updateAmount(ratioNode, amount);
 
         if (minuteTimeStamp != currentTimeStamp || endFlag) {
-            if (endFlag) {
+            if (endFlag && !RaceConfig.ONLINE) {
                 LOG.warn("***** ENDFLAG *****");
             }
             Ratio _ratio = endFlag ? ratioMap.get(minuteTimeStamp) : ratioMap.get(currentTimeStamp);
 
             if (_ratio != null) {
-                ratioProcess.updateRatio(_ratio);  // TODO
+                ratioProcess.updateRatio(_ratio);
             }
+
             currentTimeStamp = minuteTimeStamp;
         }
     }

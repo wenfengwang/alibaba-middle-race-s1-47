@@ -7,8 +7,10 @@ import java.util.List;
 public class RaceConfig implements Serializable {
     public static final String TeamCode = "373058h4iq";
 
-    public static final boolean ONLINE = true;
-    public static final String TOPOLOGY_MODEL = "cluster";
+    public static final boolean ONLINE = false;
+    public static final boolean BOLT_USE_THREAD_POOL = false;  //multithreading
+
+    public static final String TOPOLOGY_MODEL = "local";
 
     // jstorm
     public static final String JstormTopologyName = "373058h4iq";
@@ -63,7 +65,7 @@ public class RaceConfig implements Serializable {
     public static final String TMALL_PERSIST_BOLT_ID = "PerisistTmall";
     public static final String RATIO_SPLIT_BOLT_ID = "splitPayment";
     public static final String RATIO_COUNT_BOLT_ID = "CountPayment";
-
-
     public static final String RATIO_PERSIST_BOLT_ID = "PersistRatio";
+
+
 }

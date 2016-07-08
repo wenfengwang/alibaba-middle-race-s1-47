@@ -2,20 +2,19 @@ package com.alibaba.middleware.race.model;
 
 import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
-import com.alibaba.middleware.race.jstorm.spout.RaceSpoutPull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by wangwenfeng on 7/1/16.
  */
 public class Ratio {
-    private static Logger LOG = LoggerFactory.getLogger(Ratio.class);
     private final long timeStamp; // 整分时间戳
     private final String  key;
     private volatile double ratio; // 比值
-    public volatile boolean toBeTair = false;
+    public AtomicBoolean toBeTair = new AtomicBoolean(false);
     public final long createTime;
+    private long lastUpdate = -1;
     private long lastToTair = -1;
 
     private volatile double currentPCAmount; // 当前整分时刻内PC端的量
@@ -90,14 +89,6 @@ public class Ratio {
         return ratio;
     }
 
-    public double getCurrentPCAmount() {
-        return currentPCAmount;
-    }
-
-    public double getCurrentMobileAmount() {
-        return currentMobileAmount;
-    }
-
     public double getPCAmount() {
         return PCAmount;
     }
@@ -152,12 +143,13 @@ public class Ratio {
     private void updateAmount(double[] amount) {
         PCAmount += amount[0];
         MobileAmount += amount[1];
-        if (!toBeTair)
-            toBeTair = true;
+        lastUpdate = System.currentTimeMillis();
+        if (!toBeTair.get())
+            toBeTair.set(true);
     }
 
     public void toTair(TairOperatorImpl tairOperator) {
-        if (toBeTair) {
+        if (toBeTair.get() && lastUpdate > lastToTair) {
             writeRatio(tairOperator);
         }
 
@@ -169,17 +161,11 @@ public class Ratio {
         }
     }
 
-    public void naiveUpdateAmount(double[] amount) {
-        currentPCAmount += amount[0];
-        currentMobileAmount += amount[1];
-    }
-
     private void writeRatio(TairOperatorImpl tairOperator) {
         ratio = (MobileAmount == 0 || PCAmount == 0) ? 0 : MobileAmount/PCAmount;
         tairOperator.write(key,ratio);
         lastToTair = System.currentTimeMillis();
-        LOG.info(key+": "+ ratio);
-        toBeTair = false;
+        toBeTair.set(false);
     }
 
 }

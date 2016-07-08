@@ -31,9 +31,9 @@ public class TairOperatorImpl implements Serializable {
     }
 
     public boolean write(Serializable key, Serializable value) {
+        if (!RaceConfig.ONLINE)
+            LOG.warn("Tair: " + key +", " +value);
 
-
-        LOG.warn("Tair: " + key +", " +value);
         ResultCode result = tairManager.put(nameSpace, key, value);
         return result.isSuccess();
     }

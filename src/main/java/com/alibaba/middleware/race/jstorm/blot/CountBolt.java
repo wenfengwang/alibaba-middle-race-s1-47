@@ -87,17 +87,9 @@ public class CountBolt implements IBasicBolt, Serializable {
                         }
                     }
                 }
-//                if (RaceConfig.MqTaobaoTradeTopic.equals(topic)) {
-//                    atomicIntegers[0].addAndGet(1);
-//                } else if (RaceConfig.MqTmallTradeTopic.equals(topic)){
-//                    atomicIntegers[1].addAndGet(1);
-//                }
                 amount += order.getTotalPrice();
                 emitTuple.put(timeStamp,amount);
             }
-//            if (RaceConfig.MqTaobaoTradeTopic.equals(topic)) {
-//                LOG.warn("Taobao Message Numbers: " + atomicIntegers[0].get() + ", Tmall Message Numbers: " + atomicIntegers[1].get());
-//            }
             collector.emit(new Values(emitTuple));
         } catch (Exception e) {
             e.printStackTrace();
