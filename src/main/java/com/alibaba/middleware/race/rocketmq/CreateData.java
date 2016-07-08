@@ -41,13 +41,9 @@ public class CreateData {
         HashMap<Long, double[]> pyMap = new HashMap<>();
 
         final String [] topics = new String[]{RaceConfig.MqTaobaoTradeTopic, RaceConfig.MqTmallTradeTopic};
-        String str = "";
         int count = 0;
-        float times = 0;
-        float sumTime = 0;
-        while (count < 4320000){
-            long starttime = System.currentTimeMillis();
         while (count < 200000){
+            long starttime = System.currentTimeMillis();
             for (int i = 0; i < 300; i++) {
                 try {
                     final int platform = rand.nextInt(2);
@@ -133,7 +129,7 @@ public class CreateData {
         for (Map.Entry<Long,double[]> entry : pyEntrySet) {
             py_bw_result.write(entry.getKey()+","+entry.getValue()[0]+","+entry.getValue()[1]+","+entry.getValue()[1]/entry.getValue()[0]+"\n");
         }
-        System.out.println(System.currentTimeMillis() - starttime);
+//        System.out.println(System.currentTimeMillis() - starttime);
 
         System.out.println("TB: "+atomIntTb);
         System.out.println("TM: "+atomIntTm);
