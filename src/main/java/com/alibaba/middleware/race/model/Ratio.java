@@ -149,7 +149,7 @@ public class Ratio {
         }
     }
 
-    public void updateAmount(double[] amount) {
+    private void updateAmount(double[] amount) {
         PCAmount += amount[0];
         MobileAmount += amount[1];
         if (!toBeTair)
@@ -169,7 +169,7 @@ public class Ratio {
         }
     }
 
-    public void writeRatio(TairOperatorImpl tairOperator) {
+    private void writeRatio(TairOperatorImpl tairOperator) {
         ratio = (MobileAmount == 0 || PCAmount == 0) ? 0 : MobileAmount/PCAmount;
         tairOperator.write(key,ratio);
         lastToTair = System.currentTimeMillis();

@@ -8,6 +8,7 @@ import backtype.storm.tuple.Tuple;
 import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 import com.alibaba.middleware.race.model.Ratio;
+import com.alibaba.middleware.race.model.RatioProcess;
 import com.alibaba.middleware.race.test.AnalyseThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +35,8 @@ public class PersistRatio implements IBasicBolt, Serializable {
     private long currentTimeStamp;
     private long minTimeStamp;
     private long maxTimeStamp;
-    private TairOperatorImpl tairOperator;
     private ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
+    private RatioProcess ratioProcess;
 
     private Ratio headNode;
     private Ratio tailNode;
@@ -45,8 +46,8 @@ public class PersistRatio implements IBasicBolt, Serializable {
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
         ratioMap = new ConcurrentHashMap<>();
-        tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr,RaceConfig.TairNamespace);
         currentTimeStamp = 0;
+        ratioProcess = new RatioProcess();
         endFlag = false;
         headNode = tailNode = null;
     }
@@ -68,21 +69,20 @@ public class PersistRatio implements IBasicBolt, Serializable {
             }
             Ratio _ratio = ratioMap.get(currentTimeStamp);
             while (_ratio != null && _ratio.toBeTair) {
-                _ratio.toTair(tairOperator);
+//                _ratio.toTair(tairOperator);
                 _ratio = _ratio.getNextRtaio();
             }
             endFlag = true;
             return;
         }
 
-        // TODO 最后一个时刻的结果一直挂
         Ratio ratioNode = ratioMap.get(minuteTimeStamp);
         if (ratioNode == null) {
             if (currentTimeStamp == 0) { // 0 init
                 ratioNode = new Ratio(minuteTimeStamp,null);
                 maxTimeStamp = minTimeStamp = currentTimeStamp = minuteTimeStamp;
                 headNode = tailNode = ratioNode;
-            } else if (minuteTimeStamp < minTimeStamp) { // TODO 存不存在相等为null的情况?
+            } else if (minuteTimeStamp < minTimeStamp) {
                 ratioNode = new Ratio(minuteTimeStamp,headNode,0); // flag 位，0是head节点 ，1是tail节点
                 minTimeStamp = minuteTimeStamp;
                 headNode = ratioNode;
@@ -114,7 +114,10 @@ public class PersistRatio implements IBasicBolt, Serializable {
 
             }
         });
-        ratioNode.updateAmount(amount); // TODO 这个地方搞成线程池怎么保证线程安全
+
+//        ratioNode.updateAmount(amount); // TODO
+
+        ratioProcess.updateAmount(ratioNode, amount);
 
         if (minuteTimeStamp != currentTimeStamp || endFlag) {
             if (endFlag) {
@@ -123,7 +126,7 @@ public class PersistRatio implements IBasicBolt, Serializable {
             Ratio _ratio = endFlag ? ratioMap.get(minuteTimeStamp) : ratioMap.get(currentTimeStamp);
 
             if (_ratio != null) {
-                _ratio.toTair(tairOperator);
+                ratioProcess.updateRatio(_ratio);  // TODO
             }
             currentTimeStamp = minuteTimeStamp;
         }
