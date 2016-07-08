@@ -8,6 +8,7 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Created by wangwenfeng on 7/4/16.
@@ -142,7 +143,7 @@ public class AnalyseResult {
     public void analysePayment(String name) throws IOException, InterruptedException {
         Thread.sleep(5000);
         BufferedReader py_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + name +".txt")));
-        HashMap<Long, double[]> resutltMap = new HashMap<>();
+        TreeMap<Long, double[]> resutltMap = new TreeMap<>();
         String result_str = py_br.readLine();
         while (result_str!=null) {
             String[] result = result_str.split(",");
@@ -153,7 +154,7 @@ public class AnalyseResult {
         double pcTotalPrice = 0;
         double moTotalPrice = 0;
         Set<Map.Entry<Long, double[]>> EntrySet = resutltMap.entrySet();
-        HashMap<Long, String> ResultMap = new HashMap<>();
+        TreeMap<Long, String> ResultMap = new TreeMap<>();
         int EntrySetSize = EntrySet.size();
         float success = 0;
         for (Map.Entry<Long, double[]> entry : EntrySet) {

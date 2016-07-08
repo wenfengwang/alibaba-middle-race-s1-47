@@ -15,6 +15,8 @@ public class Ratio {
     private final String  key;
     private volatile double ratio; // 比值
     public volatile boolean toBeTair = false;
+    private int update_count = 0;
+    private int tair_count = 0;
 
     private volatile double currentPCAmount; // 当前整分时刻内PC端的量
     private volatile double currentMobileAmount; // 当前整分时刻内移动端的量
@@ -124,6 +126,7 @@ public class Ratio {
             currentPCAmount += pc;
             currentMobileAmount += mobile;
         }
+        update_count++;
         PCAmount += pc;
         MobileAmount += mobile;
         if (!toBeTair)
@@ -132,6 +135,7 @@ public class Ratio {
 
     public void toTair(TairOperatorImpl tairOperator) {
       if (toBeTair) {
+        tair_count++;
         ratio = (MobileAmount == 0 || PCAmount == 0) ? 0 : MobileAmount/PCAmount;
         tairOperator.write(key,ratio);
         LOG.info(key+": "+ ratio);
