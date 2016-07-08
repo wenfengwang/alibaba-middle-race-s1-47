@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  * Created by wangwenfeng on 7/1/16.
  */
 public class Ratio {
-    private static Logger LOG = LoggerFactory.getLogger(RaceSpoutPull.class);
+    private static Logger LOG = LoggerFactory.getLogger(Ratio.class);
     private final long timeStamp; // 整分时间戳
     private final String  key;
     private volatile double ratio; // 比值
@@ -167,6 +167,11 @@ public class Ratio {
             ratio.toTair(tairOperator);
             ratio.getNextRtaio();
         }
+    }
+
+    public void naiveUpdateAmount(double[] amount) {
+        currentPCAmount += amount[0];
+        currentMobileAmount += amount[1];
     }
 
     private void writeRatio(TairOperatorImpl tairOperator) {

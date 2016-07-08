@@ -35,8 +35,7 @@ public class PersistRatio implements IBasicBolt, Serializable {
     private long currentTimeStamp;
     private long minTimeStamp;
     private long maxTimeStamp;
-    private ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
-    private RatioProcess ratioProcess;
+    private transient RatioProcess ratioProcess;
 
     private Ratio headNode;
     private Ratio tailNode;
@@ -107,13 +106,6 @@ public class PersistRatio implements IBasicBolt, Serializable {
             }
             ratioMap.put(minuteTimeStamp,ratioNode);
         }
-
-        cachedThreadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-
-            }
-        });
 
 //        ratioNode.updateAmount(amount); // TODO
 

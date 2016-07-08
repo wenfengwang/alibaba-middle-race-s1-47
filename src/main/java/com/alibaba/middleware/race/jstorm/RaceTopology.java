@@ -34,7 +34,7 @@ public class RaceTopology {
             } else {
                 LocalCluster localCluster = new LocalCluster();
                 localCluster.submitTopology(RaceConfig.JstormTopologyName, tpConf, setBuilderWithPush());
-                Thread.sleep(60000);
+                Thread.sleep(100000000);
                 localCluster.shutdown();
                 LOG.info("Topology submitted!!!!");
             }
