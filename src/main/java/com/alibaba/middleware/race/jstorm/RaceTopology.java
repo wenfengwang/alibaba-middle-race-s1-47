@@ -83,9 +83,9 @@ public class RaceTopology {
         builder.setBolt(RaceConfig.TMALL_COUNT_BOLT_ID, new CountBolt(), bolt_Parallelism_hint).shuffleGrouping(RaceConfig.SPOUT_NAME,RaceConfig.TMALL_STREAM_ID);
         builder.setBolt(RaceConfig.TMALL_PERSIST_BOLT_ID, new PersistBolt(RaceConfig.prex_tmall),_bolt_Parallelism_hint).shuffleGrouping(RaceConfig.TMALL_COUNT_BOLT_ID);
 
-        builder.setBolt(RaceConfig.RATIO_SPLIT_BOLT_ID, new RatioBolt(), bolt_Parallelism_hint).shuffleGrouping(RaceConfig.SPOUT_NAME,RaceConfig.PAYMENT_STREAM_ID);
-        builder.setBolt(RaceConfig.RATIO_COUNT_BOLT_ID, new RatioCount(),_bolt_Parallelism_hint).shuffleGrouping(RaceConfig.RATIO_SPLIT_BOLT_ID);
-        builder.setBolt(RaceConfig.RATIO_PERSIST_BOLT_ID, new PersistRatio(),_bolt_Parallelism_hint).shuffleGrouping(RaceConfig.RATIO_COUNT_BOLT_ID);
+       // builder.setBolt(RaceConfig.RATIO_SPLIT_BOLT_ID, new RatioBolt(), bolt_Parallelism_hint).shuffleGrouping(RaceConfig.SPOUT_NAME,RaceConfig.PAYMENT_STREAM_ID);
+       // builder.setBolt(RaceConfig.RATIO_COUNT_BOLT_ID, new RatioCount(),_bolt_Parallelism_hint).shuffleGrouping(RaceConfig.RATIO_SPLIT_BOLT_ID);
+       // builder.setBolt(RaceConfig.RATIO_PERSIST_BOLT_ID, new PersistRatio(),_bolt_Parallelism_hint).shuffleGrouping(RaceConfig.RATIO_COUNT_BOLT_ID);
         return builder.createTopology();
     }
 }
