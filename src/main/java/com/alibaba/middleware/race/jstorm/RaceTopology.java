@@ -34,7 +34,7 @@ public class RaceTopology {
             } else {
                 LocalCluster localCluster = new LocalCluster();
                 localCluster.submitTopology(RaceConfig.JstormTopologyName, tpConf, setBuilderWithPush());
-                Thread.sleep(10000000);
+                Thread.sleep(60000);
                 localCluster.shutdown();
                 LOG.info("Topology submitted!!!!");
             }
@@ -70,7 +70,7 @@ public class RaceTopology {
         if (!RaceConfig.ONLINE)
             publicSpoutConfig.put(SpoutConfig.META_NAMESERVER,RaceConfig.MQNameServerAddr);
 
-        int spout_Parallelism_hint = 2;
+        int spout_Parallelism_hint = 3;
         int bolt_Parallelism_hint = 2;
         int _bolt_Parallelism_hint = 1;
         TopologyBuilder builder = new TopologyBuilder();

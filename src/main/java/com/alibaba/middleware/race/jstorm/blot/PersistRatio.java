@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -123,6 +124,18 @@ public class PersistRatio implements IBasicBolt, Serializable {
 
     @Override
     public void cleanup() {
+        Ratio ratio = ratioMap.get(minTimeStamp);
+        int count = 0;
+        long sumUseTime = 0;
+        while (ratio!= null) {
+            count++;
+            sumUseTime += ( ratio.getLastToTair() - ratio.getCreateTime());
+            LOG.info("***** " + ratio.getKey() + ": " + ratio.getResult() + "; created Time is:" +ratio.getCreateTime()
+                    + ", last update Time is: "+ ratio.getLastToTair()+"use Time is: "
+                    +(ratio.getLastToTair() -ratio.getCreateTime())+" *****");
+            ratio = ratio.getNextRtaio();
+        }
+        LOG.info("!!!!! avager use time is: " + sumUseTime/count +" !!!!!");
     }
 
     @Override

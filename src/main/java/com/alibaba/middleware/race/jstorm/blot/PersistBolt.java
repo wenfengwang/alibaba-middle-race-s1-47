@@ -109,6 +109,10 @@ public class PersistBolt implements IBasicBolt, Serializable {
 
     @Override
     public void cleanup() {
+        Set<Map.Entry<Long, Double>> entrySet = amountMap.entrySet();
+        for(Map.Entry<Long, Double> entry : entrySet) {
+            LOG.info("***** " + prefix+entry.getKey()+": " + entry.getValue()+ " *****");
+        }
     }
 
     @Override

@@ -17,7 +17,9 @@ import com.alibaba.rocketmq.common.message.MessageExt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -32,7 +34,7 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
     private LinkedBlockingDeque<MqTuple> sendingQueue;
     private SpoutOutputCollector collector;
     private static DefaultMQPushConsumer consumer;
-    private AtomicInteger count = new AtomicInteger(0);
+    private static final long start_time = System.currentTimeMillis();
 
     private Map tpConf;
     private Map spoutConf;
@@ -64,14 +66,16 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
         if (consumer == null) {
             LOG.warn(id + " already exist consumer in current worker, don't need to fetch data ");
         }
-        count.addAndGet(1);
         LOG.info("Spout Successfully init: " + id);
     }
 
     @Override
     public void close() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
         if (consumer != null)
             consumer.shutdown();
+        LOG.info("***** Spout 启动时间: " + sdf.format(new Date(start_time)) + " *****");
+        LOG.info("***** Spout 结束时间: " + sdf.format(System.currentTimeMillis()) + " *****");
     }
 
     @Override
