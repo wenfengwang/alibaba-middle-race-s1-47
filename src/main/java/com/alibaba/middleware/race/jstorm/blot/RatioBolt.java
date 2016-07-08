@@ -91,7 +91,7 @@ public class RatioBolt implements IBasicBolt, Serializable {
                 node[paymentMessage.getPayPlatform()] += paymentMessage.getPayAmount();
                 emitTuple.put(timeStamp,node);
             }
-//            LOG.info("***** Payment Message Numbers: " + atomicInteger.get() + " *****");
+            LOG.warn("***** Payment Message Numbers: " + atomicInteger.get() + " *****");
             collector.emit(new Values(emitTuple));
         } catch (Exception e) {
             e.printStackTrace();

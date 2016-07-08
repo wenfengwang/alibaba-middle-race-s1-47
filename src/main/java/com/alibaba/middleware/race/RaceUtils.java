@@ -33,13 +33,16 @@ public class RaceUtils {
             return ret;
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("*********");
         }
         return null;
     }
 
     public static long toMinuteTimeStamp(long timeStamp) {
         return  (timeStamp / 1000 / 60) * 60;
+    }
+
+    public static double round(double v) {
+        return Math.round(v *100.0)/100.0;
     }
 
 }

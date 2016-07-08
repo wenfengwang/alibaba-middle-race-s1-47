@@ -1,6 +1,7 @@
 package com.alibaba.middleware.race.test;
 
 import com.alibaba.middleware.race.RaceConfig;
+import com.alibaba.middleware.race.RaceUtils;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 
 import java.io.*;
@@ -91,11 +92,11 @@ public class AnalyseResult {
             String str;
             if (tairTaobaoPrice > entry.getValue()-1 && tairTaobaoPrice < entry.getValue()+1) {
                 tbSuccess++;
-                str = RaceConfig.prex_taobao+timeStamp + ", Result: Success. Tair: " + tairTaobaoPrice +
-                                                                ", Producer: "+ entry.getValue() + "\n";
+                str = RaceConfig.prex_taobao+timeStamp + ", Result: Success. Tair: " + RaceUtils.round(tairTaobaoPrice) +
+                                                                ", Producer: "+ RaceUtils.round(entry.getValue()) + "\n";
             } else {
-                str = RaceConfig.prex_taobao+timeStamp + ", Result: Failed. Tair: " + tairTaobaoPrice +
-                                                                ", Producer: "+ entry.getValue() + "\n";
+                str = RaceConfig.prex_taobao+timeStamp + ", Result: Failed. Tair: " + RaceUtils.round(tairTaobaoPrice) +
+                                                                ", Producer: "+ RaceUtils.round(entry.getValue()) + "\n";
             }
             bw.write(str);
         }
@@ -125,11 +126,11 @@ public class AnalyseResult {
             String str;
             if (tairTmallPrice > entry.getValue()-1 && tairTmallPrice <= entry.getValue()+1) {
                 tmSuccess++;
-                str = RaceConfig.prex_tmall+timeStamp + ", Result: Success. Tair: " + tairTmallPrice +
-                                                            ", Producer: "+ entry.getValue() + "\n";
+                str = RaceConfig.prex_tmall+timeStamp + ", Result: Success. Tair: " + RaceUtils.round(tairTmallPrice) +
+                                                            ", Producer: "+ RaceUtils.round(entry.getValue()) + "\n";
             } else {
-                str = RaceConfig.prex_tmall+timeStamp + ", Result: Failed. Tair: " + tairTmallPrice +
-                                                            ", Producer: "+ entry.getValue() + "\n";
+                str = RaceConfig.prex_tmall+timeStamp + ", Result: Failed. Tair: " + RaceUtils.round(tairTmallPrice) +
+                                                            ", Producer: "+ RaceUtils.round(entry.getValue()) + "\n";
             }
             bw.write(str);
         }
@@ -164,11 +165,11 @@ public class AnalyseResult {
             String str;
             if (tairRatio > ratio-0.01 && tairRatio < ratio+0.01) {
                 success++;
-                str = RaceConfig.prex_ratio+timeStamp + ", Result: Success. Tair: " + tairRatio +
-                                                            ", Producer: "+ ratio + "\n";
+                str = RaceConfig.prex_ratio+timeStamp + ", Result: Success. Tair: " + RaceUtils.round(tairRatio) +
+                                                            ", Producer: "+ RaceUtils.round(ratio) + "\n";
             } else {
-                str = RaceConfig.prex_ratio+timeStamp + ", Result: Failed. Tair: " + tairRatio +
-                                                            ", Producer: "+ ratio + "\n";
+                str = RaceConfig.prex_ratio+timeStamp + ", Result: Failed. Tair: " + RaceUtils.round(tairRatio) +
+                                                            ", Producer: "+ RaceUtils.round(ratio) + "\n";
             }
             ResultMap.put(timeStamp,str);
             bw.write(str);
