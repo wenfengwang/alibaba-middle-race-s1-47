@@ -32,7 +32,10 @@ public class AnalyseThread implements Runnable {
                     analyseResult.analyseTmall();
                     break;
                 case 3:
-                    analyseResult.analysePayment();
+                    analyseResult.analysePayment("py_result");
+                    break;
+                case 4:
+                    analyseResult.analysePayment("py_result_confirm");
                     break;
             }
         } catch (InterruptedException e) {

@@ -60,7 +60,7 @@ public class RatioBolt implements IBasicBolt, Serializable {
                     emitTuple.put(-1l,new double[]{-1,-1});
                     continue;
                 }
-                atomicInteger.addAndGet(1);
+//                atomicInteger.addAndGet(1);
                 PaymentMessage paymentMessage = RaceUtils.readKryoObject(PaymentMessage.class, body);
                 long timeStamp = RaceUtils.toMinuteTimeStamp(paymentMessage.getCreateTime());
                 double[] node = emitTuple.get(timeStamp); // 0 PC 1 MOBILE
@@ -91,7 +91,7 @@ public class RatioBolt implements IBasicBolt, Serializable {
                 node[paymentMessage.getPayPlatform()] += paymentMessage.getPayAmount();
                 emitTuple.put(timeStamp,node);
             }
-            LOG.warn("***** Payment Message Numbers: " + atomicInteger.get() + " *****");
+//            LOG.warn("***** Payment Message Numbers: " + atomicInteger.get() + " *****");
             collector.emit(new Values(emitTuple));
         } catch (Exception e) {
             e.printStackTrace();
