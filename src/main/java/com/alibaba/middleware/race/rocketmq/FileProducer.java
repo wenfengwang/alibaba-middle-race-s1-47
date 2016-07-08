@@ -65,8 +65,6 @@ public class FileProducer {
 //                }
 //            });
             count++;
-            if (count %1000 == 0 )
-                System.out.println(count);
             amount += orderMessage.getTotalPrice();
             str = br.readLine();
         }
