@@ -16,6 +16,9 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Created by wangwenfeng on 7/1/16.
@@ -32,6 +35,7 @@ public class PersistRatio implements IBasicBolt, Serializable {
     private long minTimeStamp;
     private long maxTimeStamp;
     private TairOperatorImpl tairOperator;
+    private ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
 
     private Ratio headNode;
     private Ratio tailNode;
@@ -87,26 +91,30 @@ public class PersistRatio implements IBasicBolt, Serializable {
                 maxTimeStamp = minuteTimeStamp;
                 tailNode = ratioNode;
             } else {
-                long preTimeStamp = minuteTimeStamp - 60;
-                Ratio preRatio = null;
-                while (preRatio == null) {
-                    preRatio = ratioMap.get(preTimeStamp);
-                    if (preRatio != null) {
-                        ratioNode = new Ratio(minuteTimeStamp,preRatio);
-                    } else {
-                        preTimeStamp -= 60;
+                ratioNode = ratioMap.get(maxTimeStamp);
+                boolean finded = false;
+                while (ratioNode.getPreRatio()!=null) {
+                    if (minuteTimeStamp < ratioNode.getTimeStamp() && minuteTimeStamp > ratioNode.getPreRatio().getTimeStamp()) {
+                        ratioNode = new Ratio(minuteTimeStamp,ratioNode.getPreRatio());
+                        finded = true;
+                        break;
                     }
+                    ratioNode =ratioNode.getPreRatio();
+                }
+                if (!finded) {
+                    throw new RuntimeException("Not find PreRatio!!!");
                 }
             }
             ratioMap.put(minuteTimeStamp,ratioNode);
         }
 
-        boolean updateFlag = true;
-        do {
-            ratioNode.updateAmount(amount[0],amount[1],updateFlag);
-            updateFlag = false;
-            ratioNode = ratioNode.getNextRtaio();
-        } while (ratioNode != null);
+        cachedThreadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        });
+        ratioNode.updateAmount(amount); // TODO 这个地方搞成线程池怎么保证线程安全
 
         if (minuteTimeStamp != currentTimeStamp || endFlag) {
             if (endFlag) {
@@ -114,9 +122,8 @@ public class PersistRatio implements IBasicBolt, Serializable {
             }
             Ratio _ratio = endFlag ? ratioMap.get(minuteTimeStamp) : ratioMap.get(currentTimeStamp);
 
-            while (_ratio != null && _ratio.toBeTair) {
+            if (_ratio != null) {
                 _ratio.toTair(tairOperator);
-                _ratio = _ratio.getNextRtaio();
             }
             currentTimeStamp = minuteTimeStamp;
         }

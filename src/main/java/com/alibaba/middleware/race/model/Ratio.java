@@ -41,9 +41,9 @@ public class Ratio {
             this.nextRtaio = null;
             return;
         }
-        PCAmount = preRatio.PCAmount;
-        MobileAmount = preRatio.MobileAmount;
-        ratio = preRatio.ratio;
+        PCAmount = preRatio.getPCAmount();
+        MobileAmount = preRatio.getMobileAmount();
+        ratio = preRatio.getRatio();
 
         try {
             // preRatio nextRatio肯定不为null  调用这个构造方法的逻辑保证的
@@ -137,27 +137,44 @@ public class Ratio {
     public long getLastToTair() {
         return lastToTair;
     }
-    public void updateAmount(double pc, double mobile, boolean flag) {
-        if (flag) {
-            currentPCAmount += pc;
-            currentMobileAmount += mobile;
+    public void updateCurrentAmount(double[] amount) {  //double pc, double mobile
+        currentPCAmount += amount[0];
+        currentMobileAmount += amount[1];
+        updateAmount(amount);
+
+        Ratio ratio = nextRtaio;
+        while (ratio != null) {
+            ratio.updateAmount(amount);
+            ratio = ratio.getNextRtaio();
         }
-        PCAmount += pc;
-        MobileAmount += mobile;
+    }
+
+    public void updateAmount(double[] amount) {
+        PCAmount += amount[0];
+        MobileAmount += amount[1];
         if (!toBeTair)
             toBeTair = true;
     }
 
     public void toTair(TairOperatorImpl tairOperator) {
-      if (toBeTair) {
+        if (toBeTair) {
+            writeRatio(tairOperator);
+        }
+
+        Ratio ratio = nextRtaio;
+
+        while (ratio != null) {
+            ratio.toTair(tairOperator);
+            ratio.getNextRtaio();
+        }
+    }
+
+    public void writeRatio(TairOperatorImpl tairOperator) {
         ratio = (MobileAmount == 0 || PCAmount == 0) ? 0 : MobileAmount/PCAmount;
         tairOperator.write(key,ratio);
         lastToTair = System.currentTimeMillis();
         LOG.info(key+": "+ ratio);
         toBeTair = false;
-      } else {
-          LOG.warn("Ratio to be Tair error.");
-      }
     }
 
 }
