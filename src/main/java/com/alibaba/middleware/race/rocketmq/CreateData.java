@@ -44,7 +44,7 @@ public class CreateData {
         String str = "";
         long starttime = System.currentTimeMillis();
         int count = 0;
-        while (count < 2000000){
+        while (count < 200000){
             for (int i = 0; i < 300; i++) {
                 try {
                     final int platform = rand.nextInt(2);
