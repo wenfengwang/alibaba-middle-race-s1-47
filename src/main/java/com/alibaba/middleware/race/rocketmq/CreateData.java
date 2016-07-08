@@ -42,9 +42,11 @@ public class CreateData {
 
         final String [] topics = new String[]{RaceConfig.MqTaobaoTradeTopic, RaceConfig.MqTmallTradeTopic};
         String str = "";
-        long starttime = System.currentTimeMillis();
         int count = 0;
-        while (count < 2000000){
+        float times = 0;
+        float sumTime = 0;
+        while (count < 4320000){
+            long starttime = System.currentTimeMillis();
             for (int i = 0; i < 300; i++) {
                 try {
                     final int platform = rand.nextInt(2);
@@ -110,8 +112,12 @@ public class CreateData {
             tb_bw_data.flush();
             tm_bw_data.flush();
             py_bw_data.flush();
-            Thread.sleep(850);
-            System.out.println(count);
+            Thread.sleep(991);
+            float usetime = System.currentTimeMillis() - starttime;
+            times++;
+            sumTime += usetime;
+            System.out.println(sumTime/times);
+//            System.out.println(count);
             count += 300;
         }
 
@@ -130,7 +136,7 @@ public class CreateData {
         for (Map.Entry<Long,double[]> entry : pyEntrySet) {
             py_bw_result.write(entry.getKey()+","+entry.getValue()[0]+","+entry.getValue()[1]+","+entry.getValue()[1]/entry.getValue()[0]+"\n");
         }
-        System.out.println(System.currentTimeMillis() - starttime);
+//        System.out.println(System.currentTimeMillis() - starttime);
 
         System.out.println("TB: "+atomIntTb);
         System.out.println("TM: "+atomIntTm);
