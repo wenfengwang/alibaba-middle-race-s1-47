@@ -7,8 +7,8 @@ import java.util.List;
 public class RaceConfig implements Serializable {
     public static final String TeamCode = "373058h4iq";
 
-    public static final boolean ONLINE = true;
-    public static final String TOPOLOGY_MODEL = "cluster";
+    public static final boolean ONLINE = false;
+    public static final String TOPOLOGY_MODEL = "local";
 
     // jstorm
     public static final String JstormTopologyName = "373058h4iq";
@@ -41,7 +41,7 @@ public class RaceConfig implements Serializable {
 //    public static final String CREATE_DATA_PREFIX = "E:\\mdw_data\\";
 
     public static final String CREATE_DATA_PREFIX = "/Users/wangwenfeng/mqdata/";
-    public static final String FILE_PRODUCER_SOURCE_PREFIX = "/Users/wangwenfeng/mqdata/";
+    public static final String FILE_PRODUCER_SOURCE_PREFIX = "/Users/wangwenfeng/mqdata/4h/";
 
 //    public static final String TB_LOG_PATH = "/home/dev/mdw_log/Tb_";
 //    public static final String TM_LOG_PATH = "/home/dev/mdw_log/Tm_";
