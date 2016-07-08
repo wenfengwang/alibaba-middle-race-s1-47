@@ -26,10 +26,10 @@ public class RaceConfig implements Serializable {
     public static final String prex_taobao = "platformTaobao_" + TeamCode + "_";
     public static final String prex_ratio = "ratio_" + TeamCode + "_";
 
-    public static final int TairNamespace = 19542;
-    public static final List<String> TairServerAddr = Arrays.asList(new String[]{"10.101.72.127:5198","10.101.72.129:5198"});
-//    public static final List<String> TairServerAddr = Arrays.asList(new String[]{"192.168.1.161:5198"});
-//    public static final int  TairNamespace = 1;
+//    public static final int TairNamespace = 19542;
+//    public static final List<String> TairServerAddr = Arrays.asList(new String[]{"10.101.72.127:5198","10.101.72.129:5198"});
+    public static final List<String> TairServerAddr = Arrays.asList(new String[]{"192.168.1.161:5198"});
+    public static final int  TairNamespace = 1;
 
 
 //    result path
@@ -40,8 +40,8 @@ public class RaceConfig implements Serializable {
 
 //    public static final String CREATE_DATA_PREFIX = "E:\\mdw_data\\";
 
-    public static final String CREATE_DATA_PREFIX = "/Users/wangwenfeng/mqdata/";
-    public static final String FILE_PRODUCER_SOURCE_PREFIX = "/Users/wangwenfeng/mqdata/4h/";
+    public static final String CREATE_DATA_PREFIX = "E:\\mdw_data\\unknow";
+    public static final String FILE_PRODUCER_SOURCE_PREFIX = "E:\\mdw_data\\";
 
 //    public static final String TB_LOG_PATH = "/home/dev/mdw_log/Tb_";
 //    public static final String TM_LOG_PATH = "/home/dev/mdw_log/Tm_";

@@ -41,11 +41,8 @@ public class CreateData {
         HashMap<Long, double[]> pyMap = new HashMap<>();
 
         final String [] topics = new String[]{RaceConfig.MqTaobaoTradeTopic, RaceConfig.MqTmallTradeTopic};
-        String str = "";
         int count = 0;
-        float times = 0;
-        float sumTime = 0;
-        while (count < 4320000){
+        while (count < 200000){
             long starttime = System.currentTimeMillis();
             for (int i = 0; i < 300; i++) {
                 try {
@@ -112,12 +109,8 @@ public class CreateData {
             tb_bw_data.flush();
             tm_bw_data.flush();
             py_bw_data.flush();
-            Thread.sleep(991);
-            float usetime = System.currentTimeMillis() - starttime;
-            times++;
-            sumTime += usetime;
-            System.out.println(sumTime/times);
-//            System.out.println(count);
+            Thread.sleep(850);
+            System.out.println(count);
             count += 300;
         }
 

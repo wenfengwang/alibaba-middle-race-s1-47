@@ -139,9 +139,9 @@ public class AnalyseResult {
         bw.close();
     }
 
-    public void analysePayment() throws IOException, InterruptedException {
+    public void analysePayment(String name) throws IOException, InterruptedException {
         Thread.sleep(5000);
-        BufferedReader py_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + "py_result.txt")));
+        BufferedReader py_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + name +".txt")));
         HashMap<Long, double[]> resutltMap = new HashMap<>();
         String result_str = py_br.readLine();
         while (result_str!=null) {
