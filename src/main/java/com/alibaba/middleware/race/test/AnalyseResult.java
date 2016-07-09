@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.jar.Pack200;
 
 /**
  * Created by wangwenfeng on 7/4/16.
@@ -87,6 +88,8 @@ public class AnalyseResult {
         Set<Map.Entry<Long, Double>> tbEntrySet = resutltMap.entrySet();
         int tbEntrySetSize = tbEntrySet.size();
         float tbSuccess = 0;
+        try {
+
         for (Map.Entry<Long, Double> entry : tbEntrySet) {
             long timeStamp = entry.getKey();
             Double tairTaobaoPrice = (Double) tairOperator.get(RaceConfig.prex_taobao+timeStamp);
@@ -102,6 +105,9 @@ public class AnalyseResult {
                                                                 ", Producer: "+ RaceUtils.round(entry.getValue()) + "\n";
             }
             bw.write(str);
+        }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         bw.write("Taobao准确率: " + tbSuccess/tbEntrySetSize + "\n");
         bw.flush();
@@ -123,6 +129,8 @@ public class AnalyseResult {
         Set<Map.Entry<Long, Double>> tmEntrySet = resutltMap.entrySet();
         int tmEntrySetSize = tmEntrySet.size();
         float tmSuccess = 0;
+        try {
+
         for (Map.Entry<Long, Double> entry : tmEntrySet) {
             long timeStamp = entry.getKey();
             Double tairTmallPrice = (Double) tairOperator.get(RaceConfig.prex_tmall+timeStamp);
@@ -138,6 +146,9 @@ public class AnalyseResult {
                                                             ", Producer: "+ RaceUtils.round(entry.getValue()) + "\n";
             }
             bw.write(str);
+        }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         bw.write("Tmall准确率: " + tmSuccess/tmEntrySetSize + "\n");
         bw.flush();

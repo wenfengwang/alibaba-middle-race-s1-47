@@ -12,7 +12,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Created by sxian.wang on 2016/7/9.
  */
 public class AmountProcess {
-    public static final ConcurrentHashMap<Long,Amount> amountMap = new ConcurrentHashMap<>();
+    public  final ConcurrentHashMap<Long,Amount> amountMap = new ConcurrentHashMap<>();
     private final int THREAD_NUM = 5;
     private final LinkedBlockingQueue<Amount> toTairQueue = new LinkedBlockingQueue<>();
 
