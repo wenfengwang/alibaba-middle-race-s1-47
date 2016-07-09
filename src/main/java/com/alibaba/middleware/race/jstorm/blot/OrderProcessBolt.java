@@ -61,11 +61,16 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
                 long timeStamp = (long) input.getValue(0);
                 long orderId = (long) input.getValue(1);
                 double price = (double) input.getValue(2);
+                if (timeStamp == 0 && orderId == 0 && price == 0) {
+                    collector.emit(RaceConfig.TAOBAO_PERSIST_STREAM_ID, new Values(0, 0));
+                    collector.emit(RaceConfig.TMALL_PERSIST_STREAM_ID, new Values(0, 0));
+
+                }
                 if (TBOrderSet.contains(orderId)) {
-                    collector.emit(RaceConfig.TAOBAO_PERSIST_STREAM_ID,new Values(timeStamp, price));
+                    collector.emit(RaceConfig.TAOBAO_PERSIST_STREAM_ID, new Values(timeStamp, price));
                     emitWaittingMsg(1,collector);
                 } else if (TMOrderSet.contains(orderId)){
-                    collector.emit(RaceConfig.TMALL_STREAM_ID,new Values(timeStamp, price));
+                    collector.emit(RaceConfig.TMALL_PERSIST_STREAM_ID, new Values(timeStamp, price));
                     emitWaittingMsg(2,collector);
                 } else {
                     unfindedOrder.offer(new Object[]{timeStamp,orderId,price});
@@ -89,7 +94,6 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        // todo 下游再加个bolt
         declarer.declareStream(RaceConfig.TAOBAO_PERSIST_STREAM_ID,new Fields("timestamp","amount"));
         declarer.declareStream(RaceConfig.TMALL_PERSIST_STREAM_ID,new Fields("timestamp","amount"));
     }

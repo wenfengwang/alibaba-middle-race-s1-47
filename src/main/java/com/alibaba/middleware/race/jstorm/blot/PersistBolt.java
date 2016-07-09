@@ -21,9 +21,6 @@ import java.util.Set;
  * 持久化数据模块
  */
 
-// TODO 各个Topic的持久化bolt应该仅设置为一个, 如果设置为多个时候可能会导致数据分流,而使得消息缺失, 必须去从Tair中读取.而且多个持久化的
-// TODO bolt,会存在若干线程不安全的情况
-
 public class PersistBolt implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(PersistBolt.class);
 

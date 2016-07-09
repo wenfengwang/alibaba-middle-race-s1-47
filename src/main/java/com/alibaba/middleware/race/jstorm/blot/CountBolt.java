@@ -51,7 +51,7 @@ public class CountBolt implements IBasicBolt, Serializable {
             for (int i = 0; i < size; i++) {
                 body = list.get(i);
                 if (body.length == 2 && body[0] == 0 && body[1] == 0) {
-                    collector.emit(new Values(new ArrayList<Long>())); // todo 改下游的结束逻辑
+//                    collector.emit(new Values(new ArrayList<Long>()));
                     continue;
                 }
 
