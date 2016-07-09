@@ -23,11 +23,15 @@ public class TairOperatorImpl implements Serializable {
     private static Logger LOG = LoggerFactory.getLogger(TairOperatorImpl.class);
     DefaultTairManager tairManager = new DefaultTairManager();
 
-    public TairOperatorImpl(List confServers, int nameSpace) {
-        this.nameSpace = nameSpace;
-//        tairManager.de
-        tairManager.setConfigServerList(confServers);
+    public TairOperatorImpl() {
         tairManager.setGroupName(RaceConfig.TairGroup);
+        if (RaceConfig.ONLINE) {
+            this.nameSpace = RaceConfig.ONLINE_TAIR_NAMESPACE;
+            tairManager.setConfigServerList(RaceConfig.ONLINE_TAIR_SERVER_ADDR);
+        } else {
+            this.nameSpace = RaceConfig.TAIR_NAMESPACE;
+            tairManager.setConfigServerList(RaceConfig.TAIR_SERVER_ADDR);
+        }
         tairManager.init();
     }
 

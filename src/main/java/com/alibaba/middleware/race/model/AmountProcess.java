@@ -22,7 +22,7 @@ public class AmountProcess {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    TairOperatorImpl tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr, RaceConfig.TairNamespace);
+                    TairOperatorImpl tairOperator = new TairOperatorImpl();
                     try {
                         while (true) {
                             Amount amount = toTairQueue.take();

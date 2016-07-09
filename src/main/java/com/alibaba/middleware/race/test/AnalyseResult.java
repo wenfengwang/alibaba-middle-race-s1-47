@@ -16,7 +16,7 @@ import java.util.jar.Pack200;
  */
 public class AnalyseResult {
 
-    private final TairOperatorImpl tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr, RaceConfig.TairNamespace);
+    private final TairOperatorImpl tairOperator = new TairOperatorImpl();
     private BufferedWriter bw;
     private volatile static long startTime = 0;
 

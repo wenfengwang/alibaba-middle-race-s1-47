@@ -11,13 +11,10 @@ import java.util.concurrent.*;
  */
 public class RatioProcess {
     public static final ExecutorService fixedThread = Executors.newFixedThreadPool(1);
-    private final TairOperatorImpl tairOperator;
-//    private final ConcurrentHashMap<Long,Double> amountMap = new ConcurrentHashMap<>();
-//    private final ConcurrentHashMap<Long,Double> amountMap = new ConcurrentHashMap<>();
+    private final TairOperatorImpl tairOperator = new TairOperatorImpl();
     private final LinkedBlockingQueue<Ratio> ratioQueue = new LinkedBlockingQueue<>();
 
     public RatioProcess() {
-        tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr,RaceConfig.TairNamespace);
         new Thread(new Runnable() {
             @Override
             public void run() {
