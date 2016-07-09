@@ -54,14 +54,12 @@ public class PersistBolt implements IBasicBolt, Serializable {
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) {
         try {
-            // TODO 最后的持久化有问题  天猫的生成数据是不是有问题
             HashMap<Long, Double> tuple = (HashMap<Long, Double>) input.getValue(0);
             Set<Map.Entry<Long, Double>> entrySet = tuple.entrySet();
             for (Map.Entry<Long, Double> entry : entrySet) {
                 long minuteTimeStamp = entry.getKey();
                 double price = entry.getValue();
                 if (endFlag) {
-                    // 这里面应该不会存在极端情况吧?
                     Double totalPrice = amountMap.get(minuteTimeStamp); // 收到endflag的时候current相关的已被处理。
                     if (totalPrice == null) {
                         totalPrice = 0.0;

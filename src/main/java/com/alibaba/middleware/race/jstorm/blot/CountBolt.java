@@ -48,7 +48,6 @@ public class CountBolt implements IBasicBolt, Serializable {
         try {
             MqTuple mqTuple = (MqTuple) input.getValue(0);
             List<byte[]> list = mqTuple.getMsgList();
-            String topic = mqTuple.getTopic();
             byte[] body;
             int size = list.size();
 
@@ -69,7 +68,7 @@ public class CountBolt implements IBasicBolt, Serializable {
 
                 if (checkDuplicated) {
                     HashSet<Long> orderIdSet = orderMap.get(timeStamp);
-                    if (orderIdSet == null) { // 创建orderIdSet
+                    if (orderIdSet == null) {
                         synchronized (lockObj) {
                             orderIdSet = orderMap.get(timeStamp);
                             if (orderIdSet == null) {
