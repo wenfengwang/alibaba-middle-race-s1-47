@@ -74,12 +74,12 @@ public class PersistBolt implements IBasicBolt, Serializable {
                         }
                     }
                     endFlag = true;
-                    amountProcess.updateAmount(currentTimeStamp,amount,prefix);
+                    amountProcess.updateAmount(currentTimeStamp,sumAmount,prefix);
                     amountProcess.writeTair(currentTimeStamp);
                     sumAmount = 0;
                     return;
                 } else {
-                    amountProcess.updateAmount(currentTimeStamp,amount,prefix);
+                    amountProcess.updateAmount(currentTimeStamp,sumAmount,prefix);
                     amountProcess.writeTair(currentTimeStamp);
                     currentTimeStamp = minuteTimeStamp;
                     sumAmount = 0;
