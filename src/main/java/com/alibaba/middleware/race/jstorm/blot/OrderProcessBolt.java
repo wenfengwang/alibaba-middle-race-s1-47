@@ -28,10 +28,11 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
     public static final LinkedList<Object[]> tbWaittingEmitList = new LinkedList<>();
     public static final LinkedList<Object[]> tmWaittingEmitList = new LinkedList<>();
 
-    private ExecutorService fixedThreadPool = Executors.newFixedThreadPool(5);
+    private transient ExecutorService fixedThreadPool;
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
+        fixedThreadPool = Executors.newFixedThreadPool(5);
         for (int i = 0;i<2;i++) {
             new Thread(new Runnable() {
                 @Override
