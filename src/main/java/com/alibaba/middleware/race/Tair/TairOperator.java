@@ -9,10 +9,10 @@ public class TairOperator {
     public static void main(String[] args) {
 
         TairOperatorImpl tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr,RaceConfig.TairNamespace);
-        System.out.println("Result: "+tairOperator.get("platformTaobao_373058h4iq_1467951960"));
-        System.out.println("Result: "+tairOperator.get("platformTaobao_373058h4iq_1467959640"));
-        System.out.println("Result: "+tairOperator.get("platformTaobao_373058h4iq_1467952980"));
-        System.out.println("Result: "+tairOperator.get("platformTaobao_373058h4iq_1467946320"));
+        System.out.println("Result: "+tairOperator.get("platformTaobao_373058h4iq_1467960540"));
+        System.out.println("Result: "+tairOperator.get("platformTaobao_373058h4iq_1467960600"));
+        System.out.println("Result: "+tairOperator.get("platformTaobao_373058h4iq_1467960480"));
+        System.out.println("Result: "+tairOperator.get("platformTaobao_373058h4iq_1467960420"));
 
     }
 
