@@ -15,10 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -49,20 +46,17 @@ public class CountBolt implements IBasicBolt, Serializable {
             byte[] body;
             int size = list.size();
 
-            HashMap<Long, Double> emitTuple = new HashMap<>();
+//            HashMap<Long, ArrayList<Long>> emitTuple = new HashMap<>();
+            ArrayList<Long> emitTuple = new ArrayList<>();
             for (int i = 0; i < size; i++) {
                 body = list.get(i);
                 if (body.length == 2 && body[0] == 0 && body[1] == 0) {
-                    emitTuple.put(-1l,-1.0);
+                    collector.emit(new Values(new ArrayList<Long>())); // todo 改下游的结束逻辑
                     continue;
                 }
 
                 OrderMessage order = RaceUtils.readKryoObject(OrderMessage.class, body);
                 long timeStamp = RaceUtils.toMinuteTimeStamp(order.getCreateTime());
-                Double amount = emitTuple.get(timeStamp);
-                if (amount == null) {
-                    amount = 0.0;
-                }
 
                 if (checkDuplicated) {
                     HashSet<Long> orderIdSet = orderMap.get(timeStamp);
@@ -84,8 +78,15 @@ public class CountBolt implements IBasicBolt, Serializable {
                         }
                     }
                 }
-                amount += order.getTotalPrice();
-                emitTuple.put(timeStamp,amount);
+
+                emitTuple.add(order.getOrderId());
+//                if (amount == null) {
+//                    amount = new ArrayList<>();
+//                    amount.add(orderId);
+//                    emitTuple.put(timeStamp, amount);
+//                } else {
+//                    amount.add(orderId);
+//                }
             }
             collector.emit(new Values(emitTuple));
         } catch (Exception e) {

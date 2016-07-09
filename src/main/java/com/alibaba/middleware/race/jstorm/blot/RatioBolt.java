@@ -53,44 +53,29 @@ public class RatioBolt implements IBasicBolt, Serializable {
             byte[] body;
             int size = list.size();
 
-            HashMap<Long,double[]> emitTuple = new HashMap<>();
+            HashMap<Long,double[]> emitPayTuple = new HashMap<>();
+
             for (int i = 0; i < size; i++) {
                 body = list.get(i);
                 if (body.length == 2 && body[0] == 0 && body[1] == 0) {
-                    emitTuple.put(-1l,new double[]{-1,-1});
+                    emitPayTuple.put(-1l,new double[]{-1,-1});
                     continue;
                 }
                 PaymentMessage paymentMessage = RaceUtils.readKryoObject(PaymentMessage.class, body);
                 long timeStamp = RaceUtils.toMinuteTimeStamp(paymentMessage.getCreateTime());
-                double[] node = emitTuple.get(timeStamp); // 0 PC 1 MOBILE
+                long orderId = paymentMessage.getOrderId();
+                double price = paymentMessage.getPayAmount();
+
+                double[] node = emitPayTuple.get(timeStamp); // 0 PC 1 MOBILE
                 if (node == null) {
                     node = new double[]{0,0};
                 }
 
-//                if (checkDuplicated) {
-//                    HashSet<Long> orderIdSet = paymentMap.get(timeStamp);
-//                    if (orderIdSet == null) { // 创建orderIdSet
-//                        synchronized (lockObj) {
-//                            orderIdSet = paymentMap.get(timeStamp);
-//                            if (orderIdSet == null) {
-//                                orderIdSet = new HashSet<>();
-//                                paymentMap.put(timeStamp, orderIdSet);
-//                            }
-//                        }
-//                    }
-//
-//                    if (orderIdSet.contains(timeStamp)) {
-//                        continue;
-//                    } else {
-//                        synchronized (orderIdSet) {
-//                            orderIdSet.add(paymentMessage.getOrderId());
-//                        }
-//                    }
-//                }
-                node[paymentMessage.getPayPlatform()] += paymentMessage.getPayAmount();
-                emitTuple.put(timeStamp,node);
+                node[paymentMessage.getPayPlatform()] += price;
+                collector.emit(RaceConfig.PAY_ORDER_STREAM_ID, new Values(paymentMessage.getCreateTime(),orderId,price));
+                emitPayTuple.put(timeStamp,node);
             }
-            collector.emit(new Values(emitTuple));
+            collector.emit(RaceConfig.PAY_STREAM_ID,new Values(emitPayTuple));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -103,7 +88,8 @@ public class RatioBolt implements IBasicBolt, Serializable {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("payInfoHash"));
+        declarer.declareStream(RaceConfig.PAY_STREAM_ID,new Fields("payinfo"));
+        declarer.declareStream(RaceConfig.PAY_ORDER_STREAM_ID,new Fields("timetamp","orderid","price"));
     }
 
     @Override

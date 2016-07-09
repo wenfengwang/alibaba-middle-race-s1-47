@@ -53,10 +53,18 @@ public class RaceConfig implements Serializable {
 
     // Topology config
     public static final String SPOUT_NAME = "BigSpout";
+    // spout -> 序列化
     public static final String TAOBAO_STREAM_ID = "TaoBao_Stream";
     public static final String TMALL_STREAM_ID = "Tmall_Stream";
-
     public static final String PAYMENT_STREAM_ID = "Payment_Stream";
+    // 支付信息流
+    public static final String PAY_STREAM_ID = "ToPay_Stream";
+    public static final String PAY_ORDER_STREAM_ID = "ToOrder_Stream";
+    // 订单持久化流
+    public static final String TAOBAO_PERSIST_STREAM_ID = "TaobaoPersist_Stream";
+    public static final String TMALL_PERSIST_STREAM_ID = "TmallPersist_Stream";
+
+    public static final String ORDER_TRANS_BOLT = "OrderTrans";
     public static final String TAOBAO_COUNT_BOLT_ID = "CountTaobao";
     public static final String TAOBAO_PERSIST_BOLT_ID = "PerisistTaobao";
     public static final String TMALL_COUNT_BOLT_ID = "CountTmall";

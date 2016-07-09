@@ -30,7 +30,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
     private final String prefix;
     private volatile long currentTimeStamp;
     private static volatile boolean endFlag = false;
-    private double amount;
+    private double sumAmount;
     private TopologyContext context;
 
     private transient AmountProcess amountProcess;
@@ -46,53 +46,49 @@ public class PersistBolt implements IBasicBolt, Serializable {
     public void prepare(Map stormConf, TopologyContext context) {
         this.context = context;
         this.currentTimeStamp = 0;
-        amount = 0;
+        sumAmount = 0;
         amountProcess = new AmountProcess();
     }
 
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) {
         try {
-            HashMap<Long, Double> tuple = (HashMap<Long, Double>) input.getValue(0);
-            Set<Map.Entry<Long, Double>> entrySet = tuple.entrySet();
-            for (Map.Entry<Long, Double> entry : entrySet) {
-                long minuteTimeStamp = entry.getKey();
-                double price = entry.getValue();
-                if (endFlag) {
-                    amountProcess.updateAmount(minuteTimeStamp,price,prefix);
-                    amountProcess.writeTair(minuteTimeStamp);
-                    continue;
-                }
-
-                // 因外在大概率上消息顺序是有序的,所以仅当时间戳的值改变后我们对当前的值进行持久化操作
-                // 每次应该都是写current的时间戳
-                if (currentTimeStamp != minuteTimeStamp) {
-                    if (currentTimeStamp == 0 ) { // 初始化
-                        amountProcess.updateAmount(minuteTimeStamp,price,prefix);
-                        currentTimeStamp = minuteTimeStamp;
-                        continue;
-                    } else if (minuteTimeStamp == -1 && price == -1) {
-                        if (!RaceConfig.ONLINE) {
-                            if (context.getThisComponentId().equals(RaceConfig.TAOBAO_PERSIST_BOLT_ID)) {
-                                new Thread(new AnalyseThread(RaceConfig.TB_LOG_PATH,1)).start();
-                            } else {
-                                new Thread(new AnalyseThread(RaceConfig.TM_LOG_PATH,2)).start();
-                            }
-                        }
-                        endFlag = true;
-                        amountProcess.updateAmount(currentTimeStamp,amount,prefix);
-                        amountProcess.writeTair(currentTimeStamp);
-                        amount = 0;
-                        continue;
-                    } else {
-                        amountProcess.updateAmount(currentTimeStamp,amount,prefix);
-                        amountProcess.writeTair(currentTimeStamp);
-                        currentTimeStamp = minuteTimeStamp;
-                        amount = 0;
-                    }
-                }
-                amount += price;
+            long minuteTimeStamp = (long) input.getValue(0);
+            double amount = (double) input.getValue(1);
+            if (endFlag) {
+                amountProcess.updateAmount(minuteTimeStamp,amount,prefix);
+                amountProcess.writeTair(minuteTimeStamp);
+                return;
             }
+
+            // 因外在大概率上消息顺序是有序的,所以仅当时间戳的值改变后我们对当前的值进行持久化操作
+            // 每次应该都是写current的时间戳
+            if (currentTimeStamp != minuteTimeStamp) {
+                if (currentTimeStamp == 0 ) { // 初始化
+                    amountProcess.updateAmount(minuteTimeStamp,amount,prefix);
+                    currentTimeStamp = minuteTimeStamp;
+                    return;
+                } else if (minuteTimeStamp == -1 && amount == -1) {
+                    if (!RaceConfig.ONLINE) {
+                        if (context.getThisComponentId().equals(RaceConfig.TAOBAO_PERSIST_BOLT_ID)) {
+                            new Thread(new AnalyseThread(RaceConfig.TB_LOG_PATH,1)).start();
+                        } else {
+                            new Thread(new AnalyseThread(RaceConfig.TM_LOG_PATH,2)).start();
+                        }
+                    }
+                    endFlag = true;
+                    amountProcess.updateAmount(currentTimeStamp,amount,prefix);
+                    amountProcess.writeTair(currentTimeStamp);
+                    sumAmount = 0;
+                    return;
+                } else {
+                    amountProcess.updateAmount(currentTimeStamp,amount,prefix);
+                    amountProcess.writeTair(currentTimeStamp);
+                    currentTimeStamp = minuteTimeStamp;
+                    sumAmount = 0;
+                }
+            }
+            sumAmount += amount;
         } catch (Exception e) {
             e.printStackTrace();
         }
