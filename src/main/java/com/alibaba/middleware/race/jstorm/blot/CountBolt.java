@@ -29,7 +29,6 @@ public class CountBolt implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(CountBolt.class);
 
     private static ConcurrentHashMap<Long,HashSet<Long>> orderMap;
-    private final static AtomicInteger[] atomicIntegers = new AtomicInteger[]{new AtomicInteger(0),new AtomicInteger(0)};
     private final static Object lockObj = new Object();
 
     private final boolean checkDuplicated = RaceConfig.CHECK_ORDER_DUPLICATED;

@@ -25,6 +25,7 @@ public class TairOperatorImpl implements Serializable {
 
     public TairOperatorImpl(List confServers, int nameSpace) {
         this.nameSpace = nameSpace;
+//        tairManager.de
         tairManager.setConfigServerList(confServers);
         tairManager.setGroupName(RaceConfig.TairGroup);
         tairManager.init();

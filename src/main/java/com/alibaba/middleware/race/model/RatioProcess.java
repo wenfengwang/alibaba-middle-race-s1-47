@@ -10,7 +10,7 @@ import java.util.concurrent.*;
  * Created by sxian.wang on 2016/7/8.
  */
 public class RatioProcess {
-    public static final ExecutorService fixedThread = Executors.newFixedThreadPool(10);
+    public static final ExecutorService fixedThread = Executors.newFixedThreadPool(1);
     private final TairOperatorImpl tairOperator;
 //    private final ConcurrentHashMap<Long,Double> amountMap = new ConcurrentHashMap<>();
 //    private final ConcurrentHashMap<Long,Double> amountMap = new ConcurrentHashMap<>();

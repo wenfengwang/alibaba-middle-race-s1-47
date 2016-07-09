@@ -3,19 +3,20 @@ package com.alibaba.middleware.race.model;
 import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 
+import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by wangwenfeng on 7/1/16.
  */
-public class Ratio {
+public class Ratio implements Serializable{
     private final long timeStamp; // 整分时间戳
     private final String  key;
     private volatile double ratio; // 比值
     public AtomicBoolean toBeTair = new AtomicBoolean(false);
     public final long createTime;
-    private long lastUpdate = -1;
-    private long lastToTair = -1;
+    private volatile long lastUpdate = -1;
+    private volatile long lastToTair = -1;
 
     private volatile double currentPCAmount; // 当前整分时刻内PC端的量
     private volatile double currentMobileAmount; // 当前整分时刻内移动端的量
@@ -129,8 +130,10 @@ public class Ratio {
         return lastToTair;
     }
     public void updateCurrentAmount(double[] amount) {  //double pc, double mobile
-        currentPCAmount += amount[0];
-        currentMobileAmount += amount[1];
+        synchronized (this) {
+            currentPCAmount += amount[0];
+            currentMobileAmount += amount[1];
+        }
         updateAmount(amount);
 
         Ratio ratio = nextRtaio;
@@ -140,12 +143,15 @@ public class Ratio {
         }
     }
 
-    private void updateAmount(double[] amount) {
-        PCAmount += amount[0];
-        MobileAmount += amount[1];
-        lastUpdate = System.currentTimeMillis();
-        if (!toBeTair.get())
-            toBeTair.set(true);
+    private synchronized void updateAmount(double[] amount) {
+        synchronized (this) {
+            PCAmount += amount[0];
+            MobileAmount += amount[1];
+            lastUpdate = System.currentTimeMillis();
+            if (!toBeTair.get())
+                toBeTair.set(true);
+        }
+        System.out.println("----------------------------------------------");
     }
 
     public void toTair(TairOperatorImpl tairOperator) {
@@ -162,10 +168,13 @@ public class Ratio {
     }
 
     private void writeRatio(TairOperatorImpl tairOperator) {
-        ratio = (MobileAmount == 0 || PCAmount == 0) ? 0 : MobileAmount/PCAmount;
-        tairOperator.write(key,ratio);
-        lastToTair = System.currentTimeMillis();
-        toBeTair.set(false);
+        synchronized (this) {
+            ratio = (MobileAmount == 0 || PCAmount == 0) ? 0 : MobileAmount/PCAmount;
+            tairOperator.write(key,ratio);
+            lastToTair = System.currentTimeMillis();
+            toBeTair.set(false);
+        }
+        System.out.println("**********************************************");
     }
 
 }

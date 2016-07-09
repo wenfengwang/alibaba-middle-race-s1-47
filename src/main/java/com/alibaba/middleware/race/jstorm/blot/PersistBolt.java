@@ -7,6 +7,7 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
 import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
+import com.alibaba.middleware.race.model.AmountProcess;
 import com.alibaba.middleware.race.test.AnalyseThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,16 +29,17 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PersistBolt implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(PersistBolt.class);
 
-    private Map<Long, Double> amountMap;
-    TairOperatorImpl tairOperator;
-
+    private final String prefix;
     private volatile long currentTimeStamp;
     private static volatile boolean endFlag = false;
     private double amount;
-    private String prefix;
     private TopologyContext context;
 
-    public PersistBolt() {}
+    private transient AmountProcess amountProcess;
+
+    public PersistBolt() {
+        prefix = null;
+    }
     public PersistBolt(String prefix) {
         this.prefix = prefix;
     }
@@ -45,10 +47,9 @@ public class PersistBolt implements IBasicBolt, Serializable {
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
         this.context = context;
-        amountMap = new ConcurrentHashMap<>();
         this.currentTimeStamp = 0;
         amount = 0;
-        tairOperator = new TairOperatorImpl(RaceConfig.TairServerAddr, RaceConfig.TairNamespace);
+        amountProcess = new AmountProcess();
     }
 
     @Override
@@ -60,23 +61,17 @@ public class PersistBolt implements IBasicBolt, Serializable {
                 long minuteTimeStamp = entry.getKey();
                 double price = entry.getValue();
                 if (endFlag) {
-                    Double totalPrice = amountMap.get(minuteTimeStamp); // 收到endflag的时候current相关的已被处理。
-                    if (totalPrice == null) {
-                        totalPrice = 0.0;
-                    }
-                    totalPrice += price;
-                    amountMap.put(minuteTimeStamp,totalPrice);
-                    tairOperator.write(prefix+minuteTimeStamp, totalPrice);
+                    amountProcess.updateAmount(minuteTimeStamp,price,prefix);
+                    amountProcess.writeTair(minuteTimeStamp);
                     continue;
                 }
 
                 // 因外在大概率上消息顺序是有序的,所以仅当时间戳的值改变后我们对当前的值进行持久化操作
                 // 每次应该都是写current的时间戳
                 if (currentTimeStamp != minuteTimeStamp) {
-                    double totalPrice = amountMap.get(currentTimeStamp) == null ? amount : amountMap.get(currentTimeStamp) + amount;
                     if (currentTimeStamp == 0 ) { // 初始化
+                        amountProcess.updateAmount(minuteTimeStamp,price,prefix);
                         currentTimeStamp = minuteTimeStamp;
-                        amountMap.put(currentTimeStamp, price);
                         continue;
                     } else if (minuteTimeStamp == -1 && price == -1) {
                         if (!RaceConfig.ONLINE) {
@@ -87,13 +82,13 @@ public class PersistBolt implements IBasicBolt, Serializable {
                             }
                         }
                         endFlag = true;
-                        amountMap.put(currentTimeStamp, totalPrice);
-                        tairOperator.write(prefix+currentTimeStamp, totalPrice);
+                        amountProcess.updateAmount(currentTimeStamp,amount,prefix);
+                        amountProcess.writeTair(currentTimeStamp);
                         amount = 0;
                         continue;
                     } else {
-                        amountMap.put(currentTimeStamp, totalPrice);
-                        tairOperator.write(prefix+currentTimeStamp, totalPrice);
+                        amountProcess.updateAmount(currentTimeStamp,amount,prefix);
+                        amountProcess.writeTair(currentTimeStamp);
                         currentTimeStamp = minuteTimeStamp;
                         amount = 0;
                     }
@@ -107,10 +102,10 @@ public class PersistBolt implements IBasicBolt, Serializable {
 
     @Override
     public void cleanup() {
-        Set<Map.Entry<Long, Double>> entrySet = amountMap.entrySet();
-        for(Map.Entry<Long, Double> entry : entrySet) {
-            LOG.info("***** " + prefix+entry.getKey()+": " + entry.getValue()+ " *****");
-        }
+//        Set<Map.Entry<Long, Double>> entrySet = amountMap.entrySet();
+//        for(Map.Entry<Long, Double> entry : entrySet) {
+//            LOG.info("***** " + prefix+entry.getKey()+": " + entry.getValue()+ " *****");
+//        }
     }
 
     @Override
