@@ -73,6 +73,7 @@ public class AnalyseResult {
 
 
     public void analyseTaobao() throws IOException, InterruptedException {
+        Thread.currentThread().setName("analyseTaobao");
         Thread.sleep(5000);
         BufferedReader tb_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + "tb_result.txt")));
         HashMap<Long, Double> resutltMap = new HashMap<>();
@@ -88,7 +89,8 @@ public class AnalyseResult {
         float tbSuccess = 0;
         for (Map.Entry<Long, Double> entry : tbEntrySet) {
             long timeStamp = entry.getKey();
-            double tairTaobaoPrice = tairOperator.get(RaceConfig.prex_taobao+timeStamp) == null ? 0.0 :(double)  tairOperator.get(RaceConfig.prex_taobao+timeStamp) ;
+            Double tairTaobaoPrice = (Double) tairOperator.get(RaceConfig.prex_taobao+timeStamp);
+            tairTaobaoPrice = tairTaobaoPrice == null ? 0.0 : tairTaobaoPrice ;
 
             String str;
             if (tairTaobaoPrice > entry.getValue()-1 && tairTaobaoPrice < entry.getValue()+1) {
@@ -107,6 +109,7 @@ public class AnalyseResult {
     }
 
     public void analyseTmall() throws IOException, InterruptedException {
+        Thread.currentThread().setName("analyseTmall");
         Thread.sleep(5000);
         BufferedReader tm_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + "tm_result.txt")));
         HashMap<Long, Double> resutltMap = new HashMap<>();
@@ -122,7 +125,8 @@ public class AnalyseResult {
         float tmSuccess = 0;
         for (Map.Entry<Long, Double> entry : tmEntrySet) {
             long timeStamp = entry.getKey();
-            double tairTmallPrice = tairOperator.get(RaceConfig.prex_tmall+timeStamp) == null ? 0.0 :(double)  tairOperator.get(RaceConfig.prex_tmall+timeStamp) ;
+            Double tairTmallPrice = (Double) tairOperator.get(RaceConfig.prex_tmall+timeStamp);
+            tairTmallPrice = tairTmallPrice == null ? 0.0 : tairTmallPrice ;
 
             String str;
             if (tairTmallPrice > entry.getValue()-1 && tairTmallPrice <= entry.getValue()+1) {
@@ -141,6 +145,7 @@ public class AnalyseResult {
     }
 
     public void analysePayment(String name) throws IOException, InterruptedException {
+        Thread.currentThread().setName("analysePayment");
         Thread.sleep(5000);
         BufferedReader py_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + name +".txt")));
         TreeMap<Long, double[]> resutltMap = new TreeMap<>();

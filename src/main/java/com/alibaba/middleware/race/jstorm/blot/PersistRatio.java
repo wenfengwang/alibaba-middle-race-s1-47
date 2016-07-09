@@ -61,7 +61,6 @@ public class PersistRatio implements IBasicBolt, Serializable {
             if (!RaceConfig.ONLINE) {
                 try {
                     new Thread(new AnalyseThread(RaceConfig.PY_LOG_PATH,3)).start();
-//                    new Thread(new AnalyseThread(RaceConfig.PY_LOG_PATH+"_confirm",4)).start();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

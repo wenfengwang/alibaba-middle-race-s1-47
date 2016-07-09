@@ -162,12 +162,12 @@ public class Ratio implements Serializable{
         Ratio ratio = nextRtaio;
 
         while (ratio != null) {
-            ratio.toTair(tairOperator);
-            ratio.getNextRtaio();
+            ratio.writeRatio(tairOperator);
+            ratio = ratio.getNextRtaio();
         }
     }
 
-    private void writeRatio(TairOperatorImpl tairOperator) {
+    public void writeRatio(TairOperatorImpl tairOperator) {
         synchronized (this) {
             ratio = (MobileAmount == 0 || PCAmount == 0) ? 0 : MobileAmount/PCAmount;
             tairOperator.write(key,ratio);

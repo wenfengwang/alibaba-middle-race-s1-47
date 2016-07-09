@@ -1,12 +1,9 @@
 package com.alibaba.middleware.race.model;
 
-import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 import com.google.common.util.concurrent.AtomicDouble;
 
 import java.io.Serializable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by sxian.wang on 2016/7/9.
@@ -26,7 +23,7 @@ public class Amount implements Serializable {
         this.amount.addAndGet(amount);
     }
 
-    public void toTair(TairOperatorImpl tairOperator) {
+    public void writeTair(TairOperatorImpl tairOperator) {
         tairOperator.write(key, amount);
     }
 }

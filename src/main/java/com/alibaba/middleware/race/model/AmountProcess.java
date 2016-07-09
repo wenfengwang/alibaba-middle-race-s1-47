@@ -26,7 +26,7 @@ public class AmountProcess {
                     try {
                         while (true) {
                             Amount amount = toTairQueue.take();
-                            amount.toTair(tairOperator);
+                            amount.writeTair(tairOperator);
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
