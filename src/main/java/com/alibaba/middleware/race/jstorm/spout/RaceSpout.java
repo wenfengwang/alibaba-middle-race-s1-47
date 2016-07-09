@@ -195,6 +195,7 @@ public class RaceSpout implements IRichSpout, MessageListenerConcurrently, IAckV
                 break;
             case RaceConfig.MqPayTopic:
                 collector.emit(RaceConfig.PAYMENT_STREAM_ID,new Values(mqTuple));
+//                LOG.info("***** emit tuple...... *****");
                 break;
         }
     }
