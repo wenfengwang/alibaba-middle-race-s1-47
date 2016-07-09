@@ -72,7 +72,7 @@ public class RatioBolt implements IBasicBolt, Serializable {
                 }
 
                 node[paymentMessage.getPayPlatform()] += price;
-                collector.emit(RaceConfig.PAY_ORDER_STREAM_ID, new Values(paymentMessage.getCreateTime(),orderId,price));
+                collector.emit(RaceConfig.PAY_ORDER_STREAM_ID, new Values(timeStamp,orderId,price));
                 emitPayTuple.put(timeStamp,node);
             }
             collector.emit(RaceConfig.PAY_STREAM_ID,new Values(emitPayTuple));
