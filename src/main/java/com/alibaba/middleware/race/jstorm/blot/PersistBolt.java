@@ -6,7 +6,6 @@ import backtype.storm.topology.IBasicBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
 import com.alibaba.middleware.race.RaceConfig;
-import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 import com.alibaba.middleware.race.model.AmountProcess;
 import com.alibaba.middleware.race.test.AnalyseThread;
 import org.slf4j.Logger;
@@ -16,7 +15,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by wangwenfeng on 5/27/16.

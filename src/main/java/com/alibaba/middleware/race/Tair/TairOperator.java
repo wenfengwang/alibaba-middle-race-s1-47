@@ -1,7 +1,5 @@
 package com.alibaba.middleware.race.Tair;
 
-import com.alibaba.middleware.race.RaceConfig;
-
 /**
  * Created by wangwenfeng on 5/25/16.
  */

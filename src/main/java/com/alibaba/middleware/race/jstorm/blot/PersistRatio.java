@@ -6,7 +6,6 @@ import backtype.storm.topology.IBasicBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
 import com.alibaba.middleware.race.RaceConfig;
-import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 import com.alibaba.middleware.race.model.Ratio;
 import com.alibaba.middleware.race.model.RatioProcess;
 import com.alibaba.middleware.race.test.AnalyseThread;
@@ -15,11 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Created by wangwenfeng on 7/1/16.
@@ -66,7 +61,7 @@ public class PersistRatio implements IBasicBolt, Serializable {
                 }
             }
             Ratio _ratio = ratioMap.get(currentTimeStamp);
-            while (_ratio != null) {
+            if (_ratio != null) {
                 ratioProcess.updateRatio(_ratio);
             }
             endFlag = true;
@@ -116,7 +111,6 @@ public class PersistRatio implements IBasicBolt, Serializable {
             if (_ratio != null) {
                 ratioProcess.updateRatio(_ratio);
             }
-
             currentTimeStamp = minuteTimeStamp;
         }
     }

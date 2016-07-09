@@ -63,7 +63,7 @@ public class Ratio implements Serializable{
         key = RaceConfig.prex_ratio + timeStamp;
         switch (flag) {
             case 0:
-                this.ratio = 0; // TODO ratio在构造器里面设置不设置无所谓?
+                this.ratio = 0;
                 preRatio = null;
                 nextRtaio = ratio;
                 ratio.setPreRatio(this);
@@ -151,7 +151,7 @@ public class Ratio implements Serializable{
             if (!toBeTair.get())
                 toBeTair.set(true);
         }
-        System.out.println("----------------------------------------------");
+//        System.out.println("----------------------------------------------");
     }
 
     public void toTair(TairOperatorImpl tairOperator) {
@@ -174,7 +174,7 @@ public class Ratio implements Serializable{
             lastToTair = System.currentTimeMillis();
             toBeTair.set(false);
         }
-        System.out.println("**********************************************");
+//        System.out.println("**********************************************");
     }
 
 }

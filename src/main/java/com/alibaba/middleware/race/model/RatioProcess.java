@@ -1,10 +1,10 @@
 package com.alibaba.middleware.race.model;
 
-import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 
-import java.util.HashMap;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by sxian.wang on 2016/7/8.

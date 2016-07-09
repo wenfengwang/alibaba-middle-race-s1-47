@@ -1,8 +1,6 @@
 package com.alibaba.middleware.race.Tair;
 
 import com.alibaba.middleware.race.RaceConfig;
-import com.alibaba.middleware.race.RaceUtils;
-import com.alibaba.middleware.race.jstorm.blot.PersistRatio;
 import com.taobao.tair.DataEntry;
 import com.taobao.tair.Result;
 import com.taobao.tair.ResultCode;
@@ -11,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.util.List;
 
 
 /**
