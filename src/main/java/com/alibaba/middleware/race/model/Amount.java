@@ -1,10 +1,10 @@
 package com.alibaba.middleware.race.model;
 
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
-//import com.google.common.util.concurrent.AtomicDouble;
-import com.google.common.util.concurrent.AtomicDouble;
 
 import java.io.Serializable;
+
+//import com.google.common.util.concurrent.AtomicDouble;
 
 /**
  * Created by sxian.wang on 2016/7/9.

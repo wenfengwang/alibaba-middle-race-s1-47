@@ -1,10 +1,5 @@
 package com.alibaba.middleware.race.Tair;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Random;
-
 /**
  * Created by wangwenfeng on 5/25/16.
  */

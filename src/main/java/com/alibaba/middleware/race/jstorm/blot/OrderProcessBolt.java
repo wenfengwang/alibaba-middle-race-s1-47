@@ -11,11 +11,10 @@ import com.alibaba.middleware.race.RaceConfig;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by sxian.wang on 2016/7/9.
@@ -27,9 +26,12 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
     public static final LinkedBlockingQueue<ArrayList<Long>> TBOrderQueue = new LinkedBlockingQueue<>();
     public static final LinkedBlockingQueue<ArrayList<Long>> TMOrderQueue = new LinkedBlockingQueue<>();
 
+    // 这几个数据结构线程安全的问题
     public static final LinkedBlockingQueue<Object[]> unfindedOrder = new LinkedBlockingQueue<>();
-    public static final LinkedList<Object[]> tbWaittingEmitList = new LinkedList<>();
-    public static final LinkedList<Object[]> tmWaittingEmitList = new LinkedList<>();
+    public static final LinkedBlockingQueue<Object[]> tbWaittingEmitList = new LinkedBlockingQueue<>();
+    public static final LinkedBlockingQueue<Object[]> tmWaittingEmitList = new LinkedBlockingQueue<>();
+    public static final AtomicBoolean isRunningTbWaitList = new AtomicBoolean(false);
+    public static final AtomicBoolean isRunningTmWaitList = new AtomicBoolean(false);
 
     private transient ExecutorService waitMsgFixedThreadPool;
     private transient ExecutorService paymenyMsgFixedThreadPool;
@@ -145,27 +147,30 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
     }
 
     private void emitWaittingMsg(int flag, final BasicOutputCollector collector) {
-         // todo 改成异步 -> collector 机制不确定
-        if (flag == 1) {
+        if (flag == 1 && !isRunningTbWaitList.get()) {
             waitMsgFixedThreadPool.execute(new Runnable() {
                 @Override
                 public void run() {
                     Object[] obj = tbWaittingEmitList.poll();
+                    isRunningTbWaitList.set(true);
                     while (obj!=null) {
                         collector.emit(RaceConfig.TAOBAO_PERSIST_STREAM_ID, new Values(obj[0],obj[1]));
                         obj = tbWaittingEmitList.poll();
                     }
+                    isRunningTbWaitList.set(false);
                 }
             });
-        } else {
+        } else if (!isRunningTmWaitList.get()){
             waitMsgFixedThreadPool.execute(new Runnable() {
                 @Override
                 public void run() {
                     Object[] obj = tmWaittingEmitList.poll();
+                    isRunningTmWaitList.set(true);
                     while (obj != null) {
                         collector.emit(RaceConfig.TMALL_PERSIST_STREAM_ID, new Values(obj[0],obj[1]));
                         obj = tmWaittingEmitList.poll();
                     }
+                    isRunningTmWaitList.set(false);
                 }
             });
         }

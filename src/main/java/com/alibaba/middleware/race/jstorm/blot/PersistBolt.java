@@ -12,9 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by wangwenfeng on 5/27/16.
@@ -85,10 +83,6 @@ public class PersistBolt implements IBasicBolt, Serializable {
 
     @Override
     public void cleanup() {
-//        Set<Map.Entry<Long, Double>> entrySet = amountMap.entrySet();
-//        for(Map.Entry<Long, Double> entry : entrySet) {
-//            LOG.info("***** " + prefix+entry.getKey()+": " + entry.getValue()+ " *****");
-//        }
     }
 
     @Override
