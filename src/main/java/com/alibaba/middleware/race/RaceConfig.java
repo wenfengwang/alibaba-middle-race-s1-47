@@ -40,7 +40,7 @@ public class RaceConfig implements Serializable {
 
 //    public static final String CREATE_DATA_PREFIX = "E:\\mdw_data\\";
 
-    public static final String CREATE_DATA_PREFIX = "E:\\mdw_data\\unknow";
+    public static final String CREATE_DATA_PREFIX = "/Users/wangwenfeng/mqdata/0710/";//"E:\\mdw_data\\unknow";
     public static final String FILE_PRODUCER_SOURCE_PREFIX = "E:\\mdw_data\\4h\\";
 
 //    public static final String TB_LOG_PATH = "/home/dev/mdw_log/Tb_";

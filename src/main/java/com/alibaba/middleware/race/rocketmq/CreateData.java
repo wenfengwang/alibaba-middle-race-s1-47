@@ -42,8 +42,8 @@ public class CreateData {
 
         final String [] topics = new String[]{RaceConfig.MqTaobaoTradeTopic, RaceConfig.MqTmallTradeTopic};
         int count = 0;
-        while (count < 200000){
-            long starttime = System.currentTimeMillis();
+        while (count < 4320000){
+//            long starttime = System.currentTimeMillis();
             for (int i = 0; i < 300; i++) {
                 try {
                     final int platform = rand.nextInt(2);
@@ -56,33 +56,34 @@ public class CreateData {
                     orderMessage.setCreateTime(System.currentTimeMillis());
                     PaymentMessage[] paymentMessages = PaymentMessage.createPayMentMsg(orderMessage);
 
-                    long timeStamp = RaceUtils.toMinuteTimeStamp(orderMessage.getCreateTime());
                     if (platform == 0) {
-                        Double totalPrice = tbMap.get(timeStamp);
                         tb_bw_data.write(orderMessage.toString().split("([{|}])")[1] + "\n");
-                        if (totalPrice == null) {
-                            tbMap.put(timeStamp,orderMessage.getTotalPrice());
-                        } else {
-                            totalPrice += orderMessage.getTotalPrice();
-                            tbMap.put(timeStamp, totalPrice);
-                        }
                     } else {
                         tm_bw_data.write(orderMessage.toString().split("([{|}])")[1] + "\n");
-                        Double totalPrice = tmMap.get(timeStamp);
-                        if (totalPrice == null) {
-                            tmMap.put(timeStamp,orderMessage.getTotalPrice());
-                        } else {
-                            totalPrice += orderMessage.getTotalPrice();
-                            tmMap.put(timeStamp, totalPrice);
-                        }
                     }
 
                     double amount = 0;
                     for (final PaymentMessage paymentMessage : paymentMessages) {
-                        timeStamp = RaceUtils.toMinuteTimeStamp(paymentMessage.getCreateTime());
+                        long timeStamp = RaceUtils.toMinuteTimeStamp(paymentMessage.getCreateTime());
                         double[] amounts = pyMap.get(timeStamp);
                         if (amounts == null) {
                             amounts = new double[]{0,0};
+                        }
+                        if (platform == 0) {
+                            Double totalPrice = tbMap.get(timeStamp);
+                            if (totalPrice == null) {
+                                tbMap.put(timeStamp, new Double(paymentMessage.getPayAmount()));
+                            } else {
+                                tbMap.put(timeStamp, totalPrice + paymentMessage.getPayAmount());
+                            }
+
+                        } else {
+                            Double totalPrice = tmMap.get(timeStamp);
+                            if (totalPrice == null) {
+                                tmMap.put(timeStamp, new Double(paymentMessage.getPayAmount()));
+                            } else {
+                                tmMap.put(timeStamp, totalPrice + paymentMessage.getPayAmount());
+                            }
                         }
 
                         amounts[paymentMessage.getPayPlatform()] += paymentMessage.getPayAmount();
@@ -98,6 +99,7 @@ public class CreateData {
                             amount += paymentMessage.getPayAmount();
                         }
                     }
+
                     if (Double.compare(amount, orderMessage.getTotalPrice()) != 0) {
                         throw new RuntimeException("totalprice is not equal.");
                     }
@@ -109,8 +111,8 @@ public class CreateData {
             tb_bw_data.flush();
             tm_bw_data.flush();
             py_bw_data.flush();
-            Thread.sleep(850);
-            System.out.println(count);
+            Thread.sleep(990);
+//            System.out.println(System.currentTimeMillis() - starttime);
             count += 300;
         }
 
