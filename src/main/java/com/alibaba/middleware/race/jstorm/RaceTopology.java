@@ -90,7 +90,7 @@ public class RaceTopology {
                 .shuffleGrouping(RaceConfig.SPOUT_NAME,RaceConfig.PAYMENT_STREAM_ID);
 
         // 处理订单号和支付信息
-        builder.setBolt(RaceConfig.ORDER_TRANS_BOLT, new OrderProcessBolt(),mid_Parallelism_hint)
+        builder.setBolt(RaceConfig.ORDER_TRANS_BOLT, new OrderProcessBolt(),low_Parallelism_hint)
                 .shuffleGrouping(RaceConfig.TAOBAO_COUNT_BOLT_ID)
                 .shuffleGrouping(RaceConfig.TMALL_COUNT_BOLT_ID)
                 .shuffleGrouping(RaceConfig.RATIO_SPLIT_BOLT_ID, RaceConfig.PAY_ORDER_STREAM_ID);

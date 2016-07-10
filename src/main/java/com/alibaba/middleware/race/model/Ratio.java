@@ -2,8 +2,10 @@ package com.alibaba.middleware.race.model;
 
 import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
+import com.google.common.util.concurrent.AtomicDouble;
 
 import java.io.Serializable;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -15,13 +17,11 @@ public class Ratio implements Serializable{
     private volatile double ratio; // 比值
     public AtomicBoolean toBeTair = new AtomicBoolean(false);
     public final long createTime;
-    private volatile long lastUpdate = -1;
-    private volatile long lastToTair = -1;
 
-    private volatile double currentPCAmount; // 当前整分时刻内PC端的量
-    private volatile double currentMobileAmount; // 当前整分时刻内移动端的量
-    private volatile double PCAmount;    // 当前时刻的PC端总金额
-    private volatile double MobileAmount;    // 当前时刻的手机端总金额
+    private volatile AtomicDouble currentPCAmount; // 当前整分时刻内PC端的量
+    private volatile AtomicDouble currentMobileAmount; // 当前整分时刻内移动端的量
+    private volatile AtomicDouble PCAmount;    // 当前时刻的PC端总金额
+    private volatile AtomicDouble MobileAmount;    // 当前时刻的手机端总金额
 
     private Ratio preRatio;
     private Ratio nextRtaio;
@@ -29,20 +29,20 @@ public class Ratio implements Serializable{
     public Ratio(long timeStamp, Ratio preRatio) {
         createTime = System.currentTimeMillis();
         this.timeStamp = timeStamp;
-        this.currentPCAmount = 0;
-        this.currentMobileAmount = 0;
+        this.currentPCAmount = new AtomicDouble(0);
+        this.currentMobileAmount = new AtomicDouble(0);
         this.preRatio = preRatio;
         key = RaceConfig.prex_ratio + timeStamp;
 
         if (preRatio == null) {
-            PCAmount = 0;
-            MobileAmount = 0;
+            PCAmount = new AtomicDouble(0);
+            MobileAmount = new AtomicDouble(0);
             ratio = 0;
             this.nextRtaio = null;
             return;
         }
-        PCAmount = preRatio.getPCAmount();
-        MobileAmount = preRatio.getMobileAmount();
+        PCAmount = new AtomicDouble(preRatio.getPCAmount());
+        MobileAmount = new AtomicDouble(preRatio.getMobileAmount());
         ratio = preRatio.getRatio();
 
         try {
@@ -58,8 +58,8 @@ public class Ratio implements Serializable{
     public Ratio(long timeStamp, Ratio ratio, int flag) { //flag位，0是head节点 ，1是tair节点
         createTime = System.currentTimeMillis();
         this.timeStamp = timeStamp;
-        this.currentPCAmount = 0;
-        this.currentMobileAmount = 0;
+        this.currentPCAmount = new AtomicDouble(0);
+        this.currentMobileAmount = new AtomicDouble(0);
         key = RaceConfig.prex_ratio + timeStamp;
         switch (flag) {
             case 0:
@@ -67,16 +67,16 @@ public class Ratio implements Serializable{
                 preRatio = null;
                 nextRtaio = ratio;
                 ratio.setPreRatio(this);
-                PCAmount = 0;
-                MobileAmount = 0;
+                PCAmount = new AtomicDouble(0);
+                MobileAmount = new AtomicDouble(0);
                 break;
             case 1:
                 this.ratio = ratio.getRatio();
                 preRatio = ratio;
                 nextRtaio = null;
                 ratio.setNextRtaio(this);
-                PCAmount = ratio.getPCAmount();
-                MobileAmount = ratio.getMobileAmount();
+                PCAmount = new AtomicDouble(ratio.getPCAmount());
+                MobileAmount = new AtomicDouble(ratio.getMobileAmount());
                 break;
         }
 
@@ -91,11 +91,11 @@ public class Ratio implements Serializable{
     }
 
     public double getPCAmount() {
-        return PCAmount;
+        return PCAmount.get();
     }
 
     public double getMobileAmount() {
-        return MobileAmount;
+        return MobileAmount.get();
     }
 
     public Ratio getPreRatio() {
@@ -110,29 +110,14 @@ public class Ratio implements Serializable{
         return nextRtaio;
     }
 
-    public String getKey() {
-        return key;
-    }
-
-    public double getResult() {
-        return ratio;
-    }
-
     public void setNextRtaio(Ratio nextRtaio) {
         this.nextRtaio = nextRtaio;
     }
 
-    public long getCreateTime() {
-        return createTime;
-    }
-
-    public long getLastToTair() {
-        return lastToTair;
-    }
     public void updateCurrentAmount(double[] amount) {  //double pc, double mobile
         synchronized (this) {
-            currentPCAmount += amount[0];
-            currentMobileAmount += amount[1];
+            currentPCAmount.addAndGet(amount[0]);
+            currentMobileAmount.addAndGet(amount[1]);
         }
         updateAmount(amount);
 
@@ -143,24 +128,19 @@ public class Ratio implements Serializable{
         }
     }
 
-    private synchronized void updateAmount(double[] amount) {
-        synchronized (this) {
-            PCAmount += amount[0];
-            MobileAmount += amount[1];
-            lastUpdate = System.currentTimeMillis();
+    private void updateAmount(double[] amount) {
+            PCAmount.addAndGet(amount[0]);
+            MobileAmount.addAndGet(amount[1]);
             if (!toBeTair.get())
                 toBeTair.set(true);
-        }
-//        System.out.println("----------------------------------------------");
     }
 
-    public void toTair(TairOperatorImpl tairOperator) {
-        if (toBeTair.get() && lastUpdate > lastToTair) {
+    public void toTair(TairOperatorImpl tairOperator,LinkedBlockingQueue ratioQueue) {
+        if (toBeTair.get()) {
             writeRatio(tairOperator);
         }
 
         Ratio ratio = nextRtaio;
-
         while (ratio != null) {
             ratio.writeRatio(tairOperator);
             ratio = ratio.getNextRtaio();
@@ -168,12 +148,11 @@ public class Ratio implements Serializable{
     }
 
     public void writeRatio(TairOperatorImpl tairOperator) {
-        synchronized (this) {
-            ratio = (MobileAmount == 0 || PCAmount == 0) ? 0 : MobileAmount/PCAmount;
+//        synchronized (this) { // 有没有加同步的必要
+            ratio = (MobileAmount.get() == 0 || PCAmount.get() == 0) ? 0 : MobileAmount.get()/PCAmount.get();
             tairOperator.write(key,ratio);
-            lastToTair = System.currentTimeMillis();
             toBeTair.set(false);
-        }
+//        }
 //        System.out.println("**********************************************");
     }
 

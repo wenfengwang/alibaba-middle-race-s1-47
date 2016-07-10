@@ -34,9 +34,6 @@ public class AnalyseThread implements Runnable {
                 case 3:
                     analyseResult.analysePayment("py_result");
                     break;
-                case 4:
-                    analyseResult.analysePayment("py_result_confirm");
-                    break;
             }
         } catch (InterruptedException e) {
             e.printStackTrace();

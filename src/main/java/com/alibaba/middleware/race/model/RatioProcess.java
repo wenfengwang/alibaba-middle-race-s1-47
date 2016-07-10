@@ -15,23 +15,25 @@ public class RatioProcess {
     private final LinkedBlockingQueue<Ratio> ratioQueue = new LinkedBlockingQueue<>();
 
     public RatioProcess() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        Ratio ratio = ratioQueue.take();
-                        ratio.toTair(tairOperator);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+        for (int i = 0;i<2;i++) {  // todo 关注下会不会有线程安全问题
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        try {
+                            Ratio ratio = ratioQueue.take();
+                            ratio.toTair(tairOperator, ratioQueue);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-            }
-        }).start();
+            }).start();
+        }
     }
 
     public void updateAmount(final Ratio ratio, final double[] amount) {
-//        ratio.naiveUpdateAmount(amount);
+        // 多线程更新的问题
         fixedThread.execute(new Runnable() {
             @Override
             public void run() {
@@ -40,13 +42,11 @@ public class RatioProcess {
         });
     }
 
-    public void updateRatio(final Ratio ratio) {
-        ratioQueue.offer(ratio);
-//        fixedThread.execute(new Runnable() {
-//            @Override
-//            public void run() {
-//                ratio.toTair(tairOperator);
-//            }
-//        });
+    public void updateRatio(Ratio ratio) {
+        synchronized (ratioQueue) {
+            if (!ratioQueue.contains(ratio)) {
+                ratioQueue.offer(ratio);
+            }
+        }
     }
 }

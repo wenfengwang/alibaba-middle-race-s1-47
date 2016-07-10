@@ -11,21 +11,8 @@ import java.util.Random;
 public class TairOperator {
     public static void main(String[] args) {
 
-//
-        Random random = new Random(47);
-        long time = System.currentTimeMillis();
-        HashSet<Long> testSet = new HashSet<>();
-        for (int i = 0;i<10000000;i++) {
-            testSet.add(random.nextLong());
-        }
+      System.out.println(new TairOperatorImpl().get("ratio_373058h4iq_1467960600"));
 
-        long midtime = System.currentTimeMillis();
-        System.out.println(midtime - time);
-        for (int i = 0;i<1000000;i++) {
-            long l = random.nextInt(200000);
-            boolean finded = testSet.contains(l);
-        }
-        System.out.println("total time: " +(System.currentTimeMillis()-midtime));
     }
 
 }
