@@ -26,7 +26,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
     private long currentTimeStamp;
     private boolean endFlag = false;
     private TopologyContext context;
-
+    private int count = 0;
     private transient AmountProcess amountProcess;
 
     public PersistBolt() {
@@ -46,6 +46,12 @@ public class PersistBolt implements IBasicBolt, Serializable {
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) {
         try {
+            count++; // todo 记得去掉
+            if (count > 199940 && context.getThisComponentId().equals(RaceConfig.TAOBAO_PERSIST_BOLT_ID)) {
+                System.out.println();
+            } else if (count > 200250){
+                System.out.println();
+            }
             long minuteTimeStamp = (long) input.getValue(0);
             double amount = (double) input.getValue(1);
             if (endFlag) {

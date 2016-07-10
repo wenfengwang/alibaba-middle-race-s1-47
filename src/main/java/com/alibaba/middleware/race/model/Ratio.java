@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Ratio implements Serializable{
     private final long timeStamp; // 整分时间戳
     private final String  key;
-    private volatile double ratio; // 比值
+    private double ratio; // 比值 todo 去掉了volatile
     public AtomicBoolean toBeTair = new AtomicBoolean(false); // todo 记得去掉
     public final long createTime;
 
