@@ -148,12 +148,11 @@ public class Ratio implements Serializable{
     }
 
     public void writeRatio(TairOperatorImpl tairOperator) {
-//        synchronized (this) { // 有没有加同步的必要
+        synchronized (this) { // todo 有没有加同步的必要
             ratio = (MobileAmount.get() == 0 || PCAmount.get() == 0) ? 0 : MobileAmount.get()/PCAmount.get();
             tairOperator.write(key,ratio);
             toBeTair.set(false);
-//        }
-//        System.out.println("**********************************************");
+        }
     }
 
 }

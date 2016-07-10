@@ -34,6 +34,9 @@ public class AmountProcess {
     }
 
     public void updateAmount(final long timeStamp,final double amount,String prefix) {
+        if (timeStamp == 0) {
+            System.out.println();
+        }
         Amount amountObj = amountMap.get(timeStamp);
         if (amountObj == null) {
             amountObj = new Amount(timeStamp,prefix);
@@ -43,6 +46,9 @@ public class AmountProcess {
     }
 
     public void writeTair(long timeStamp) throws InterruptedException {
+        if (timeStamp == 0) {
+            System.out.println();
+        }
         Amount amount = amountMap.get(timeStamp);
         synchronized (toTairQueue) {
             if (!toTairQueue.contains(amount))

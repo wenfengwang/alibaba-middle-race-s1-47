@@ -27,7 +27,6 @@ public class PersistBolt implements IBasicBolt, Serializable {
     private final String prefix;
     private long currentTimeStamp;
     private boolean endFlag = false;
-    private double sumAmount;
     private TopologyContext context;
 
     private transient AmountProcess amountProcess;
@@ -43,7 +42,6 @@ public class PersistBolt implements IBasicBolt, Serializable {
     public void prepare(Map stormConf, TopologyContext context) {
         this.context = context;
         this.currentTimeStamp = 0;
-        sumAmount = 0;
         amountProcess = new AmountProcess();
     }
 
@@ -62,9 +60,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
             // 每次应该都是写current的时间戳
             if (currentTimeStamp != minuteTimeStamp) {
                 if (currentTimeStamp == 0 ) { // 初始化
-                    amountProcess.updateAmount(minuteTimeStamp,amount,prefix);
                     currentTimeStamp = minuteTimeStamp;
-                    return;
                 } else if (minuteTimeStamp == 0 && amount == 0) {
                     if (!RaceConfig.ONLINE) {
                         if (context.getThisComponentId().equals(RaceConfig.TAOBAO_PERSIST_BOLT_ID)) {
@@ -74,18 +70,14 @@ public class PersistBolt implements IBasicBolt, Serializable {
                         }
                     }
                     endFlag = true;
-                    amountProcess.updateAmount(currentTimeStamp,sumAmount,prefix);
                     amountProcess.writeTair(currentTimeStamp);
-                    sumAmount = 0;
                     return;
                 } else {
-                    amountProcess.updateAmount(currentTimeStamp,sumAmount,prefix);
                     amountProcess.writeTair(currentTimeStamp);
                     currentTimeStamp = minuteTimeStamp;
-                    sumAmount = 0;
                 }
             }
-            sumAmount += amount;
+            amountProcess.updateAmount(minuteTimeStamp,amount,prefix);
         } catch (Exception e) {
             e.printStackTrace();
         }
