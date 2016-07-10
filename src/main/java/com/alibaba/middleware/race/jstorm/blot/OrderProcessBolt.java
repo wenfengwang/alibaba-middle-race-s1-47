@@ -34,9 +34,6 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
     private transient ExecutorService waitMsgFixedThreadPool;
     private transient ExecutorService paymenyMsgFixedThreadPool;
 
-    private final AtomicInteger tmCount = new AtomicInteger(0);
-    private final AtomicInteger tbCount = new AtomicInteger(0);
-
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
         waitMsgFixedThreadPool = Executors.newFixedThreadPool(2);
@@ -109,11 +106,9 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
                         }
                         if (TBOrderSet.contains(orderId)) {
                             collector.emit(RaceConfig.TAOBAO_PERSIST_STREAM_ID, new Values(timeStamp, price));
-                            tbCount.addAndGet(1);
                             emitWaittingMsg(1,collector);
                         } else if (TMOrderSet.contains(orderId)) {
                             collector.emit(RaceConfig.TMALL_PERSIST_STREAM_ID, new Values(timeStamp, price));
-                            tmCount.addAndGet(1);
                             emitWaittingMsg(2,collector);
                         } else {
                             unfindedOrder.offer(new Object[]{timeStamp,orderId,price});
@@ -158,7 +153,6 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
                     Object[] obj = tbWaittingEmitList.poll();
                     while (obj!=null) {
                         collector.emit(RaceConfig.TAOBAO_PERSIST_STREAM_ID, new Values(obj[0],obj[1]));
-                        tbCount.addAndGet(1);
                         obj = tbWaittingEmitList.poll();
                     }
                 }
@@ -169,7 +163,6 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
                 public void run() {
                     Object[] obj = tmWaittingEmitList.poll();
                     while (obj != null) {
-                        tmCount.addAndGet(1);
                         collector.emit(RaceConfig.TMALL_PERSIST_STREAM_ID, new Values(obj[0],obj[1]));
                         obj = tmWaittingEmitList.poll();
                     }
