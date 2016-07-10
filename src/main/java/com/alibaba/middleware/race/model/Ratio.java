@@ -110,20 +110,8 @@ public class Ratio implements Serializable{
         return nextRtaio;
     }
 
-    public String getKey() {
-        return key;
-    }
-
-    public double getResult() {
-        return ratio;
-    }
-
     public void setNextRtaio(Ratio nextRtaio) {
         this.nextRtaio = nextRtaio;
-    }
-
-    public long getCreateTime() {
-        return createTime;
     }
 
     public void updateCurrentAmount(double[] amount) {  //double pc, double mobile
@@ -153,21 +141,18 @@ public class Ratio implements Serializable{
         }
 
         Ratio ratio = nextRtaio;
-
         while (ratio != null) {
-            if (!ratioQueue.contains(ratio))
-                ratio.writeRatio(tairOperator);
-
+            ratio.writeRatio(tairOperator);
             ratio = ratio.getNextRtaio();
         }
     }
 
     public void writeRatio(TairOperatorImpl tairOperator) {
-        synchronized (this) { // 有没有加同步的必要
+//        synchronized (this) { // 有没有加同步的必要
             ratio = (MobileAmount.get() == 0 || PCAmount.get() == 0) ? 0 : MobileAmount.get()/PCAmount.get();
             tairOperator.write(key,ratio);
             toBeTair.set(false);
-        }
+//        }
 //        System.out.println("**********************************************");
     }
 

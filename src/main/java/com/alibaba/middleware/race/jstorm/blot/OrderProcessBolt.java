@@ -23,16 +23,20 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
 
     public static final HashSet<Long> TBOrderSet = new HashSet<>();
     public static final HashSet<Long> TMOrderSet = new HashSet<>();
-    public static final LinkedBlockingQueue<Object[]> unfindedOrder = new LinkedBlockingQueue<>();
+    public static final LinkedBlockingQueue<ArrayList<Long>> TBOrderQueue = new LinkedBlockingQueue<>();
+    public static final LinkedBlockingQueue<ArrayList<Long>> TMOrderQueue = new LinkedBlockingQueue<>();
 
+    public static final LinkedBlockingQueue<Object[]> unfindedOrder = new LinkedBlockingQueue<>();
     public static final LinkedList<Object[]> tbWaittingEmitList = new LinkedList<>();
     public static final LinkedList<Object[]> tmWaittingEmitList = new LinkedList<>();
 
-    private transient ExecutorService fixedThreadPool;
+    private transient ExecutorService waitMsgFixedThreadPool;
+    private transient ExecutorService paymenyMsgFixedThreadPool;
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
-        fixedThreadPool = Executors.newFixedThreadPool(2);
+        waitMsgFixedThreadPool = Executors.newFixedThreadPool(2);
+        paymenyMsgFixedThreadPool = Executors.newFixedThreadPool(8);
         for (int i = 0;i<2;i++) {
             new Thread(new Runnable() {
                 @Override
@@ -54,43 +58,74 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
                 }
             }).start();
         }
-
-
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        TBOrderSet.addAll(TBOrderQueue.take());
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        TMOrderSet.addAll(TMOrderQueue.take());
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
     }
 
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) {
+        processTuple(input.getSourceComponent(),input.getValues(),collector);
+    }
 
-        switch (input.getSourceComponent()) {
-            case RaceConfig.RATIO_SPLIT_BOLT_ID:
-                long timeStamp = (long) input.getValue(0);
-                long orderId = (long) input.getValue(1);
-                double price = (double) input.getValue(2);
-                if (timeStamp == 0 && orderId == 0 && price == 0) {
-                    collector.emit(RaceConfig.TAOBAO_PERSIST_STREAM_ID, new Values(0, 0));
-                    collector.emit(RaceConfig.TMALL_PERSIST_STREAM_ID, new Values(0, 0));
+    private void processTuple(final String boltId, final List<Object> list, final BasicOutputCollector collector) {
+        paymenyMsgFixedThreadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                switch (boltId) {
+                    case RaceConfig.RATIO_SPLIT_BOLT_ID:
+                        long timeStamp = (long) list.get(0);
+                        long orderId = (long) list.get(1);
+                        double price = (double) list.get(2);
+                        if (timeStamp == -1 && orderId == -1 && price == -1) {
+                            collector.emit(RaceConfig.TAOBAO_PERSIST_STREAM_ID, new Values(-1, -1));
+                            collector.emit(RaceConfig.TMALL_PERSIST_STREAM_ID, new Values(-1, -1));
+                            return;
+                        }
+                        if (TBOrderSet.contains(orderId)) {
+                            collector.emit(RaceConfig.TAOBAO_PERSIST_STREAM_ID, new Values(timeStamp, price));
+                            emitWaittingMsg(1,collector);
+                        } else if (TMOrderSet.contains(orderId)) {
+                            collector.emit(RaceConfig.TMALL_PERSIST_STREAM_ID, new Values(timeStamp, price));
+                            emitWaittingMsg(2,collector);
+                        } else {
+                            unfindedOrder.offer(new Object[]{timeStamp,orderId,price});
+                        }
+                        break;
+                    case RaceConfig.TAOBAO_COUNT_BOLT_ID:
+                        // TODO 如果这样效率很低，何以考虑用时间戳做key，HashSet作为vale，建索引
+                        TBOrderQueue.add((ArrayList<Long>) list.get(0));
+                        break;
+                    case RaceConfig.TMALL_COUNT_BOLT_ID:
+                        TMOrderQueue.add((ArrayList<Long>) list.get(0));
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
 
-                }
-                if (TBOrderSet.contains(orderId)) {
-                    collector.emit(RaceConfig.TAOBAO_PERSIST_STREAM_ID, new Values(timeStamp, price));
-                    emitWaittingMsg(1,collector);
-                } else if (TMOrderSet.contains(orderId)){
-                    collector.emit(RaceConfig.TMALL_PERSIST_STREAM_ID, new Values(timeStamp, price));
-                    emitWaittingMsg(2,collector);
-                } else {
-                    unfindedOrder.offer(new Object[]{timeStamp,orderId,price});
-                }
-                break;
-            case RaceConfig.TAOBAO_COUNT_BOLT_ID:
-                // TODO 如果这样效率很低，何以考虑用时间戳做key，HashSet作为vale，建索引
-                TBOrderSet.addAll((ArrayList<Long>) input.getValue(0));
-                break;
-            case RaceConfig.TMALL_COUNT_BOLT_ID:
-                TMOrderSet.addAll((ArrayList<Long>) input.getValue(0));
-                break;
-            default:
-                break;
-        }
     }
 
     @Override
@@ -111,7 +146,7 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
     private void emitWaittingMsg(int flag, final BasicOutputCollector collector) {
          // todo 改成异步 -> collector 机制不确定
         if (flag == 1) {
-            fixedThreadPool.execute(new Runnable() {
+            waitMsgFixedThreadPool.execute(new Runnable() {
                 @Override
                 public void run() {
                     Object[] obj = tbWaittingEmitList.poll();
@@ -122,7 +157,7 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
                 }
             });
         } else {
-            fixedThreadPool.execute(new Runnable() {
+            waitMsgFixedThreadPool.execute(new Runnable() {
                 @Override
                 public void run() {
                     Object[] obj = tmWaittingEmitList.poll();

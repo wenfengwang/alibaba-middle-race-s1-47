@@ -12,20 +12,19 @@ public class TairOperator {
     public static void main(String[] args) {
 
 //
-        Random random = new Random(47);
-        long time = System.currentTimeMillis();
-        HashSet<Long> testSet = new HashSet<>();
-        for (int i = 0;i<10000000;i++) {
-            testSet.add(random.nextLong());
-        }
+       HashSet<Long> hs = new HashSet<>();
+        long a = 123l;
+        long b = 123165l;
+        long c = 1234567891012l;
+        Long d = 1234567891012l;
+        hs.add(a);
+        hs.add(b);
+        hs.add(c);
+        Object[] objects = new Object[] {a,b};
+        System.out.println(hs.contains(objects[0]));
+        System.out.println(hs.contains(objects[1]));
+        System.out.println(hs.contains(d));
 
-        long midtime = System.currentTimeMillis();
-        System.out.println(midtime - time);
-        for (int i = 0;i<1000000;i++) {
-            long l = random.nextInt(200000);
-            boolean finded = testSet.contains(l);
-        }
-        System.out.println("total time: " +(System.currentTimeMillis()-midtime));
     }
 
 }
