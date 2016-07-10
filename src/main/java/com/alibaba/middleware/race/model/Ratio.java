@@ -14,14 +14,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Ratio implements Serializable{
     private final long timeStamp; // 整分时间戳
     private final String  key;
-    private volatile double ratio; // 比值
-    public AtomicBoolean toBeTair = new AtomicBoolean(false);
+    private double ratio; // 比值 todo 去掉了volatile
+    public AtomicBoolean toBeTair = new AtomicBoolean(false); // todo 记得去掉
     public final long createTime;
 
-    private volatile AtomicDouble currentPCAmount; // 当前整分时刻内PC端的量
-    private volatile AtomicDouble currentMobileAmount; // 当前整分时刻内移动端的量
-    private volatile AtomicDouble PCAmount;    // 当前时刻的PC端总金额
-    private volatile AtomicDouble MobileAmount;    // 当前时刻的手机端总金额
+    private AtomicDouble currentPCAmount; // 当前整分时刻内PC端的量
+    private AtomicDouble currentMobileAmount; // 当前整分时刻内移动端的量
+    private AtomicDouble PCAmount;    // 当前时刻的PC端总金额
+    private AtomicDouble MobileAmount;    // 当前时刻的手机端总金额
 
     private Ratio preRatio;
     private Ratio nextRtaio;

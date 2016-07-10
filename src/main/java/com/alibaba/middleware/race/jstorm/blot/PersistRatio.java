@@ -40,7 +40,7 @@ public class PersistRatio implements IBasicBolt, Serializable {
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
         ratioMap = new ConcurrentHashMap<>();
-        currentTimeStamp = 0;
+        currentTimeStamp = -1;
         ratioProcess = new RatioProcess();
         endFlag = false;
         headNode = tailNode = null;
@@ -51,26 +51,17 @@ public class PersistRatio implements IBasicBolt, Serializable {
         long minuteTimeStamp = (Long) input.getValue(0);
         // input.getValue(1) 他妈的这个地方这个对象是复用的！！！在没有收到endFlag的时候，一直引用的是RatioCount中的sumAmout WHAT THE FUCK!
         double[] amount = (double[]) input.getValue(1); // 0 PC 1 MOBILE
-        if (minuteTimeStamp == 0 && amount[0] == 0 && amount[1] == 0 ) {
 
-            if (!RaceConfig.ONLINE) {
-                try {
-                    new Thread(new AnalyseThread(RaceConfig.PY_LOG_PATH,3)).start();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            Ratio _ratio = ratioMap.get(currentTimeStamp);
-            if (_ratio != null) {
-                ratioProcess.updateRatio(_ratio);
-            }
-            endFlag = true;
+        Ratio ratioNode = ratioMap.get(minuteTimeStamp);
+        if (endFlag) { // TODO 应该不至于出现endflag了, 还有空对象的奇葩情况吧!
+            ratioProcess.updateAmount(ratioNode, amount);
+            Ratio _ratio = ratioMap.get(minuteTimeStamp);
+            ratioProcess.updateRatio(_ratio);
             return;
         }
 
-        Ratio ratioNode = ratioMap.get(minuteTimeStamp);
         if (ratioNode == null) {
-            if (currentTimeStamp == 0) { // 0 init
+            if (currentTimeStamp == -1) { // 0 init
                 ratioNode = new Ratio(minuteTimeStamp,null);
                 maxTimeStamp = minTimeStamp = currentTimeStamp = minuteTimeStamp;
                 headNode = tailNode = ratioNode;
@@ -101,13 +92,26 @@ public class PersistRatio implements IBasicBolt, Serializable {
         }
 
         ratioProcess.updateAmount(ratioNode, amount);
+        if (minuteTimeStamp != currentTimeStamp) {
 
-        if (minuteTimeStamp != currentTimeStamp || endFlag) {
-            if (endFlag && !RaceConfig.ONLINE) {
-                LOG.warn("***** ENDFLAG *****");
+            if (minuteTimeStamp == 0 && amount[0] == 0 && amount[1] == 0 ) {
+                if (!RaceConfig.ONLINE) {
+                    try {
+                        new Thread(new AnalyseThread(RaceConfig.PY_LOG_PATH,3)).start();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                Ratio _ratio = ratioMap.get(currentTimeStamp);
+                if (_ratio != null) {
+                    ratioProcess.updateRatio(_ratio);
+                }
+                endFlag = true;
+                return;
             }
-            Ratio _ratio = endFlag ? ratioMap.get(minuteTimeStamp) : ratioMap.get(currentTimeStamp);
 
+            // 如果不等式成立,并且endflag了
+            Ratio _ratio = ratioMap.get(currentTimeStamp);
             if (_ratio != null) {
                 ratioProcess.updateRatio(_ratio);
             }
