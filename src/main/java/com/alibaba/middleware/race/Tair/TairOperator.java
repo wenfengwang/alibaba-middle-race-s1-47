@@ -11,19 +11,7 @@ import java.util.Random;
 public class TairOperator {
     public static void main(String[] args) {
 
-//
-       HashSet<Long> hs = new HashSet<>();
-        long a = 123l;
-        long b = 123165l;
-        long c = 1234567891012l;
-        Long d = 1234567891012l;
-        hs.add(a);
-        hs.add(b);
-        hs.add(c);
-        Object[] objects = new Object[] {a,b};
-        System.out.println(hs.contains(objects[0]));
-        System.out.println(hs.contains(objects[1]));
-        System.out.println(hs.contains(d));
+      System.out.println(new TairOperatorImpl().get("ratio_373058h4iq_1467960600"));
 
     }
 

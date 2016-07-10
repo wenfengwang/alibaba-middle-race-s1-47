@@ -76,7 +76,7 @@ public class AnalyseResult {
         Thread.currentThread().setName("analyseTaobao");
         Thread.sleep(5000);
         BufferedReader tb_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + "tb_result.txt")));
-        HashMap<Long, Double> resutltMap = new HashMap<>();
+        TreeMap<Long, Double> resutltMap = new TreeMap<>();
         String result_str = tb_br.readLine();
         while (result_str!=null) {
             String[] result = result_str.split(",");
@@ -117,7 +117,7 @@ public class AnalyseResult {
         Thread.currentThread().setName("analyseTmall");
         Thread.sleep(5000);
         BufferedReader tm_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + "tm_result.txt")));
-        HashMap<Long, Double> resutltMap = new HashMap<>();
+        TreeMap<Long, Double> resutltMap = new TreeMap<>();
         String result_str = tm_br.readLine();
         while (result_str!=null) {
             String[] result = result_str.split(",");
