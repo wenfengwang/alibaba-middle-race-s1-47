@@ -25,8 +25,8 @@ public class PersistBolt implements IBasicBolt, Serializable {
     private static Logger LOG = LoggerFactory.getLogger(PersistBolt.class);
 
     private final String prefix;
-    private volatile long currentTimeStamp;
-    private volatile boolean endFlag = false;
+    private long currentTimeStamp;
+    private boolean endFlag = false;
     private double sumAmount;
     private TopologyContext context;
 
@@ -65,7 +65,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
                     amountProcess.updateAmount(minuteTimeStamp,amount,prefix);
                     currentTimeStamp = minuteTimeStamp;
                     return;
-                } else if (minuteTimeStamp == -1 && amount == -1) {
+                } else if (minuteTimeStamp == 0 && amount == 0) {
                     if (!RaceConfig.ONLINE) {
                         if (context.getThisComponentId().equals(RaceConfig.TAOBAO_PERSIST_BOLT_ID)) {
                             new Thread(new AnalyseThread(RaceConfig.TB_LOG_PATH,1)).start();

@@ -99,8 +99,8 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
                         long orderId = (long) list.get(1);
                         double price = (double) list.get(2);
                         if (timeStamp == 0 && orderId == 0 && price == 0) {
-                            collector.emit(RaceConfig.TAOBAO_PERSIST_STREAM_ID, new Values(-1l, -1.0));
-                            collector.emit(RaceConfig.TMALL_PERSIST_STREAM_ID, new Values(-1l, -1.0));
+                            collector.emit(RaceConfig.TAOBAO_PERSIST_STREAM_ID, new Values(0l, 0.0));
+                            collector.emit(RaceConfig.TMALL_PERSIST_STREAM_ID, new Values(0l, 0.0));
                             return;
                         }
                         if (TBOrderSet.contains(orderId)) {
