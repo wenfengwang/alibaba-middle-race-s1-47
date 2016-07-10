@@ -1,7 +1,9 @@
 package com.alibaba.middleware.race.model;
 
+import com.alibaba.middleware.race.RaceConfig;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -34,12 +36,30 @@ public class AmountProcess {
     }
 
     public void updateAmount(final long timeStamp,final double amount,String prefix) {
+        if (prefix.equals(RaceConfig.prex_tmall)) {
+            long a = 1;
+        } else {
+            long a = 1;
+        }
         Amount amountObj = amountMap.get(timeStamp);
         if (amountObj == null) {
             amountObj = new Amount(timeStamp,prefix);
             amountMap.put(timeStamp,amountObj);
         }
         amountObj.updateAmount(amount);
+    }
+
+    // todo 记得去掉
+    public void writeTair(long timeStamp,int count,int flag) throws InterruptedException {
+        Amount amount = amountMap.get(timeStamp);
+        // 这个地方
+        if (!toTairQueue.contains(amount))
+            toTairQueue.offer(amount);
+        if (count == 200257 || count == 199945) {
+            for (Map.Entry<Long, Amount> entry : amountMap.entrySet()) {
+                System.out.println("***** " + entry.getKey() +": " + entry.getValue().getSumAmount() +"," + flag+","+timeStamp);
+            }
+        }
     }
 
     public void writeTair(long timeStamp) throws InterruptedException {
