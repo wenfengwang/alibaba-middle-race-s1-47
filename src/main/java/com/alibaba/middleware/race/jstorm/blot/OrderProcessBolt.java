@@ -32,26 +32,30 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
-        fixedThreadPool = Executors.newFixedThreadPool(5);
+        fixedThreadPool = Executors.newFixedThreadPool(2);
         for (int i = 0;i<2;i++) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        Object[] obj = unfindedOrder.take();
-                        if (TBOrderSet.contains(obj[1])) {
-                            tbWaittingEmitList.offer(new Object[]{obj[0],obj[2]}); // 时间戳 金额
-                        } else if (TMOrderSet.contains(obj[1])){
-                            tmWaittingEmitList.offer(new Object[]{obj[0],obj[2]});
-                        } else {
-                            unfindedOrder.offer(obj);
+                    while (true) {
+                        try {
+                            Object[] obj = unfindedOrder.take();
+                            if (TBOrderSet.contains(obj[1])) {
+                                tbWaittingEmitList.offer(new Object[]{obj[0],obj[2]}); // 时间戳 金额
+                            } else if (TMOrderSet.contains(obj[1])){
+                                tmWaittingEmitList.offer(new Object[]{obj[0],obj[2]});
+                            } else {
+                                unfindedOrder.offer(obj);
+                            }
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
                     }
                 }
             }).start();
         }
+
+
     }
 
     @Override
@@ -105,6 +109,7 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
     }
 
     private void emitWaittingMsg(int flag, final BasicOutputCollector collector) {
+         // todo 改成异步 -> collector 机制不确定
         if (flag == 1) {
             fixedThreadPool.execute(new Runnable() {
                 @Override

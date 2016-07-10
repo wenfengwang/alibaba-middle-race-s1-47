@@ -43,7 +43,7 @@ public class AmountProcess {
     }
 
     public void writeTair(long timeStamp) throws InterruptedException {
-        final Amount amount = amountMap.get(timeStamp);
+        Amount amount = amountMap.get(timeStamp);
         synchronized (toTairQueue) {
             if (!toTairQueue.contains(amount))
                 toTairQueue.offer(amount);
