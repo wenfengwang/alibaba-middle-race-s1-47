@@ -26,7 +26,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
 
     private final String prefix;
     private volatile long currentTimeStamp;
-    private static volatile boolean endFlag = false;
+    private volatile boolean endFlag = false;
     private double sumAmount;
     private TopologyContext context;
 

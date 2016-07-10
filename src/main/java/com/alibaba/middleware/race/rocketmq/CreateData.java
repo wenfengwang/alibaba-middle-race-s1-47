@@ -42,7 +42,7 @@ public class CreateData {
 
         final String [] topics = new String[]{RaceConfig.MqTaobaoTradeTopic, RaceConfig.MqTmallTradeTopic};
         int count = 0;
-        while (count < 4320000){
+        while (count < 200000){
 //            long starttime = System.currentTimeMillis();
             for (int i = 0; i < 300; i++) {
                 try {

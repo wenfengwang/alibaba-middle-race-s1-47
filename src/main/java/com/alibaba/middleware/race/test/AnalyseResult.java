@@ -74,7 +74,7 @@ public class AnalyseResult {
 
     public void analyseTaobao() throws IOException, InterruptedException {
         Thread.currentThread().setName("analyseTaobao");
-        Thread.sleep(5000);
+        Thread.sleep(10000);
         BufferedReader tb_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + "tb_result.txt")));
         TreeMap<Long, Double> resutltMap = new TreeMap<>();
         String result_str = tb_br.readLine();
@@ -115,7 +115,7 @@ public class AnalyseResult {
 
     public void analyseTmall() throws IOException, InterruptedException {
         Thread.currentThread().setName("analyseTmall");
-        Thread.sleep(5000);
+        Thread.sleep(10000);
         BufferedReader tm_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + "tm_result.txt")));
         TreeMap<Long, Double> resutltMap = new TreeMap<>();
         String result_str = tm_br.readLine();
@@ -156,7 +156,7 @@ public class AnalyseResult {
 
     public void analysePayment(String name) throws IOException, InterruptedException {
         Thread.currentThread().setName("analysePayment");
-        Thread.sleep(5000);
+        Thread.sleep(10000);
         BufferedReader py_br = new BufferedReader(new FileReader(new File(RaceConfig.FILE_PRODUCER_SOURCE_PREFIX + name +".txt")));
         TreeMap<Long, double[]> resutltMap = new TreeMap<>();
         String result_str = py_br.readLine();

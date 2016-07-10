@@ -58,8 +58,8 @@ public class RatioBolt implements IBasicBolt, Serializable {
             for (int i = 0; i < size; i++) {
                 body = list.get(i);
                 if (body.length == 2 && body[0] == 0 && body[1] == 0) {
-                    emitPayTuple.put(-1l,new double[]{-1,-1});
-                    collector.emit(RaceConfig.PAY_ORDER_STREAM_ID, new Values(-1,-1,-1));
+                    emitPayTuple.put(0l,new double[]{0,0});
+                    collector.emit(RaceConfig.PAY_ORDER_STREAM_ID, new Values(0l,0l,0.0));
                     continue;
                 }
                 PaymentMessage paymentMessage = RaceUtils.readKryoObject(PaymentMessage.class, body);

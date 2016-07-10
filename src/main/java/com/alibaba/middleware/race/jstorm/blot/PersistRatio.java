@@ -51,7 +51,7 @@ public class PersistRatio implements IBasicBolt, Serializable {
         long minuteTimeStamp = (Long) input.getValue(0);
         // input.getValue(1) 他妈的这个地方这个对象是复用的！！！在没有收到endFlag的时候，一直引用的是RatioCount中的sumAmout WHAT THE FUCK!
         double[] amount = (double[]) input.getValue(1); // 0 PC 1 MOBILE
-        if (minuteTimeStamp == -1 && amount[0] == -1 && amount[1] == -1 ) {
+        if (minuteTimeStamp == 0 && amount[0] == 0 && amount[1] == 0 ) {
 
             if (!RaceConfig.ONLINE) {
                 try {

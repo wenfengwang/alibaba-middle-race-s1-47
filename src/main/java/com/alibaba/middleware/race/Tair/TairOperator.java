@@ -10,8 +10,9 @@ import java.util.Random;
  */
 public class TairOperator {
     public static void main(String[] args) {
+        TairOperatorImpl tairOperator = new TairOperatorImpl();
 
-      System.out.println(new TairOperatorImpl().get("ratio_373058h4iq_1467960600"));
+        System.out.println(tairOperator.get("platformTmall_373058h4iq_1468144740"));
 
     }
 

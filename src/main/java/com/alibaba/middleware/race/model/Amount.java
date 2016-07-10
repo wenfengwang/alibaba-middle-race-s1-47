@@ -26,6 +26,6 @@ public class Amount implements Serializable {
     }
 
     public void writeTair(TairOperatorImpl tairOperator) {
-        tairOperator.write(key, amount);
+        tairOperator.write(key, amount.get());
     }
 }
