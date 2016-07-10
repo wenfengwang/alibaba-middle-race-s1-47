@@ -115,10 +115,8 @@ public class Ratio implements Serializable{
     }
 
     public void updateCurrentAmount(double[] amount) {  //double pc, double mobile
-        synchronized (this) {
-            currentPCAmount.addAndGet(amount[0]);
-            currentMobileAmount.addAndGet(amount[1]);
-        }
+        currentPCAmount.addAndGet(amount[0]);
+        currentMobileAmount.addAndGet(amount[1]);
         updateAmount(amount);
 
         Ratio ratio = nextRtaio;
@@ -129,10 +127,10 @@ public class Ratio implements Serializable{
     }
 
     private void updateAmount(double[] amount) {
-            PCAmount.addAndGet(amount[0]);
-            MobileAmount.addAndGet(amount[1]);
-            if (!toBeTair.get())
-                toBeTair.set(true);
+        PCAmount.addAndGet(amount[0]);
+        MobileAmount.addAndGet(amount[1]);
+        if (!toBeTair.get())
+            toBeTair.set(true);
     }
 
     public void toTair(TairOperatorImpl tairOperator,LinkedBlockingQueue ratioQueue) {
@@ -148,11 +146,9 @@ public class Ratio implements Serializable{
     }
 
     public void writeRatio(TairOperatorImpl tairOperator) {
-        synchronized (this) { // todo 有没有加同步的必要
             ratio = (MobileAmount.get() == 0 || PCAmount.get() == 0) ? 0 : MobileAmount.get()/PCAmount.get();
             tairOperator.write(key,ratio);
             toBeTair.set(false);
-        }
     }
 
 }

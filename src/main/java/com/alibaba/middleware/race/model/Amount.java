@@ -4,8 +4,6 @@ import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 
 import java.io.Serializable;
 
-//import com.google.common.util.concurrent.AtomicDouble;
-
 /**
  * Created by sxian.wang on 2016/7/9.
  */
@@ -25,8 +23,6 @@ public class Amount implements Serializable {
     }
 
     public void writeTair(TairOperatorImpl tairOperator) {
-        synchronized (this) {
-            tairOperator.write(key, sumAmount);
-        }
+        tairOperator.write(key, sumAmount);
     }
 }

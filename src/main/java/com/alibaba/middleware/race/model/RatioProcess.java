@@ -43,10 +43,8 @@ public class RatioProcess {
     }
 
     public void updateRatio(Ratio ratio) {
-        synchronized (ratioQueue) {
-            if (!ratioQueue.contains(ratio)) {
-                ratioQueue.offer(ratio);
-            }
+        if (!ratioQueue.contains(ratio)) {
+            ratioQueue.offer(ratio);
         }
     }
 }
