@@ -35,11 +35,6 @@ public class AmountProcess {
     }
 
     public void updateAmount(final long timeStamp,final double amount,String prefix) {
-        if (prefix.equals(RaceConfig.prex_tmall)) {
-            long a = 1;
-        } else {
-            long a = 1;
-        }
         Amount amountObj = amountMap.get(timeStamp);
         if (amountObj == null) {
             amountObj = new Amount(timeStamp,prefix);
@@ -50,6 +45,7 @@ public class AmountProcess {
 
     public void writeTair(long timeStamp) throws InterruptedException {
         Amount amount = amountMap.get(timeStamp);
-        toTairQueue.offer(amount);
+        if (!toTairQueue.contains(amount))
+            toTairQueue.offer(amount);
     }
 }
