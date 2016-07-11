@@ -3,6 +3,7 @@ package com.alibaba.middleware.race.model;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by sxian.wang on 2016/7/9.
@@ -11,6 +12,7 @@ public class Amount implements Serializable {
     public final long timeStamp;
     private final String key;
 
+    private AtomicBoolean toTair = new AtomicBoolean(false);  // todo 记得去掉
     private double sumAmount = 0;  // todo 去掉 volatile 和原子类就好了？
 
     public Amount(long timeStamp,String prefix) {
@@ -20,9 +22,11 @@ public class Amount implements Serializable {
 
     public void updateAmount(double amount) {
         sumAmount += amount;
+        toTair.set(true);
     }
 
     public void writeTair(TairOperatorImpl tairOperator) {
         tairOperator.write(key, sumAmount);
+        toTair.set(false);
     }
 }
