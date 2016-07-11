@@ -118,7 +118,6 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
                         }
                         break;
                     case RaceConfig.TAOBAO_COUNT_BOLT_ID:
-                        // TODO 如果这样效率很低，何以考虑用时间戳做key，HashSet作为vale，建索引
                         TBOrderQueue.add((ArrayList<Long>) list.get(0));
                         break;
                     case RaceConfig.TMALL_COUNT_BOLT_ID:

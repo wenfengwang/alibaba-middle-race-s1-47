@@ -15,7 +15,6 @@ public class Ratio implements Serializable{
     private final long timeStamp; // 整分时间戳
     private final String  key;
     private double ratio; // 比值 todo 去掉了volatile
-    public AtomicBoolean toBeTair = new AtomicBoolean(false); // todo 记得去掉
     public final long createTime;
 
     private AtomicDouble currentPCAmount; // 当前整分时刻内PC端的量
@@ -129,15 +128,10 @@ public class Ratio implements Serializable{
     private void updateAmount(double[] amount) {
         PCAmount.addAndGet(amount[0]);
         MobileAmount.addAndGet(amount[1]);
-        if (!toBeTair.get())
-            toBeTair.set(true);
     }
 
     public void toTair(TairOperatorImpl tairOperator,LinkedBlockingQueue ratioQueue) {
-        if (toBeTair.get()) {
-            writeRatio(tairOperator);
-        }
-
+        writeRatio(tairOperator);
         Ratio ratio = nextRtaio;
         while (ratio != null) {
             ratio.writeRatio(tairOperator);
@@ -148,7 +142,6 @@ public class Ratio implements Serializable{
     public void writeRatio(TairOperatorImpl tairOperator) {
             ratio = (MobileAmount.get() == 0 || PCAmount.get() == 0) ? 0 : MobileAmount.get()/PCAmount.get();
             tairOperator.write(key,ratio);
-            toBeTair.set(false);
     }
 
 }

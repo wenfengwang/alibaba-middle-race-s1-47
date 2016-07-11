@@ -15,7 +15,7 @@ public class RatioProcess {
     private final LinkedBlockingQueue<Ratio> ratioQueue = new LinkedBlockingQueue<>();
 
     public RatioProcess() {
-        for (int i = 0;i<2;i++) {  // todo 关注下会不会有线程安全问题
+        for (int i = 0;i<2;i++) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {

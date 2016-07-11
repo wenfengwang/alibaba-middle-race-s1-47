@@ -53,7 +53,7 @@ public class PersistRatio implements IBasicBolt, Serializable {
         double[] amount = (double[]) input.getValue(1); // 0 PC 1 MOBILE
 
         Ratio ratioNode = ratioMap.get(minuteTimeStamp);
-        if (endFlag) { // TODO 应该不至于出现endflag了, 还有空对象的奇葩情况吧!
+        if (endFlag) {
             ratioProcess.updateAmount(ratioNode, amount);
             Ratio _ratio = ratioMap.get(minuteTimeStamp);
             ratioProcess.updateRatio(_ratio);
