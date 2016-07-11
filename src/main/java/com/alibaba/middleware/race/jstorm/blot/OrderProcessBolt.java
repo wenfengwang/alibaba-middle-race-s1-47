@@ -42,8 +42,7 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
         waitMsgFixedThreadPool = Executors.newFixedThreadPool(2);
-        // todo 提高了线程池的数量, 观察下性能效果
-        paymenyMsgFixedThreadPool = Executors.newFixedThreadPool(12);
+        paymenyMsgFixedThreadPool = Executors.newFixedThreadPool(8);
         for (int i = 0;i<2;i++) {
             new Thread(new Runnable() {
                 @Override
