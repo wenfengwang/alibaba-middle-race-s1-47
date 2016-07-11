@@ -49,7 +49,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
             double amount = (double) input.getValue(1);
             if (endFlag) {
                 amountProcess.updateAmount(minuteTimeStamp,amount,prefix);
-                amountProcess.writeTair(minuteTimeStamp);
+                amountProcess.writeTair(minuteTimeStamp,0);
                 return;
             }
 

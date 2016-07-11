@@ -3,7 +3,6 @@ package com.alibaba.middleware.race.model;
 import com.alibaba.middleware.race.Tair.TairOperatorImpl;
 
 import java.io.Serializable;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by sxian.wang on 2016/7/9.

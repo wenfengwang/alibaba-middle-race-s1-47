@@ -6,7 +6,6 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 import java.io.Serializable;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by wangwenfeng on 7/1/16.
