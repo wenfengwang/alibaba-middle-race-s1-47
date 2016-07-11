@@ -38,7 +38,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
         this.context = context;
-        this.currentTimeStamp = 0;
+        this.currentTimeStamp = -1;
         amountProcess = new AmountProcess();
     }
 
@@ -56,7 +56,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
             // 因外在大概率上消息顺序是有序的,所以仅当时间戳的值改变后我们对当前的值进行持久化操作
             // 每次应该都是写current的时间戳
             if (currentTimeStamp != minuteTimeStamp) {
-                if (currentTimeStamp == 0 ) { // 初始化
+                if (currentTimeStamp == -1 ) { // 初始化
                     currentTimeStamp = minuteTimeStamp;
                 } else if (minuteTimeStamp == 0 && amount == 0) {
                     if (!RaceConfig.ONLINE) {
