@@ -81,9 +81,9 @@ public class RaceTopology {
 
         builder.setSpout(RaceConfig.SPOUT_NAME,new RaceSpout(conf), spout_Parallelism_hint);
 
-        builder.setBolt(RaceConfig.TAOBAO_COUNT_BOLT_ID, new CountBolt(), mid_Parallelism_hint)
+        builder.setBolt(RaceConfig.TAOBAO_COUNT_BOLT_ID, new CountBolt(), high_Parallelism_hint)
                 .shuffleGrouping(RaceConfig.SPOUT_NAME,RaceConfig.TAOBAO_STREAM_ID);
-        builder.setBolt(RaceConfig.TMALL_COUNT_BOLT_ID, new CountBolt(), mid_Parallelism_hint)
+        builder.setBolt(RaceConfig.TMALL_COUNT_BOLT_ID, new CountBolt(), high_Parallelism_hint)
                 .shuffleGrouping(RaceConfig.SPOUT_NAME,RaceConfig.TMALL_STREAM_ID);
         builder.setBolt(RaceConfig.RATIO_SPLIT_BOLT_ID, new RatioBolt(), high_Parallelism_hint)
                 .shuffleGrouping(RaceConfig.SPOUT_NAME,RaceConfig.PAYMENT_STREAM_ID);

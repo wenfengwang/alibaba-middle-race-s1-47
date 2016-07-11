@@ -42,7 +42,7 @@ public class OrderProcessBolt implements IBasicBolt, Serializable {
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
         waitMsgFixedThreadPool = Executors.newFixedThreadPool(2);
-        paymenyMsgFixedThreadPool = Executors.newFixedThreadPool(8);
+        paymenyMsgFixedThreadPool = Executors.newFixedThreadPool(12);
         for (int i = 0;i<2;i++) {
             new Thread(new Runnable() {
                 @Override

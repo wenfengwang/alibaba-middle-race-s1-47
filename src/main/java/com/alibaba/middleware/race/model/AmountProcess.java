@@ -48,14 +48,8 @@ public class AmountProcess {
         amountObj.updateAmount(amount);
     }
 
-    public void writeTair(long timeStamp,int flag) throws InterruptedException {
-        Amount amount = amountMap.get(timeStamp);
-        toTairQueue.offer(amount);
-    }
-
     public void writeTair(long timeStamp) throws InterruptedException {
         Amount amount = amountMap.get(timeStamp);
-        if (!toTairQueue.contains(amount))
-            toTairQueue.offer(amount);
+        toTairQueue.offer(amount);
     }
 }
