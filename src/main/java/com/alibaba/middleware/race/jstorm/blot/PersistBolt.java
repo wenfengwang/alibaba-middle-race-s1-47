@@ -67,7 +67,7 @@ public class PersistBolt implements IBasicBolt, Serializable {
                         }
                     }
                     endFlag = true;
-                    amountProcess.writeTair(currentTimeStamp);
+                    amountProcess.writeTair(currentTimeStamp,1);
                     return;
                 } else {
                     amountProcess.writeTair(currentTimeStamp);
